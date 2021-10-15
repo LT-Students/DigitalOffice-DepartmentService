@@ -44,7 +44,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateDepartmentRequest request)
     {
-      if (!(await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments)))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 

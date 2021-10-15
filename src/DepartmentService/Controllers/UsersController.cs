@@ -11,9 +11,9 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   public class UsersController : ControllerBase
   {
     [HttpPost("create")]
-    public async Task<OperationResultResponse<bool>> Create(
-      [FromServices] IAddDepartmentUsersCommand command,
-      [FromBody] AddDepartmentUsersRequest request)
+    public async Task<OperationResultResponse<bool>> CreateAsync(
+      [FromServices] ICreateDepartmentUsersCommand command,
+      [FromBody] CreateDepartmentUsersRequest request)
     {
       return await command.ExecuteAsync(request);
     }

@@ -30,8 +30,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
       builder
         .HasOne(u => u.Department)
-        .WithMany(d => d.Projects)
-        .HasForeignKey(u => u.DepartmentId);
+        .WithMany(d => d.Projects);
     }
   }
 }

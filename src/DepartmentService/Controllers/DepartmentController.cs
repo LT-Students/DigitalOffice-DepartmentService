@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   public class DepartmentController : ControllerBase
   {
     [HttpPost("create")]
-    public async Task<OperationResultResponse<Guid>> Create(
+    public async Task<OperationResultResponse<Guid>> CreateAsync(
       [FromServices] ICreateDepartmentCommand command,
       [FromBody] CreateDepartmentRequest department)
     {
@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     }
 
     [HttpGet("get")]
-    public async Task<OperationResultResponse<DepartmentResponse>> Get(
+    public async Task<OperationResultResponse<DepartmentResponse>> GetAsync(
       [FromServices] IGetDepartmentCommand command,
       [FromQuery] GetDepartmentFilter filter)
     {
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     }
 
     [HttpGet("find")]
-    public async Task<FindResultResponse<DepartmentInfo>> Find(
+    public async Task<FindResultResponse<DepartmentInfo>> FindAsync(
       [FromServices] IFindDepartmentsCommand command,
       [FromQuery] FindDepartmentFilter filter)
     {
@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     }
 
     [HttpPatch("edit")]
-    public async Task<OperationResultResponse<bool>> Edit(
+    public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditDepartmentCommand command,
       [FromQuery] Guid departmentId,
       [FromBody] JsonPatchDocument<EditDepartmentRequest> request)

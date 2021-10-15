@@ -9,12 +9,12 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Company;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace LT.DigitalOffice.DepartmentService.Broker
@@ -24,16 +24,17 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     private readonly IDepartmentRepository _repository;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
+    private readonly IRedisHelper _redisHelper;
 
     private async Task<List<DepartmentData>> GetDepartment(IGetDepartmentsRequest request)
     {
       List<DbDepartment> dbDepartments = new();
 
-      List<Guid> departmentIds = request.DepartmentsIds;
+      List<Guid> departmentsIds = request.DepartmentsIds;
 
-      if (departmentIds != null && departmentIds.Any())
+      if (departmentsIds != null && departmentsIds.Any())
       {
-        dbDepartments = await _repository.GetAsync(departmentIds, true);
+        dbDepartments = await _repository.GetAsync(departmentsIds, true);
       }
 
       return dbDepartments.Select(
@@ -47,11 +48,13 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     public GetDepartmentsConsumer(
       IDepartmentRepository repository,
       IConnectionMultiplexer cache,
-      IOptions<RedisConfig> redisConfig)
+      IOptions<RedisConfig> redisConfig,
+      IRedisHelper redisHelper)
     {
       _repository = repository;
       _cache = cache;
       _redisConfig = redisConfig;
+      _redisHelper = redisHelper;
     }
 
     public async Task Consume(ConsumeContext<IGetDepartmentsRequest> context)
@@ -62,10 +65,14 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
       await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(departmentId);
 
-      await _cache.GetDatabase(Cache.Departments).StringSetAsync(
-        departments.Select(d => d.Id).GetRedisCacheHashCode(),
-        JsonConvert.SerializeObject(departments),
-        TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+      if (departments != null)
+      {
+        await _redisHelper.CreateAsync(
+          Cache.Departments,
+          context.Message.DepartmentsIds.GetRedisCacheHashCode(),
+          departments,
+          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+      }
     }
   }
 }

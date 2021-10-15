@@ -17,18 +17,18 @@ using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Business
 {
-  public class AddDepartmentUsersCommand : IAddDepartmentUsersCommand
+  public class CreateDepartmentUsersCommand : ICreateDepartmentUsersCommand
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
-    private readonly IAddDepartmentUsersRequestValidator _validator;
+    private readonly ICreateDepartmentUsersRequestValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
 
-    public AddDepartmentUsersCommand(
+    public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
-      IAddDepartmentUsersRequestValidator validator,
+      ICreateDepartmentUsersRequestValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository)
     {
@@ -39,7 +39,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
       _repository = repository;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(AddDepartmentUsersRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(CreateDepartmentUsersRequest request)
     {
       Guid senderUserId = _httpContextAccessor.HttpContext.GetUserId();
 
@@ -50,8 +50,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
 
         return new OperationResultResponse<bool>
         {
-          Status = OperationResultStatusType.Failed,
-          Errors = new() { "Not enough rights." }
+          Status = OperationResultStatusType.Failed
         };
       }
 

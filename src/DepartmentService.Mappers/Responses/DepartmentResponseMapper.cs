@@ -50,7 +50,6 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
       List<ProjectData> projectsInfo,
       GetDepartmentFilter filter)
     {
-
       DepartmentInfo department;
 
       DbDepartmentUser departmentDirector =

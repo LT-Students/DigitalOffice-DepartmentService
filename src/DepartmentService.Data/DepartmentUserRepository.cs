@@ -100,7 +100,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return true;
     }
 
-    public List<Guid> Get(IGetDepartmentUsersRequest request, out int totalCount)
+    public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
     {
       IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentUsers.AsQueryable();
 
@@ -120,7 +120,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUser = dbDepartmentUser.Where(x => x.IsActive);
       }
 
-      totalCount = dbDepartmentUser.Count();
+      int totalCount = await dbDepartmentUser.CountAsync();
 
       if (request.SkipCount.HasValue)
       {
@@ -132,7 +132,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUser = dbDepartmentUser.Take(request.TakeCount.Value);
       }
 
-      return dbDepartmentUser.Select(x => x.UserId).ToList();
+      return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
 
     public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> userIds)

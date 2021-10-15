@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment);
 
-    List<Guid> Get(IGetDepartmentUsersRequest request, out int totalCount);
+    Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request);
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> userIds);
 

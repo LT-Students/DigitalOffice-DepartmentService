@@ -13,9 +13,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker
   {
     private readonly IDepartmentUserRepository _repository;
 
-    private object FindUsersAsync(IGetDepartmentUsersRequest request)
+    private async Task<object> FindUsersAsync(IGetDepartmentUsersRequest request)
     {
-      List<Guid> userIds = _repository.Get(request, out int totalCount);
+      (List<Guid> userIds, int totalCount) = await _repository.GetAsync(request);
 
       return IGetDepartmentUsersResponse.CreateObj(userIds, totalCount);
     }

@@ -12,14 +12,14 @@ using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.DepartmentService.Validation
 {
-  public class AddDepartmentUsersRequestValidator : AbstractValidator<AddDepartmentUsersRequest>, IAddDepartmentUsersRequestValidator
+  public class CreateDepartmentUsersRequestValidator : AbstractValidator<CreateDepartmentUsersRequest>, ICreateDepartmentUsersRequestValidator
   {
     private readonly IRequestClient<ICheckUsersExistence> _rcCheckUsersExistence;
-    private readonly ILogger<AddDepartmentUsersRequestValidator> _logger;
+    private readonly ILogger<CreateDepartmentUsersRequestValidator> _logger;
 
-    public AddDepartmentUsersRequestValidator(
+    public CreateDepartmentUsersRequestValidator(
       IRequestClient<ICheckUsersExistence> rcCheckUsersExistence,
-      ILogger<AddDepartmentUsersRequestValidator> logger)
+      ILogger<CreateDepartmentUsersRequestValidator> logger)
     {
       _rcCheckUsersExistence = rcCheckUsersExistence;
       _logger = logger;

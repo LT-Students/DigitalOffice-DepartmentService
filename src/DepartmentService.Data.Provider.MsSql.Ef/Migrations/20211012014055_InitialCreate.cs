@@ -55,12 +55,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         constraints: table =>
         {
           table.PrimaryKey("PK_DepartmentUser", x => x.Id);
-          table.ForeignKey(
-            name: "FK_DepartmentUser_Departments",
-            column: x => x.DepartmentId,
-            principalTable: DbDepartment.TableName,
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
         });
     }
 
@@ -82,12 +76,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         constraints: table =>
         {
           table.PrimaryKey("PK_DepartmentNews", x => x.Id);
-          table.ForeignKey(
-            name: "FK_DepartmentNews_Departments",
-            column: x => x.DepartmentId,
-            principalTable: DbDepartment.TableName,
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
         });
     }
 
@@ -108,12 +96,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         constraints: table =>
         {
           table.PrimaryKey("PK_DepartmentProject", x => x.Id);
-          table.ForeignKey(
-            name: "FK_DepartmentProject_Departments",
-            column: x => x.DepartmentId,
-            principalTable: DbDepartment.TableName,
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
         });
     }
 

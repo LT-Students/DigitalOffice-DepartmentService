@@ -6,8 +6,8 @@ using LT.DigitalOffice.Kernel.Responses;
 namespace LT.DigitalOffice.DepartmentService.Business.Interfaces
 {
   [AutoInject]
-  public interface IAddDepartmentUsersCommand
+  public interface ICreateDepartmentUsersCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(AddDepartmentUsersRequest request);
+    Task<OperationResultResponse<bool>> ExecuteAsync(CreateDepartmentUsersRequest request);
   }
 }

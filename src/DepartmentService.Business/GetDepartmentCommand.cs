@@ -13,6 +13,7 @@ using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
@@ -42,6 +43,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IConnectionMultiplexer _cache;
+    private readonly IRedisHelper _redisHelper;
 
     private async Task<List<UserData>> GetUsersDataAsync(List<Guid> usersIds, List<string> errors)
     {
@@ -50,13 +52,14 @@ namespace LT.DigitalOffice.DepartmentService.Business
         return new();
       }
 
-      RedisValue valueFromCache = await _cache.GetDatabase(Cache.Users).StringGetAsync(usersIds.GetRedisCacheHashCode());
+      (List<UserData> userData, int _) = await _redisHelper.GetAsync<(List<UserData>, int)>
+        (Cache.Users, usersIds.GetRedisCacheHashCode());
 
-      if (valueFromCache.HasValue)
+      if (userData != null)
       {
         _logger.LogInformation("UsersData were taken from the cache. Users ids: {usersIds}", string.Join(", ", usersIds));
 
-        return JsonConvert.DeserializeObject<List<UserData>>(valueFromCache.ToString());
+        return JsonConvert.DeserializeObject<List<UserData>>(userData.ToString());
       }
 
       return await GetUsersDataThroughBrokerAsync(usersIds, errors);
@@ -213,6 +216,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
       IRequestClient<IGetProjectsRequest> rcGetProjects,
       IRequestClient<IGetPositionsRequest> rcGetPosition,
       IConnectionMultiplexer cache,
+      IRedisHelper redisHelper,
       ILogger<GetDepartmentCommand> logger)
     {
       _logger = logger;
@@ -223,6 +227,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
       _rcGetPositions = rcGetPosition;
       _departmentRepository = departmentRepository;
       _departmentResponseMapper = departmentResponseMapper;
+      _redisHelper = redisHelper;
     }
 
     public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter)
