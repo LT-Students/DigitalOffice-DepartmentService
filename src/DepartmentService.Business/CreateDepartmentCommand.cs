@@ -81,12 +81,12 @@ namespace LT.DigitalOffice.DepartmentService.Business
 
       if (request.Users != null)
       {
-        _userRepository.RemoveAsync(request.Users, _httpContextAccessor.HttpContext.GetUserId());
+        await _userRepository.RemoveAsync(request.Users, _httpContextAccessor.HttpContext.GetUserId());
       }
 
       if (request.DirectorUserId.HasValue)
       {
-        _userRepository.RemoveAsync(request.DirectorUserId.Value, _httpContextAccessor.HttpContext.GetUserId());
+        await _userRepository.RemoveAsync(request.DirectorUserId.Value, _httpContextAccessor.HttpContext.GetUserId());
       }
 
       #endregion
