@@ -44,6 +44,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
         .HasKey(d => d.Id);
 
       builder
+        .Property(d => d.Name)
+        .IsRequired();
+
+      builder
         .HasMany(d => d.Users)
         .WithOne(u => u.Department);
 

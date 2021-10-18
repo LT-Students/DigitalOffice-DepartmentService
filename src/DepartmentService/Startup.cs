@@ -9,6 +9,8 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Kernel.Helpers;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.Middlewares.Token;
 using MassTransit;
@@ -130,6 +132,7 @@ namespace LT.DigitalOffice.DepartmentService
 
       services.AddSingleton<IConnectionMultiplexer>(
         x => ConnectionMultiplexer.Connect(redisConnStr));
+      services.AddTransient<IRedisHelper, RedisHelper>();
 
       services.AddBusinessObjects();
 

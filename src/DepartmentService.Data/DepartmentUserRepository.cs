@@ -112,7 +112,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           ((x.CreatedAtUtc.Year * 12 + x.CreatedAtUtc.Month) <=
             (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month)) &&
           (x.IsActive ||
-            ((x.LeftAtUts.Value.Year * 12 + x.LeftAtUts.Value.Month) >=
+            ((x.LeftAtUtc.Value.Year * 12 + x.LeftAtUtc.Value.Month) >=
             (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));
       }
       else
@@ -143,7 +143,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .ToListAsync();
     }
 
-    public async void RemoveAsync(Guid userId, Guid removedBy)
+    public async Task RemoveAsync(Guid userId, Guid removedBy)
     {
       DbDepartmentUser dbDepartmentUser = await _provider.DepartmentUsers
         .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
@@ -153,13 +153,13 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUser.IsActive = false;
         dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
         dbDepartmentUser.ModifiedBy = removedBy;
-        dbDepartmentUser.LeftAtUts = DateTime.UtcNow;
+        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
 
         await _provider.SaveAsync();
       }
     }
 
-    public async void RemoveAsync(List<Guid> usersIds, Guid removedBy)
+    public async Task RemoveAsync(List<Guid> usersIds, Guid removedBy)
     {
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentUsers
         .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
@@ -171,7 +171,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           du.IsActive = false;
           du.ModifiedAtUtc = DateTime.UtcNow;
           du.ModifiedBy = removedBy;
-          du.LeftAtUts = DateTime.UtcNow;
+          du.LeftAtUtc = DateTime.UtcNow;
         };
 
         await _provider.SaveAsync();

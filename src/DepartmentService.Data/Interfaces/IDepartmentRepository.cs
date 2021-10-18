@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<bool> EditAsync(DbDepartment department, JsonPatchDocument<DbDepartment> request);
 
-    List<DbDepartment> Search(string text);
+    Task<List<DbDepartment>> SearchAsync(string text);
 
     Task<bool> DoesNameExistAsync(string name);
   }

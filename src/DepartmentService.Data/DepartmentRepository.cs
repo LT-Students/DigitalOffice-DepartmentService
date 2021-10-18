@@ -72,9 +72,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await departments.ToListAsync();
     }
 
-    public List<DbDepartment> Search(string text)
+    public async Task<List<DbDepartment>> SearchAsync(string text)
     {
-      return _provider.Departments.ToList().Where(d => d.Name.Contains(text, StringComparison.OrdinalIgnoreCase)).ToList();
+      return await _provider.Departments.Where(d => d.Name.Contains(text, StringComparison.OrdinalIgnoreCase)).ToListAsync();
     }
 
     public async Task<bool> EditAsync(DbDepartment department, JsonPatchDocument<DbDepartment> request)

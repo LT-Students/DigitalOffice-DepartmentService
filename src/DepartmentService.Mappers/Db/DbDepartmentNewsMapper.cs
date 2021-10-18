@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
 {
   public class DbDepartmentNewsMapper : IDbDepartmentNewsMapper
   {
-    public DbDepartmentNews Map(Guid newsId, Guid departmentId, Guid modifiedBy)
+    public DbDepartmentNews Map(Guid newsId, Guid departmentId, Guid createdBy)
     {
       return new DbDepartmentNews
       {
@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         NewsId = newsId,
         DepartmentId = departmentId,
         IsActive = true,
-        CreatedBy = modifiedBy,
+        CreatedBy = createdBy,
         CreatedAtUtc = DateTime.UtcNow
       };
     }

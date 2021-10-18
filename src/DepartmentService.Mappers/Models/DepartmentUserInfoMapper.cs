@@ -33,8 +33,8 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         MiddleName = userData.MiddleName,
         Rate = userData.Rate,
         IsActive = userData.IsActive,
-        Image = image != null ? _imageMapper.Map(image) : null,
-        Position = positionData != null ? _positionInfoMapper.Map(positionData) : null
+        Image = _imageMapper.Map(image),
+        Position = _positionInfoMapper.Map(positionData)
       };
     }
   }

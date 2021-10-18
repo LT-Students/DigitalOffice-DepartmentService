@@ -42,7 +42,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker
           d.Id,
           d.Name,
           d.Users.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director)?.UserId,
-          d.Users.Select(u => u.UserId).ToList())).ToList();
+          d.Users.Select(u => u.UserId).ToList()))
+        .ToList();
     }
 
     public GetDepartmentsConsumer(

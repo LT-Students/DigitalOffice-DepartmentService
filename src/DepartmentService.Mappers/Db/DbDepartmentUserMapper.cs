@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
 {
   public class DbDepartmentUserMapper : IDbDepartmentUserMapper
   {
-    public DbDepartmentUser Map(Guid userId, Guid departmentId, Guid modifiedBy)
+    public DbDepartmentUser Map(Guid userId, Guid departmentId, Guid createdBy)
     {
       return new DbDepartmentUser
       {
@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         UserId = userId,
         DepartmentId = departmentId,
         IsActive = true,
-        CreatedBy = modifiedBy,
+        CreatedBy = createdBy,
         CreatedAtUtc = DateTime.UtcNow
       };
     }

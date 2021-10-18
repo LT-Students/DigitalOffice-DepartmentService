@@ -15,9 +15,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker
   {
     private IDepartmentRepository _repository;
 
-    private object SearchDepartment(string text)
+    private async Task<object> SearchDepartment(string text)
     {
-      List<DbDepartment> departments = _repository.Search(text);
+      List<DbDepartment> departments = await _repository.SearchAsync(text);
 
       return ISearchResponse.CreateObj(
         departments.Select(
