@@ -43,8 +43,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
     {
       Guid senderUserId = _httpContextAccessor.HttpContext.GetUserId();
 
-      if (!(await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        await _repository.IsDepartmentDirectorAsync(request.DepartmentId, senderUserId)))
+      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers))
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
