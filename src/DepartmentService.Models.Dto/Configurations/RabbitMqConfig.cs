@@ -17,9 +17,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetUsersDataRequest))]
-    public string GetUsersDataEndpoint { get; set; }
-
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
 
@@ -28,5 +25,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
     public string CheckUsersExistenceEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IGetUsersDataRequest))]
+    public string GetUsersDataEndpoint { get; set; }
   }
 }
