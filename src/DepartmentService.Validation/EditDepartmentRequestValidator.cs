@@ -56,9 +56,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace || x == OperationType.Add,
         new()
         {
-          { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Description must not be empty." },
-          { x => x.value.ToString().Trim().Length < 1000, "Description is too long." },
-        }, CascadeMode.Stop);
+          { x => x.value?.ToString().Trim().Length < 1000, "Description is too long." },
+        });
 
       #endregion
 
@@ -69,7 +68,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace,
         new()
         {
-          { x => Guid.TryParse(x.value?.ToString(), out Guid _), "Incorrect format of DirectorId." },
+          { x => Guid.TryParse(x.value.ToString(), out Guid _), "Incorrect format of DirectorId." },
         });
 
       #endregion

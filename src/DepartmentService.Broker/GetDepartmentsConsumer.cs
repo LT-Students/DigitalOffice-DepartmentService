@@ -30,11 +30,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     {
       List<DbDepartment> dbDepartments = new();
 
-      List<Guid> departmentsIds = request.DepartmentsIds;
-
-      if (departmentsIds != null && departmentsIds.Any())
+      if (request.DepartmentsIds != null && request.DepartmentsIds.Any())
       {
-        dbDepartments = await _repository.GetAsync(departmentsIds, true);
+        dbDepartments = await _repository.GetAsync(request.DepartmentsIds, true);
       }
 
       return dbDepartments.Select(

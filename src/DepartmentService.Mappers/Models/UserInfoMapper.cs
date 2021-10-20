@@ -1,24 +1,26 @@
 ﻿using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Company;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
-  public class DepartmentUserInfoMapper : IDepartmentUserInfoMapper
+  public class UserInfoMapper : IUserInfoMapper
   {
     private readonly IPositionInfoMapper _positionInfoMapper;
-    private readonly IImageInfoMapper _imageMapper;
 
-    public DepartmentUserInfoMapper(
-      IPositionInfoMapper positionInfoMapper,
-      IImageInfoMapper imageMapper)
+    public UserInfoMapper(IPositionInfoMapper positionInfoMapper)
     {
       _positionInfoMapper = positionInfoMapper;
-      _imageMapper = imageMapper;
     }
 
-    public UserInfo Map(UserData userData, PositionData positionData, ImageData image)
+    public UserInfo Map(
+      UserData userData,
+      PositionData positionData,
+      ImageInfo imageInfo,
+      DbDepartmentUser dbDepartmentUser)
     {
       if (userData == null)
       {
@@ -33,7 +35,10 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         MiddleName = userData.MiddleName,
         Rate = userData.Rate,
         IsActive = userData.IsActive,
-        Image = _imageMapper.Map(image),
+        CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,
+        ModifiedAtUtc = dbDepartmentUser.ModifiedAtUtc,
+        AvatarImage = imageInfo,
+        Role = (DepartmentUserRole)dbDepartmentUser.Role,
         Position = _positionInfoMapper.Map(positionData)
       };
     }

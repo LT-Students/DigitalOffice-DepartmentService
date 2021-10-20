@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
@@ -14,47 +15,32 @@ namespace LT.DigitalOffice.DepartmentService.Validation
 {
   public class CreateDepartmentUsersRequestValidator : AbstractValidator<CreateDepartmentUsersRequest>, ICreateDepartmentUsersRequestValidator
   {
-    private readonly IRequestClient<ICheckUsersExistence> _rcCheckUsersExistence;
-    private readonly ILogger<CreateDepartmentUsersRequestValidator> _logger;
+    private readonly IDepartmentUserValidator _departmentUserValidator;
+    private readonly IDepartmentRepository _departmentRepository;
 
     public CreateDepartmentUsersRequestValidator(
-      IRequestClient<ICheckUsersExistence> rcCheckUsersExistence,
-      ILogger<CreateDepartmentUsersRequestValidator> logger)
+      IDepartmentUserValidator departmrntUserValidator,
+      IDepartmentRepository departmentRepository)
     {
-      _rcCheckUsersExistence = rcCheckUsersExistence;
-      _logger = logger;
+      _departmentRepository = departmentRepository;
+      _departmentUserValidator = departmrntUserValidator;
 
-      RuleFor(x => x.UsersIds)
-        .Cascade(CascadeMode)
-        .NotEmpty().WithMessage("Users ids must not be null.")
-        .Must(x => x.Any()).WithMessage("Users ids must not be empty.")
-        .Must(x => !x.Contains(Guid.Empty)).WithMessage("Users ids must not contains empty value.")
-        .Must(x => x.Count() == x.Distinct().Count()).WithMessage("User cannot be added to the department twice.")
-        .MustAsync(async (x, cancellation) => await CheckUserExistence(x)).WithMessage("Users ids contains invalid id.");
-    }
 
-    private async Task<bool> CheckUserExistence(List<Guid> usersIds)
-    {
-      try
-      {
-        Response<IOperationResult<ICheckUsersExistence>> response =
-          await _rcCheckUsersExistence.GetResponse<IOperationResult<ICheckUsersExistence>>(
-            ICheckUsersExistence.CreateObj(usersIds));
-
-        if (response.Message.IsSuccess)
+      RuleFor(departmentUser => departmentUser.DepartmentId)
+        .Cascade(CascadeMode.Stop)
+        .NotEmpty()
+        .WithMessage("Request must have a project Id")
+        .MustAsync(async (x, _) => await _departmentRepository.DoesExistAsync(x))
+        .WithMessage("This project id does not exist")
+        .DependentRules(() =>
         {
-          return usersIds.Count == response.Message.Body.UserIds.Count;
-        }
+          RuleFor(projectUser => projectUser.Users)
+            .Must(user => user != null && user.Any())
+            .WithMessage("The request must contain users");
 
-        _logger.LogWarning("Can not find user Ids: {userIds}: " +
-          $"{Environment.NewLine}{string.Join('\n', response.Message.Errors)}");
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Cannot check existing users withs this ids {userIds}");
-      }
-
-      return false;
+          RuleForEach(projectUser => projectUser.Users)
+            .SetValidator(_departmentUserValidator);
+        });
     }
   }
 }

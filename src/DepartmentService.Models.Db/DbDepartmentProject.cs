@@ -12,6 +12,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public Guid ProjectId { get; set; }
     public Guid DepartmentId { get; set; }
     public Guid CreatedBy { get; set; }
+    public bool IsActive { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }

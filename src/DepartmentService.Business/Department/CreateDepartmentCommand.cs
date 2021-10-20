@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using LT.DigitalOffice.DepartmentService.Business.Interfaces;
+using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
@@ -10,12 +11,12 @@ using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
+using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
 
-namespace LT.DigitalOffice.DepartmentService.Business
+namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
   public class CreateDepartmentCommand : ICreateDepartmentCommand
   {
@@ -25,6 +26,7 @@ namespace LT.DigitalOffice.DepartmentService.Business
     private readonly IDbDepartmentMapper _mapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IResponseCreater _responseCreater;
 
     public CreateDepartmentCommand(
       IDepartmentRepository repository,
@@ -32,7 +34,8 @@ namespace LT.DigitalOffice.DepartmentService.Business
       ICreateDepartmentRequestValidator validator,
       IDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      IResponseCreater responseCreater)
     {
       _repository = repository;
       _userRepository = userRepository;
@@ -40,53 +43,33 @@ namespace LT.DigitalOffice.DepartmentService.Business
       _mapper = mapper;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
+      _responseCreater = responseCreater;
     }
 
     public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateDepartmentRequest request)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-
-        return new OperationResultResponse<Guid>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = new() { "Not enough rights." }
-        };
+        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
       }
 
       if (!_validator.ValidateCustom(request, out List<string> errors))
       {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
-        return new OperationResultResponse<Guid>
-        {
-          Status = OperationResultStatusType.Failed,
-          Errors = errors
-        };
+        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
       }
 
       OperationResultResponse<Guid> response = new();
-
-      if (await _repository.DoesNameExistAsync(request.Name))
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-        response.Status = OperationResultStatusType.Failed;
-        response.Errors.Add("The department name already exists");
-        return response;
-      }
 
       #region Deactivated previous department user records
 
       if (request.Users != null)
       {
-        await _userRepository.RemoveAsync(request.Users, _httpContextAccessor.HttpContext.GetUserId());
+        await _userRepository.RemoveAsync(request.Users);
       }
 
       if (request.DirectorUserId.HasValue)
       {
-        await _userRepository.RemoveAsync(request.DirectorUserId.Value, _httpContextAccessor.HttpContext.GetUserId());
+        await _userRepository.RemoveAsync(request.Users.FirstOrDefault(u => u.UserId == request.DirectorUserId));
       }
 
       #endregion

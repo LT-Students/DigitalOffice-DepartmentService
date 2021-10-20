@@ -6,7 +6,10 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace LT.DigitalOffice.DepartmentService.Data
@@ -14,34 +17,37 @@ namespace LT.DigitalOffice.DepartmentService.Data
   public class DepartmentUserRepository : IDepartmentUserRepository
   {
     private readonly IDataProvider _provider;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public DepartmentUserRepository(
+      IHttpContextAccessor httpContextAccessor,
       IDataProvider provider)
     {
       _provider = provider;
+      _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<bool> AddAsync(DbDepartmentUser departmentUser)
+    public async Task<bool> CreateAsync(DbDepartmentUser departmentUser)
     {
       if (departmentUser == null)
       {
         return false;
       }
 
-      _provider.DepartmentUsers.Add(departmentUser);
+      _provider.DepartmentsUsers.Add(departmentUser);
       await _provider.SaveAsync();
 
       return true;
     }
 
-    public async Task<bool> AddAsync(List<DbDepartmentUser> departmentUsers)
+    public async Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers)
     {
-      if (departmentUsers == null || !departmentUsers.Any())
+      if (departmentsUsers == null || !departmentsUsers.Any())
       {
         return false;
       }
 
-      _provider.DepartmentUsers.AddRange(departmentUsers);
+      _provider.DepartmentsUsers.AddRange(departmentsUsers);
       await _provider.SaveAsync();
 
       return true;
@@ -53,11 +59,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (includeDepartment)
       {
-        user = await _provider.DepartmentUsers.Include(u => u.Department).FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+        user = await _provider.DepartmentsUsers.Include(u => u.Department).FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
       }
       else
       {
-        user = await _provider.DepartmentUsers.FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+        user = await _provider.DepartmentsUsers.FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
       }
 
       if (user == null)
@@ -71,7 +77,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
     public async Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId)
     {
       List<DbDepartmentUser> directors =
-        _provider.DepartmentUsers.Where(du => du.DepartmentId == departmentId
+        _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId
           && (du.Role == (int)DepartmentUserRole.Director || du.UserId == newDirectorId)
           && du.IsActive).ToList();
 
@@ -102,7 +108,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
     {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentUsers.AsQueryable();
+      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
 
       dbDepartmentUser = dbDepartmentUser.Where(x => x.DepartmentId == request.DepartmentId);
 
@@ -135,47 +141,73 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
 
-    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> userIds)
+    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds)
     {
-      return await _provider.DepartmentUsers
+      if (usersIds == null)
+      {
+        return null;
+      }
+
+      return await _provider.DepartmentsUsers
         .Include(du => du.Department)
-        .Where(u => u.IsActive && userIds.Contains(u.UserId))
+        .Where(u => u.IsActive && usersIds.Contains(u.UserId))
         .ToListAsync();
     }
 
-    public async Task RemoveAsync(Guid userId, Guid removedBy)
+    public async Task RemoveAsync(CreateUserRequest user)
     {
-      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentUsers
-        .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
+      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
+        .FirstOrDefaultAsync(du => du.UserId == user.UserId && du.IsActive);
 
       if (dbDepartmentUser != null)
       {
         dbDepartmentUser.IsActive = false;
         dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
-        dbDepartmentUser.ModifiedBy = removedBy;
+        dbDepartmentUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
         dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
 
         await _provider.SaveAsync();
       }
     }
 
-    public async Task RemoveAsync(List<Guid> usersIds, Guid removedBy)
+    public async Task RemoveAsync(List<CreateUserRequest> users)
     {
-      List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentUsers
-        .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
+      List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
+        .Where(du => du.IsActive && users.Contains(users.FirstOrDefault(x => x.UserId == du.UserId))).ToListAsync();
 
-      if (usersIds != null && usersIds.Any())
+      if (users != null && users.Any())
       {
         foreach (DbDepartmentUser du in dbDepartmentsUsers)
         {
           du.IsActive = false;
           du.ModifiedAtUtc = DateTime.UtcNow;
-          du.ModifiedBy = removedBy;
+          du.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
           du.LeftAtUtc = DateTime.UtcNow;
         };
 
         await _provider.SaveAsync();
       }
+    }
+
+    public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)
+    {
+      List<DbDepartmentUser> users = await _provider.DepartmentsUsers
+        .Where(du => du.IsActive && du.DepartmentId == departmentId && usersIds.Contains(du.UserId)).ToListAsync();
+
+      if (!users.Any())
+      {
+        return false;
+      }
+
+      foreach (var user in users)
+      {
+        user.IsActive = false;
+      }
+
+      _provider.DepartmentsUsers.UpdateRange(users);
+      await _provider.SaveAsync();
+
+      return true;
     }
   }
 }

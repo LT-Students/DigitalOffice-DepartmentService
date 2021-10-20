@@ -5,11 +5,11 @@ using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace LT.DigitalOffice.DepartmentService.Business.Interfaces
+namespace LT.DigitalOffice.DepartmentService.Business.Department.Interfaces
 {
   [AutoInject]
   public interface IEditDepartmentCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> request);
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> patch);
   }
 }

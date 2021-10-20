@@ -9,12 +9,9 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters
     public Guid DepartmentId { get; set; }
 
     [FromQuery(Name = "includeusers")]
-    public bool? IncludeUsers { get; set; }
+    public bool? IncludeUsers { get; set; } = false;
 
     [FromQuery(Name = "includeprojects")]
-    public bool? IncludeProjects { get; set; }
-
-    public bool IsIncludeUsers => IncludeUsers.HasValue && IncludeUsers.Value;
-    public bool IsIncludeProjects => IncludeProjects.HasValue && IncludeProjects.Value;
+    public bool? IncludeProjects { get; set; } = false;
   }
 }

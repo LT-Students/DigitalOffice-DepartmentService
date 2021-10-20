@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces
   [AutoInject]
   public interface IDbDepartmentProjectMapper
   {
-    DbDepartmentProject Map(Guid projectId, Guid departmentId, Guid modifiedBy);
+    DbDepartmentProject Map(Guid projectId, Guid departmentId);
   }
 }

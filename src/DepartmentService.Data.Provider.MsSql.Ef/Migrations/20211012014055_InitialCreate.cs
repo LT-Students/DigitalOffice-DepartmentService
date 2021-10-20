@@ -88,6 +88,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
           Id = table.Column<Guid>(nullable: false),
           ProjectId = table.Column<Guid>(nullable: false),
           DepartmentId = table.Column<Guid>(nullable: false),
+          IsActive = table.Column<bool>(nullable: false),
           CreatedBy = table.Column<Guid>(nullable: false),
           CreatedAtUtc = table.Column<DateTime>(nullable: false),
           ModifiedBy = table.Column<Guid>(nullable: true),

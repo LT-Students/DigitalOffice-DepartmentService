@@ -7,7 +7,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 {
   public class DbDepartment
   {
-    public const string TableName = "Department";
+    public const string TableName = "Departments";
 
     public Guid Id { get; set; }
     public Guid CompanyId { get; set; }

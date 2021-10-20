@@ -19,10 +19,12 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<(List<DbDepartment>, int totalCount)> FindAsync(FindDepartmentFilter filter);
 
-    Task<bool> EditAsync(DbDepartment department, JsonPatchDocument<DbDepartment> request);
+    Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request);
 
     Task<List<DbDepartment>> SearchAsync(string text);
 
     Task<bool> DoesNameExistAsync(string name);
+
+    Task<bool> DoesExistAsync(Guid departmentId);
   }
 }

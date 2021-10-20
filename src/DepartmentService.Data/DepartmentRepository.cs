@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartments = dbDepartments.Where(d => d.Id == filter.DepartmentId);
 
-      if (filter.IsIncludeUsers)
+      if (filter.IncludeUsers.HasValue)
       {
         dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
       }
@@ -51,18 +51,25 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<(List<DbDepartment>, int totalCount)> FindAsync(FindDepartmentFilter filter)
     {
+      IQueryable<DbDepartment> dbDepartment = _provider.Departments.AsQueryable();
+
+      if (!filter.IncludeDeactivated)
+      {
+        dbDepartment = dbDepartment.Where(d => d.IsActive);
+      }
+
       return (
         await _provider.Departments
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
-          .Include(d => d.Users.Where(u => u.IsActive))
+          .Include(d => d.Users.Where(u => u.IsActive && u.Role == 1))
           .ToListAsync(),
         await _provider.Departments.CountAsync());
     }
 
-    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentIds, bool includeUsers = false)
+    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
     {
-      IQueryable<DbDepartment> departments = _provider.Departments.Where(d => departmentIds.Contains(d.Id));
+      IQueryable<DbDepartment> departments = _provider.Departments.Where(d => departmentsIds.Contains(d.Id));
 
       if (includeUsers)
       {
@@ -77,9 +84,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await _provider.Departments.Where(d => d.Name.Contains(text, StringComparison.OrdinalIgnoreCase)).ToListAsync();
     }
 
-    public async Task<bool> EditAsync(DbDepartment department, JsonPatchDocument<DbDepartment> request)
+    public async Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request)
     {
-      if (department == null)
+      DbDepartment dbDepartment = _provider.Departments.FirstOrDefault(x => x.Id == departmentId);
+
+      if (dbDepartment == null || request == null)
       {
         return false;
       }
@@ -90,8 +99,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .FirstOrDefault(o => o.path.EndsWith(nameof(DbDepartment.IsActive), StringComparison.OrdinalIgnoreCase));
       if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()))
       {
-        List<DbDepartmentUser> users = await _provider.DepartmentUsers
-          .Where(u => u.IsActive && u.DepartmentId == department.Id)
+        List<DbDepartmentUser> users = await _provider.DepartmentsUsers
+          .Where(u => u.IsActive && u.DepartmentId == dbDepartment.Id)
           .ToListAsync();
 
         foreach (DbDepartmentUser user in users)
@@ -102,9 +111,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
         }
       }
 
-      request.ApplyTo(department);
-      department.ModifiedBy = editorId;
-      department.ModifiedAtUtc = DateTime.UtcNow;
+      request.ApplyTo(dbDepartment);
+      dbDepartment.ModifiedBy = editorId;
+      dbDepartment.ModifiedAtUtc = DateTime.UtcNow;
       await _provider.SaveAsync();
 
       return true;
@@ -113,6 +122,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
     public async Task<bool> DoesNameExistAsync(string name)
     {
       return await _provider.Departments.AnyAsync(d => d.Name == name);
+    }
+
+    public async Task<bool> DoesExistAsync(Guid departmentId)
+    {
+      return await _provider.Departments.AnyAsync(x => x.Id == departmentId);
     }
   }
 }

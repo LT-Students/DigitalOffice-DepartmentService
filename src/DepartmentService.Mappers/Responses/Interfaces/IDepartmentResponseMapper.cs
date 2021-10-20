@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Responses;
 using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Company;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Responses.Interfaces
 {
@@ -12,11 +10,8 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Responses.Interfaces
   public interface IDepartmentResponseMapper
   {
     DepartmentResponse Map(
-      DbDepartment dbDepartment,
-      List<UserData> userData,
-      List<PositionData> positionData,
-      List<ImageData> userImages,
-      List<ProjectData> projectsInfo,
-      GetDepartmentFilter filter);
+          DbDepartment dbDepartment,
+          IEnumerable<UserInfo> users,
+          IEnumerable<ProjectInfo> projects);
   }
 }
