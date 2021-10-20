@@ -7,8 +7,8 @@ using LT.DigitalOffice.Kernel.Responses;
 namespace LT.DigitalOffice.DepartmentService.Business.User.Interfaces
 {
   [AutoInject]
-  public interface IRemoveDepartmentUserRequest
+  public interface IRemoveDepartmentUsersCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> userIds);
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds);
   }
 }

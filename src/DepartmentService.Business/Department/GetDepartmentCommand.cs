@@ -41,14 +41,13 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDepartmentResponseMapper _departmentResponseMapper;
     private readonly IUserInfoMapper _userInfoMapper;
-    private readonly IImageInfoMapper _imageInfoMapper;
     private readonly IProjectInfoMapper _projectInfoMapper;
     private readonly IRequestClient<IGetImagesRequest> _rcImages;
-    private readonly IRequestClient<IGetUsersDataRequest> _rcDepartmentUsers;
+    private readonly IRequestClient<IGetUsersDataRequest> _rcGetUsersData;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
-    private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
+    private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetPositions;
     private readonly IConnectionMultiplexer _cache;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreater _responseCreator;
 
     private async Task<List<UserData>> GetUsersDatasAsync(IEnumerable<DbDepartmentUser> departmentUsers, List<string> errors)
     {
@@ -83,7 +82,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       try
       {
         Response<IOperationResult<IGetUsersDataResponse>> response =
-          await _rcDepartmentUsers.GetResponse<IOperationResult<IGetUsersDataResponse>>(
+          await _rcGetUsersData.GetResponse<IOperationResult<IGetUsersDataResponse>>(
             IGetUsersDataRequest.CreateObj(usersIds));
 
         if (response.Message.IsSuccess)
@@ -158,35 +157,35 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       return new();
     }
 
-    private async Task<List<ImageInfo>> GetUserAvatarsAsync(List<Guid> imageIds, List<string> errors)
+    private async Task<List<ImageData>> GetUserImagesAsync(List<Guid> usersIds, List<string> errors)
     {
-      if (imageIds == null || !imageIds.Any())
+      if (usersIds == null || !usersIds.Any())
       {
         return null;
       }
 
-      string logMessage = "Errors while getting images with ids: {Ids}. Errors: {Errors}";
-
       try
       {
-        Response<IOperationResult<IGetImagesResponse>> response = await _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
-          IGetImagesRequest.CreateObj(imageIds, ImageSource.User));
+        Response<IOperationResult<IGetImagesResponse>> response =
+          await _rcImages.GetResponse<IOperationResult<IGetImagesResponse>>(
+            IGetImagesRequest.CreateObj(usersIds, ImageSource.User));
 
         if (response.Message.IsSuccess && response.Message.Body.ImagesData != null)
         {
-          return response.Message.Body.ImagesData.Select(_imageInfoMapper.Map).ToList();
+          return response.Message.Body.ImagesData;
         }
-        else
-        {
-          _logger.LogWarning(
-            logMessage,
-            string.Join(", ", imageIds),
-            string.Join('\n', response.Message.Errors));
-        }
+
+        _logger.LogWarning(
+          "Errors while getting images by users ids: {UsersIds}.\nErrors: {Errors}",
+          string.Join(", ", usersIds),
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, string.Join(", ", imageIds));
+        _logger.LogError(
+          exc,
+          "Errors while getting images by users ids: {UsersIds}.",
+          string.Join(", ", usersIds));
       }
 
       errors.Add("Can not get images. Please try again later.");
@@ -194,64 +193,70 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       return null;
     }
 
-    private async Task<List<PositionData>> GetPositionAsync(List<Guid> positionIds, List<string> errors)
+    private async Task<List<PositionData>> GetPositionsAsync(List<Guid> usersIds, List<string> errors)
     {
-      if (positionIds == null || !positionIds.Any())
+      if (usersIds == null || !usersIds.Any())
       {
-        return new();
+        return null;
       }
-
-      string logMessage = "Can not get position: {ids}.";
 
       try
       {
-        Response<IOperationResult<IGetPositionsResponse>> response =
-          await _rcGetPositions.GetResponse<IOperationResult<IGetPositionsResponse>>(
-            IGetPositionsRequest.CreateObj(positionIds));
+        Response<IOperationResult<IGetCompanyEmployeesResponse>> response =
+          await _rcGetPositions.GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
+            IGetCompanyEmployeesRequest.CreateObj(
+            usersIds,
+            includeDepartments: false,
+            includePositions: true,
+            includeOffices: false));
 
         if (response.Message.IsSuccess)
         {
           return response.Message.Body.Positions;
         }
 
-        _logger.LogWarning(logMessage + "Reason: {Errors}", string.Join(", ", positionIds), string.Join("\n", response.Message.Errors));
+        _logger.LogWarning(
+          "Errors while getting positions of users ids {UserId}.\n Errors: {Errors}",
+          string.Join(", ", usersIds),
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage, string.Join(", ", positionIds));
+        _logger.LogError(
+          exc,
+          "Can not get positions of users ids {UserId}.",
+          string.Join(", ", usersIds));
       }
 
-      errors.Add("Can not get positions. Please try again later.");
+      errors.Add("Can not get users positions. Please try again later.");
 
-      return new();
+      return null;
     }
 
     public GetDepartmentCommand(
       IDepartmentRepository departmentRepository,
       IDepartmentResponseMapper departmentResponseMapper,
       IUserInfoMapper userInfoMapper,
-      IImageInfoMapper imageInfoMapper,
       IProjectInfoMapper projectInfoMapper,
       IRequestClient<IGetImagesRequest> rcImages,
-      IRequestClient<IGetUsersDataRequest> rcDepartmentUsers,
+      IRequestClient<IGetUsersDataRequest> rcGetUsersData,
       IRequestClient<IGetProjectsRequest> rcGetProjects,
-      IRequestClient<IGetPositionsRequest> rcGetPosition,
+      IRequestClient<IGetCompanyEmployeesRequest> rcGetPositions,
       IConnectionMultiplexer cache,
       ILogger<GetDepartmentCommand> logger,
-      IResponseCreater responseCreater)
+      IResponseCreater responseCreator)
     {
       _logger = logger;
       _cache = cache;
       _rcImages = rcImages;
-      _rcDepartmentUsers = rcDepartmentUsers;
+      _rcGetUsersData = rcGetUsersData;
       _rcGetProjects = rcGetProjects;
-      _rcGetPositions = rcGetPosition;
+      _rcGetPositions = rcGetPositions;
       _departmentRepository = departmentRepository;
       _departmentResponseMapper = departmentResponseMapper;
-      _imageInfoMapper = imageInfoMapper;
       _projectInfoMapper = projectInfoMapper;
       _userInfoMapper = userInfoMapper;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter)
@@ -261,37 +266,39 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       if (dbDepartment == null)
       {
-        return _responseCreater.CreateFailureResponse<DepartmentResponse>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<DepartmentResponse>(HttpStatusCode.NotFound);
       }
 
       List<ProjectData> projectData = await GetProjectsDatasAsync(dbDepartment.Projects, response.Errors);
-      List<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map).ToList();
+      IEnumerable<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map);
 
-      List<UserData> usersDatas = await GetUsersDatasAsync(dbDepartment.Users, response.Errors);
-      List<UserInfo> usersInfo = null;
-      List<Guid> usersIds = dbDepartment.Users.Select(u => u.UserId).Distinct().ToList();
+      List<UserData> usersData = await GetUsersDatasAsync(dbDepartment.Users, response.Errors);
+      IEnumerable<UserInfo> usersInfo = null;
 
-      if (usersDatas != null && usersDatas.Any())
+      if (usersData != null && usersData.Any())
       {
-        List<PositionData> positions = await GetPositionAsync(usersIds, response.Errors);
-        List<ImageInfo> imagesInfos =
-          await GetUserAvatarsAsync(usersDatas.Where(u => u.ImageId.HasValue).Select(u => u.ImageId.Value).ToList(), response.Errors);
+        List<PositionData> positionsData = await GetPositionsAsync(
+          usersData.Select(u => u.Id).Distinct().ToList(),
+          response.Errors);
 
-        usersInfo = dbDepartment.Users
-          .Select(du =>
-          {
-            UserData user = usersDatas.FirstOrDefault(x => x.Id == du.UserId);
+        List<ImageData> imagesData = await GetUserImagesAsync(
+          usersData.Where(u => u.ImageId.HasValue).Select(u => u.ImageId.Value).Distinct().ToList(),
+          response.Errors);
 
-            return _userInfoMapper.Map(
-              user,
-              positions?.FirstOrDefault(d => d.UsersIds.Any(id => id == du.UserId)),
-              imagesInfos?.FirstOrDefault(i => i.Id == user.ImageId),
-              du);
-          })
-          .ToList();
+        usersInfo = usersData.Select(
+          u =>
+            _userInfoMapper.Map(
+              u,
+              dbDepartment.Users.FirstOrDefault(du => du.UserId == u.Id),
+              imagesData.FirstOrDefault(i => i.ImageId == u.ImageId),
+              positionsData.FirstOrDefault(p => p.UsersIds.Contains(u.Id))
+          ));
       }
 
-      response.Status = response.Errors.Any() ? OperationResultStatusType.PartialSuccess : OperationResultStatusType.FullSuccess;
+      response.Status = response.Errors.Any() ?
+        OperationResultStatusType.PartialSuccess :
+        OperationResultStatusType.FullSuccess;
+
       response.Body = _departmentResponseMapper.Map(dbDepartment, usersInfo, projectInfo);
 
       return response;

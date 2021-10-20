@@ -11,8 +11,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   [AutoInject]
   public interface IDepartmentUserRepository
   {
-    Task<bool> CreateAsync(DbDepartmentUser departmentUser);
-
     Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers);
 
     Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment);
@@ -20,8 +18,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request);
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds);
-
-    Task RemoveAsync(CreateUserRequest user);
 
     Task RemoveAsync(List<CreateUserRequest> usersIds);
 

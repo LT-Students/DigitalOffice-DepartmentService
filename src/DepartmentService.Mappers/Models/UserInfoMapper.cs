@@ -9,18 +9,22 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
   public class UserInfoMapper : IUserInfoMapper
   {
+    private readonly IImageInfoMapper _imageInfoMapper;
     private readonly IPositionInfoMapper _positionInfoMapper;
 
-    public UserInfoMapper(IPositionInfoMapper positionInfoMapper)
+    public UserInfoMapper(
+      IImageInfoMapper imageInfoMapper,
+      IPositionInfoMapper positionInfoMapper)
     {
+      _imageInfoMapper = imageInfoMapper;
       _positionInfoMapper = positionInfoMapper;
     }
 
     public UserInfo Map(
       UserData userData,
-      PositionData positionData,
-      ImageInfo imageInfo,
-      DbDepartmentUser dbDepartmentUser)
+      DbDepartmentUser dbDepartmentUser,
+      ImageData imageData,
+      PositionData positionData)
     {
       if (userData == null)
       {
@@ -35,10 +39,10 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         MiddleName = userData.MiddleName,
         Rate = userData.Rate,
         IsActive = userData.IsActive,
-        CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,
-        ModifiedAtUtc = dbDepartmentUser.ModifiedAtUtc,
-        AvatarImage = imageInfo,
         Role = (DepartmentUserRole)dbDepartmentUser.Role,
+        CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,
+        LeftAtUtc = dbDepartmentUser.LeftAtUtc,
+        AvatarImage = _imageInfoMapper.Map(imageData),
         Position = _positionInfoMapper.Map(positionData)
       };
     }

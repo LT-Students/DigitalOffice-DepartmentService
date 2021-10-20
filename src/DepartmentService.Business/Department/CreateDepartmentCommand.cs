@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
@@ -11,7 +11,6 @@ using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +25,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDbDepartmentMapper _mapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreater _responseCreator;
 
     public CreateDepartmentCommand(
       IDepartmentRepository repository,
@@ -35,7 +34,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreater responseCreater)
+      IResponseCreater responseCreator)
     {
       _repository = repository;
       _userRepository = userRepository;
@@ -43,22 +42,25 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _mapper = mapper;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
-    public async Task<OperationResultResponse<Guid>> ExecuteAsync(CreateDepartmentRequest request)
+    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateDepartmentRequest request)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
-        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }
 
-      if (!_validator.ValidateCustom(request, out List<string> errors))
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
-        return _responseCreater.CreateFailureResponse<Guid>(HttpStatusCode.BadRequest, errors);
+        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<Guid> response = new();
+      OperationResultResponse<Guid?> response = new();
 
       #region Deactivated previous department user records
 
@@ -67,17 +69,17 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         await _userRepository.RemoveAsync(request.Users);
       }
 
-      if (request.DirectorUserId.HasValue)
-      {
-        await _userRepository.RemoveAsync(request.Users.FirstOrDefault(u => u.UserId == request.DirectorUserId));
-      }
-
       #endregion
 
       response.Body = await _repository.CreateAsync(_mapper.Map(request));
       response.Status = OperationResultStatusType.FullSuccess;
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+
+      if (response.Body == null)
+      {
+        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
+      }
 
       return response;
     }

@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department.Interfaces
   [AutoInject]
   public interface ICreateDepartmentCommand
   {
-    Task<OperationResultResponse<Guid>> ExecuteAsync(CreateDepartmentRequest request);
+    Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateDepartmentRequest request);
   }
 }

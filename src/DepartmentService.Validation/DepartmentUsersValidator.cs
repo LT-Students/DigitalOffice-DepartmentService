@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Models.Broker.Common;
@@ -12,27 +11,29 @@ using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.DepartmentService.Validation
 {
-  public class DepartmentUserValidator : AbstractValidator<CreateUserRequest>, IDepartmentUserValidator
+  public class DepartmentUsersValidator : AbstractValidator<List<Guid>>, IDepartmentUsersValidator
   {
     private readonly IRequestClient<ICheckUsersExistence> _rcCheckUsersExistence;
-    private readonly ILogger<DepartmentUserValidator> _logger;
+    private readonly ILogger<DepartmentUsersValidator> _logger;
 
-    public DepartmentUserValidator(
+    public DepartmentUsersValidator(
       IRequestClient<ICheckUsersExistence> rcCheckUsersExistence,
-      ILogger<DepartmentUserValidator> logger)
+      ILogger<DepartmentUsersValidator> logger)
     {
       _rcCheckUsersExistence = rcCheckUsersExistence;
       _logger = logger;
 
-      RuleFor(pu => pu.UserId)
-        .NotEmpty()
-        .WithMessage("Not specified user id.")
-        .MustAsync(async (x, cancellation) => await CheckUsersExistenceAsync(new() { x }))
-        .WithMessage("Users ids contains invalid id.");
-
-      RuleFor(pu => pu.Role)
-        .IsInEnum();
+      RuleForEach(users => users)
+        .Cascade(CascadeMode.Stop)
+        .NotEmpty().WithMessage("Users ids must not be empty.")
+        .ChildRules(users =>
+          RuleFor(users => users)
+            .Must(ids => ids.Distinct().Count() == ids.Count())
+            .WithMessage("User cannot be added to the deaprtment twice.")
+            .MustAsync(async (ids, _) => await CheckUsersExistenceAsync(ids))
+            .WithMessage("Some users does not exist."));
     }
+
     private async Task<bool> CheckUsersExistenceAsync(List<Guid> usersIds)
     {
       try

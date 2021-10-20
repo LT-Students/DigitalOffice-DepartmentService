@@ -11,20 +11,20 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   [AutoInject]
   public interface IDepartmentRepository
   {
-    Task<Guid> CreateAsync(DbDepartment department);
+    Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
     Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false);
 
     Task<DbDepartment> GetAsync(GetDepartmentFilter filter);
 
-    Task<(List<DbDepartment>, int totalCount)> FindAsync(FindDepartmentFilter filter);
+    Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
 
     Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request);
 
     Task<List<DbDepartment>> SearchAsync(string text);
 
-    Task<bool> DoesNameExistAsync(string name);
+    Task<bool> NameExistAsync(string name);
 
-    Task<bool> DoesExistAsync(Guid departmentId);
+    Task<bool> ExistAsync(Guid departmentId);
   }
 }

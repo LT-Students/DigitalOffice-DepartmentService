@@ -61,7 +61,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       foreach (Operation<EditDepartmentRequest> item in patch.Operations)
       {
         if (item.path.EndsWith(nameof(EditDepartmentRequest.Name), StringComparison.OrdinalIgnoreCase) &&
-            await _repository.DoesNameExistAsync(item.value.ToString()))
+            await _repository.NameExistAsync(item.value.ToString()))
         {
           return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Conflict);
         }

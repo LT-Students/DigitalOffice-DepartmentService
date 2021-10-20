@@ -10,32 +10,27 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Business.User
 {
-  public class RemoveDepartmentUserRequest : IRemoveDepartmentUserRequest
+  public class RemoveDepartmentUsersCommand : IRemoveDepartmentUsersCommand
   {
     private readonly IDepartmentUserRepository _repository;
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreater _responseCreater;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public RemoveDepartmentUserRequest(
+    public RemoveDepartmentUsersCommand(
       IDepartmentUserRepository repository,
       IAccessValidator accessValidator,
-      IResponseCreater responseCreater,
-      IHttpContextAccessor httpContextAccessor)
+      IResponseCreater responseCreater)
     {
       _repository = repository;
       _accessValidator = accessValidator;
       _responseCreater = responseCreater;
-      _httpContextAccessor = httpContextAccessor;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveProjects)
-        && !await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
@@ -45,13 +40,17 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
-      bool response = await _repository.RemoveAsync(departmentId, usersIds);
+      OperationResultResponse<bool> response = new();
 
-      return new()
+      response.Body = await _repository.RemoveAsync(departmentId, usersIds);
+      response.Status = OperationResultStatusType.FullSuccess;
+
+      if (response.Body)
       {
-        Status = response ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed,
-        Body = response
-      };
+        response = _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
+
+      return response;
     }
   }
 }

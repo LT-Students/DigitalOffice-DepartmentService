@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   public class DepartmentController : ControllerBase
   {
     [HttpPost("create")]
-    public async Task<OperationResultResponse<Guid>> CreateAsync(
+    public async Task<OperationResultResponse<Guid?>> CreateAsync(
       [FromServices] ICreateDepartmentCommand command,
       [FromBody] CreateDepartmentRequest department)
     {

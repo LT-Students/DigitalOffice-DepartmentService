@@ -17,65 +17,60 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
   {
     private readonly IDepartmentRepository _repository;
     private readonly IRequestClient<ICheckUsersExistence> _rcCheckUsersExistence;
-    private readonly ILogger<CreateDepartmentUsersRequestValidator> _logger;
+    private readonly ILogger<CreateDepartmentRequestValidator> _logger;
 
     public CreateDepartmentRequestValidator(
       IDepartmentRepository repository,
       IRequestClient<ICheckUsersExistence> rcCheckUsersExistence,
-      ILogger<CreateDepartmentUsersRequestValidator> logger)
+      ILogger<CreateDepartmentRequestValidator> logger)
     {
       _repository = repository;
       _rcCheckUsersExistence = rcCheckUsersExistence;
       _logger = logger;
 
-      When(department => department.Users != null && department.Users.Any(), () =>
-      {
-        RuleForEach(department => department.Users)
-          .ChildRules(user =>
-          {
-            user.RuleFor(user => user.UserId)
-              .NotEmpty().WithMessage("Wrong type of user Id.");
-
-            user.RuleFor(user => user.Role)
-              .IsInEnum();
-          });
-
-        RuleFor(department => department.Users)
-          .Cascade(CascadeMode.Stop)
-          .Must(d => d.Select(du => du.UserId).Distinct().Count() == d.Count())
-          .WithMessage("User cannot be added to the deaprtment twice.")
-          .MustAsync(async (du, cancellation) => await CheckUsersExistenceAsync(du.Select(u => u.UserId).ToList()))
-          .WithMessage("Some users does not exist.");
-      });
-
-      When(request => request.DirectorUserId != null, () =>
-      {
-        RuleFor(request => request.DirectorUserId)
-          .NotEmpty().WithMessage("Director id can not be empty.");
-      });
-
       RuleFor(request => request.Name)
+        .Cascade(CascadeMode.Stop)
         .NotEmpty().WithMessage("Department name can not be empty.")
-        .Must(n => n.Trim().Length > 2).WithMessage("Department name is too short")
+        .Must(n => n.Trim().Length > 2).WithMessage("Department name is too short.")
         .MaximumLength(100).WithMessage("Department name is too long.")
-        .MustAsync(async (request, collection) => await _repository.DoesNameExistAsync(request))
-        .WithMessage("This department name is already exists.");
+        .MustAsync(async (request, _) => await _repository.NameExistAsync(request))
+        .WithMessage("The department name is already exists.");
 
       When(request => request.Description != null, () =>
       {
         RuleFor(request => request.Description)
           .MaximumLength(1000).WithMessage("Department description is too long.");
       });
+
+      When(department => department.Users != null && department.Users.Any(), () =>
+      {
+        RuleFor(department => department.Users)
+          .Cascade(CascadeMode.Stop)
+          .ChildRules(d =>
+            RuleForEach(department => department.Users)
+              .ChildRules(u =>
+              {
+                u.RuleFor(u => u.UserId)
+                  .NotEmpty().WithMessage("Wrong type of user Id.");
+
+                u.RuleFor(u => u.Role)
+                  .IsInEnum().WithMessage("Wrong type of user role.");
+              }))
+          .Must(d => d.Select(du => du.UserId).Distinct().Count() == d.Count())
+          .WithMessage("User cannot be added to the deaprtment twice.")
+          .Must(d => d.Where(du => du.Role == Models.Dto.Enums.DepartmentUserRole.Director).Count() < 2)
+          .WithMessage("Only one user can be the department director")
+          .MustAsync(async (d, _) => await CheckUsersExistenceAsync(d.Select(du => du.UserId).ToList()))
+          .WithMessage("Some users does not exist.");
+      });
     }
 
     private async Task<bool> CheckUsersExistenceAsync(List<Guid> usersIds)
     {
-      if (!usersIds.Any())
+      if (usersIds == null || !usersIds.Any())
       {
         return true;
       }
-
-      string logMessage = "Cannot check existing users withs this ids {userIds}";
 
       try
       {
@@ -88,11 +83,17 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           return response.Message.Body.UserIds.Count() == usersIds.Count();
         }
 
-        _logger.LogWarning($"Can not find with this Ids: {usersIds}: {Environment.NewLine}{string.Join('\n', response.Message.Errors)}");
+        _logger.LogWarning(
+          "Error while checking users existence Ids: {UsersIds}.\nErrors: {Errors}.",
+          string.Join(", ", usersIds),
+          string.Join('\n', response.Message.Errors));
       }
       catch (Exception exc)
       {
-        _logger.LogError(exc, logMessage);
+        _logger.LogError(
+          exc,
+          "Can not check users existence Ids: {UsersIds}.",
+          string.Join(", ", usersIds));
       }
 
       return false;

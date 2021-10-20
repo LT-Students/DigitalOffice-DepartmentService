@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
@@ -20,7 +21,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
-    private readonly ICreateDepartmentUsersRequestValidator _validator;
+    private readonly IDepartmentUsersValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
     private readonly IResponseCreater _responseCreater;
@@ -28,7 +29,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
-      ICreateDepartmentUsersRequestValidator validator,
+      IDepartmentUsersValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
       IResponseCreater responseCreater)
@@ -41,7 +42,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _responseCreater = responseCreater;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(CreateDepartmentUsersRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
         !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
@@ -49,7 +50,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
+      ValidationResult validationResult = await _validator.ValidateAsync(usersIds);
 
       if (!validationResult.IsValid)
       {
@@ -58,10 +59,10 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       OperationResultResponse<bool> response = new();
 
-      await _repository.RemoveAsync(request.Users);
+      await _repository.RemoveAsync(departmentId, usersIds);
 
       response.Body = await _repository.CreateAsync(
-        request.Users.Select(x => _mapper.Map(x, request.DepartmentId)).ToList());
+        usersIds.Select(userId => _mapper.Map(userId, departmentId)).ToList());
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 

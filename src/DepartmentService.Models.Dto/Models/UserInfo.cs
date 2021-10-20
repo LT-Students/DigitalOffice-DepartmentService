@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
     public string MiddleName { get; set; }
     public double Rate { get; set; }
     public DateTime CreatedAtUtc { get; set; }
-    public DateTime? ModifiedAtUtc { get; set; }
+    public DateTime? LeftAtUtc { get; set; }
     public bool IsActive { get; set; }
     public DepartmentUserRole Role { get; set; }
     public ImageInfo AvatarImage { get; set; }

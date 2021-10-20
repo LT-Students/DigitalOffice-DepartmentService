@@ -23,8 +23,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetPositionsRequest))]
-    public string GetPositionsEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
+    public string GetCompanyEmployeesEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
     public string CheckUsersExistenceEndpoint { get; set; }

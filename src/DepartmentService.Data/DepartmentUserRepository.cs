@@ -27,19 +27,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<bool> CreateAsync(DbDepartmentUser departmentUser)
-    {
-      if (departmentUser == null)
-      {
-        return false;
-      }
-
-      _provider.DepartmentsUsers.Add(departmentUser);
-      await _provider.SaveAsync();
-
-      return true;
-    }
-
     public async Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers)
     {
       if (departmentsUsers == null || !departmentsUsers.Any())
@@ -55,23 +42,15 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment)
     {
-      DbDepartmentUser user = null;
+      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
 
       if (includeDepartment)
       {
-        user = await _provider.DepartmentsUsers.Include(u => u.Department).FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
-      }
-      else
-      {
-        user = await _provider.DepartmentsUsers.FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+        dbDepartmentUser = dbDepartmentUser.Include(du => du.Department);
       }
 
-      if (user == null)
-      {
-        return null;
-      }
-
-      return user;
+      return await dbDepartmentUser
+        .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
     }
 
     public async Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId)
@@ -86,8 +65,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
         return false;
       }
 
-      DbDepartmentUser prevDirector = directors.FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Director);
-      DbDepartmentUser newDirector = directors.FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Employee);
+      DbDepartmentUser prevDirector = directors
+        .FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Director);
+      DbDepartmentUser newDirector = directors
+        .FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Employee);
 
       if (newDirector == null)
       {
@@ -154,22 +135,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .ToListAsync();
     }
 
-    public async Task RemoveAsync(CreateUserRequest user)
-    {
-      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
-        .FirstOrDefaultAsync(du => du.UserId == user.UserId && du.IsActive);
-
-      if (dbDepartmentUser != null)
-      {
-        dbDepartmentUser.IsActive = false;
-        dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
-        dbDepartmentUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
-
-        await _provider.SaveAsync();
-      }
-    }
-
     public async Task RemoveAsync(List<CreateUserRequest> users)
     {
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
@@ -191,20 +156,24 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)
     {
-      List<DbDepartmentUser> users = await _provider.DepartmentsUsers
-        .Where(du => du.IsActive && du.DepartmentId == departmentId && usersIds.Contains(du.UserId)).ToListAsync();
+      List<DbDepartmentUser> dbDepartmentUsers = await _provider.DepartmentsUsers
+        .Where(du => du.IsActive && du.DepartmentId == departmentId && usersIds.Contains(du.UserId))
+        .ToListAsync();
 
-      if (!users.Any())
+      if (!dbDepartmentUsers.Any())
       {
         return false;
       }
 
-      foreach (var user in users)
+      foreach (DbDepartmentUser dbDepartmentUser in dbDepartmentUsers)
       {
-        user.IsActive = false;
+        dbDepartmentUser.IsActive = false;
+        dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
+        dbDepartmentUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
+        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
       }
 
-      _provider.DepartmentsUsers.UpdateRange(users);
+      _provider.DepartmentsUsers.UpdateRange(dbDepartmentUsers);
       await _provider.SaveAsync();
 
       return true;
