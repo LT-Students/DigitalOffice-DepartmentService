@@ -14,6 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
     {
       _httpContextAccessor = httpContextAccessor;
     }
+
     public DbDepartmentProject Map(Guid projectId, Guid departmentId)
     {
       return new DbDepartmentProject

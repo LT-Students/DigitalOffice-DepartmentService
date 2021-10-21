@@ -10,8 +10,8 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Responses.Interfaces
   public interface IDepartmentResponseMapper
   {
     DepartmentResponse Map(
-          DbDepartment dbDepartment,
-          IEnumerable<UserInfo> users,
-          IEnumerable<ProjectInfo> projects);
+      DbDepartment dbDepartment,
+      IEnumerable<UserInfo> users,
+      IEnumerable<ProjectInfo> projects);
   }
 }

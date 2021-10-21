@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
 
       AddFailureForPropertyIf(
         nameof(EditDepartmentRequest.Description),
-        x => x == OperationType.Replace || x == OperationType.Add,
+        x => x == OperationType.Replace,
         new()
         {
           { x => x.value?.ToString().Trim().Length < 1000, "Description is too long." },
