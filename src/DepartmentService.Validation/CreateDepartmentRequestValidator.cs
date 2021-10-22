@@ -33,7 +33,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         .NotEmpty().WithMessage("Department name can not be empty.")
         .Must(n => n.Trim().Length > 2).WithMessage("Department name is too short.")
         .MaximumLength(100).WithMessage("Department name is too long.")
-        .MustAsync(async (request, _) => await _repository.NameExistAsync(request))
+        .MustAsync(async (request, _) => !await _repository.NameExistAsync(request))
         .WithMessage("The department name is already exists.");
 
       When(request => request.Description != null, () =>

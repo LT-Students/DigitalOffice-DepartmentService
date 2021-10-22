@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 
@@ -19,7 +18,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds);
 
-    Task RemoveAsync(List<CreateUserRequest> usersIds);
+    Task RemoveAsync(IEnumerable<Guid> usersIds);
 
     Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds);
 

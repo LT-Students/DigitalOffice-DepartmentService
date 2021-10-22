@@ -188,7 +188,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           HttpStatusCode.BadRequest, errors);
       }
 
-      FindResultResponse<DepartmentInfo> response = new();
+      FindResultResponse<DepartmentInfo> response = new() { Body = new() };
 
       (List<DbDepartment> dbDepartments, int totalCount) = await _repository.FindAsync(filter);
 

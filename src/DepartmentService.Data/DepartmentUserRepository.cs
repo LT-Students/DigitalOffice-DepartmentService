@@ -6,7 +6,6 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using Microsoft.AspNetCore.Http;
@@ -135,12 +134,12 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .ToListAsync();
     }
 
-    public async Task RemoveAsync(List<CreateUserRequest> users)
+    public async Task RemoveAsync(IEnumerable<Guid> usersIds)
     {
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
-        .Where(du => du.IsActive && users.Contains(users.FirstOrDefault(x => x.UserId == du.UserId))).ToListAsync();
+        .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
 
-      if (users != null && users.Any())
+      if (dbDepartmentsUsers != null && dbDepartmentsUsers.Any())
       {
         foreach (DbDepartmentUser du in dbDepartmentsUsers)
         {
