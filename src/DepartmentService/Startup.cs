@@ -184,6 +184,7 @@ namespace LT.DigitalOffice.DepartmentService
     {
       services.AddMassTransit(x =>
       {
+        x.AddConsumer<CreateDepartmentEntityConsumer>();
         x.AddConsumer<GetDepartmentsConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
         x.AddConsumer<GetDepartmentUsersConsumer>();
@@ -209,6 +210,10 @@ namespace LT.DigitalOffice.DepartmentService
       IBusRegistrationContext context,
       IRabbitMqBusFactoryConfigurator cfg)
     {
+      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentEntityEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<CreateDepartmentEntityConsumer>(context);
+      });
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsEndpoint, ep =>
       {
         ep.ConfigureConsumer<GetDepartmentsConsumer>(context);

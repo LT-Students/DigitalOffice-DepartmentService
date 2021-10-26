@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
@@ -7,12 +6,10 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
-using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Models.Department;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
+using LT.DigitalOffice.Models.Broker.Responses.Department;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -21,36 +18,35 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 {
   public class GetDepartmentsConsumer : IConsumer<IGetDepartmentsRequest>
   {
-    private readonly IDepartmentRepository _repository;
+    private readonly IDepartmentRepository _departmentRepository;
     private readonly IConnectionMultiplexer _cache;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
 
-    private async Task<List<DepartmentData>> GetDepartment(IGetDepartmentsRequest request)
+    private async Task<object> GetDepartments(IGetDepartmentsRequest request)
     {
-      List<DbDepartment> dbDepartments = new();
+      List<DbDepartment> dbDepartments = await _departmentRepository.GetAsync(request);
 
-      if (request.DepartmentsIds != null && request.DepartmentsIds.Any())
-      {
-        dbDepartments = await _repository.GetAsync(request.DepartmentsIds, true);
-      }
-
-      return dbDepartments.Select(
+      return IGetDepartmentsResponse.CreateObj(dbDepartments.Select(
         d => new DepartmentData(
           d.Id,
           d.Name,
-          d.Users.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director)?.UserId,
-          d.Users.Select(u => u.UserId).ToList()))
-        .ToList();
+          directorUserId: d.Users
+            ?.FirstOrDefault(du => du.Role == (int)DepartmentUserRole.Director)
+            ?.UserId,
+          newsIds: d.News?.Select(dn => dn.NewsId).ToList(),
+          projectsIds: d.Projects?.Select(dp => dp.ProjectId).ToList(),
+          usersIds: d.Users?.Select(u => u.UserId).ToList()))
+        .ToList());
     }
 
     public GetDepartmentsConsumer(
-      IDepartmentRepository repository,
+      IDepartmentRepository departmenrRepository,
       IConnectionMultiplexer cache,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper)
     {
-      _repository = repository;
+      _departmentRepository = departmenrRepository;
       _cache = cache;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
@@ -58,20 +54,18 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
     public async Task Consume(ConsumeContext<IGetDepartmentsRequest> context)
     {
-      List<DepartmentData> departments = await GetDepartment(context.Message);
+      object result = OperationResultWrapper.CreateResponse(GetDepartments, context.Message);
 
-      object departmentId = OperationResultWrapper.CreateResponse((_) => IGetDepartmentsResponse.CreateObj(departments), context);
+      await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(result);
 
-      await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(departmentId);
-
-      if (departments != null)
+      /*if (departments != null)
       {
         await _redisHelper.CreateAsync(
           Cache.Departments,
           context.Message.DepartmentsIds.GetRedisCacheHashCode(),
           departments,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-      }
+      }*/
     }
   }
 }

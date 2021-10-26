@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
 using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
@@ -16,6 +17,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false);
 
     Task<DbDepartment> GetAsync(GetDepartmentFilter filter);
+
+    Task<List<DbDepartment>> GetAsync(IGetDepartmentsRequest request);
 
     Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
 

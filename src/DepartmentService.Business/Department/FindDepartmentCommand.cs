@@ -18,15 +18,14 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Models.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
+using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.User;
-using LT.DigitalOffice.Models.Broker.Responses.Company;
 using LT.DigitalOffice.Models.Broker.Responses.Image;
+using LT.DigitalOffice.Models.Broker.Responses.Position;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -39,7 +38,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IUserInfoMapper _userMapper;
     private readonly IRequestClient<IGetUsersDataRequest> _rcGetUsersData;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
-    private readonly IRequestClient<IGetCompanyEmployeesRequest> _rcGetPositions;
+    private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly ILogger<FindDepartmentsCommand> _logger;
     private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IResponseCreater _responseCreator;
@@ -127,13 +126,10 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       try
       {
-        Response<IOperationResult<IGetCompanyEmployeesResponse>> response =
-          await _rcGetPositions.GetResponse<IOperationResult<IGetCompanyEmployeesResponse>>(
-            IGetCompanyEmployeesRequest.CreateObj(
-            usersIds,
-            includeDepartments: false,
-            includePositions: true,
-            includeOffices: false));
+        Response<IOperationResult<IGetPositionsResponse>> response =
+          await _rcGetPositions.GetResponse<IOperationResult<IGetPositionsResponse>>(
+            IGetPositionsRequest.CreateObj(
+            usersIds));
 
         if (response.Message.IsSuccess)
         {
@@ -165,7 +161,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IUserInfoMapper userMapper,
       IRequestClient<IGetUsersDataRequest> rcGetUsersData,
       IRequestClient<IGetImagesRequest> rcGetImages,
-      IRequestClient<IGetCompanyEmployeesRequest> rcGetPositions,
+      IRequestClient<IGetPositionsRequest> rcGetPositions,
       ILogger<FindDepartmentsCommand> logger,
       IResponseCreater responseCreator)
     {
@@ -229,7 +225,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
                 userData,
                 dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id),
                 imagesData.FirstOrDefault(i => i.ImageId == userData.ImageId),
-                positionsData.FirstOrDefault(p => p.UsersIds.Contains(userData.Id)))));
+                positionsData.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
       }
 
       response.Status = response.Errors.Any() ?

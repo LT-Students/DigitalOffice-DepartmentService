@@ -3,7 +3,7 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Company;
+using LT.DigitalOffice.Models.Broker.Models.Position;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
@@ -37,7 +37,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         FirstName = userData.FirstName,
         LastName = userData.LastName,
         MiddleName = userData.MiddleName,
-        Rate = userData.Rate,
         IsActive = userData.IsActive,
         Role = (DepartmentUserRole)dbDepartmentUser.Role,
         CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,

@@ -7,7 +7,7 @@ using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +37,19 @@ namespace LT.DigitalOffice.DepartmentService.Data
       await _provider.SaveAsync();
 
       return true;
+    }
+
+    public async Task<Guid?> CreateAsync(DbDepartmentUser dbDepartmentUser)
+    {
+      if (dbDepartmentUser == null)
+      {
+        return null;
+      }
+
+      _provider.DepartmentsUsers.Add(dbDepartmentUser);
+      await _provider.SaveAsync();
+
+      return dbDepartmentUser.Id;
     }
 
     public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment)
@@ -121,7 +134,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
 
-    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds)
+    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
     {
       if (usersIds == null)
       {
@@ -134,7 +147,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .ToListAsync();
     }
 
-    public async Task RemoveAsync(IEnumerable<Guid> usersIds)
+    public async Task RemoveAsync(List<Guid> usersIds)
     {
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
         .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
@@ -151,6 +164,22 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
         await _provider.SaveAsync();
       }
+    }
+
+    public async Task RemoveAsync(Guid userId, Guid removedBy)
+    {
+      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
+        .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
+
+      if (dbDepartmentUser != null)
+      {
+        dbDepartmentUser.IsActive = false;
+        dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
+        dbDepartmentUser.ModifiedBy = removedBy;
+        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
+
+        await _provider.SaveAsync();
+      };
     }
 
     public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)

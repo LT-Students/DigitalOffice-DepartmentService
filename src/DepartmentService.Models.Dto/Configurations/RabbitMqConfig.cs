@@ -3,6 +3,7 @@ using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Models.Broker.Common;
 using LT.DigitalOffice.Models.Broker.Requests.Company;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
+using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 
@@ -10,6 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 {
   public class RabbitMqConfig : BaseRabbitMqConfig
   {
+    public string CreateDepartmentEntityEndpoint { get; set; }
     public string GetDepartmentsEndpoint { get; set; }
     public string GetDepartmentUsersEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
@@ -20,8 +22,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetCompanyEmployeesRequest))]
-    public string GetCompanyEmployeesEndpoint { get; set; }
+    [AutoInjectRequest(typeof(IGetPositionsRequest))]
+    public string GetPositionsEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
     public string CheckUsersExistenceEndpoint { get; set; }

@@ -1,21 +1,12 @@
 ﻿using System;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.Kernel.Extensions;
-using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Db
 {
   public class DbDepartmentProjectMapper : IDbDepartmentProjectMapper
   {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public DbDepartmentProjectMapper(IHttpContextAccessor httpContextAccessor)
-    {
-      _httpContextAccessor = httpContextAccessor;
-    }
-
-    public DbDepartmentProject Map(Guid projectId, Guid departmentId)
+    public DbDepartmentProject Map(Guid projectId, Guid departmentId, Guid createdBy)
     {
       return new DbDepartmentProject
       {
@@ -23,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         ProjectId = projectId,
         DepartmentId = departmentId,
         IsActive = true,
-        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+        CreatedBy = createdBy,
         CreatedAtUtc = DateTime.UtcNow
       };
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 {
@@ -12,13 +12,15 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers);
 
-    Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment);
+    Task<Guid?> CreateAsync(DbDepartmentUser dbDepartmentUser);
 
     Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request);
 
-    Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds);
+    Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false);
 
-    Task RemoveAsync(IEnumerable<Guid> usersIds);
+    Task RemoveAsync(List<Guid> usersIds);
+
+    Task RemoveAsync(Guid userId, Guid removedBy);
 
     Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds);
 
