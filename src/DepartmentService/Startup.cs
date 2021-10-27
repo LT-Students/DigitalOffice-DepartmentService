@@ -136,7 +136,7 @@ namespace LT.DigitalOffice.DepartmentService
       services.AddSingleton<IConnectionMultiplexer>(
         x => ConnectionMultiplexer.Connect(redisConnStr));
       services.AddTransient<IRedisHelper, RedisHelper>();
-
+      services.AddTransient<ICacheNotebook, CacheNotebook>();
       services.AddBusinessObjects();
 
       ConfigureMassTransit(services);

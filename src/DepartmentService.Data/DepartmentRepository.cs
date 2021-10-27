@@ -91,8 +91,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (request.NewsIds is not null && request.NewsIds.Any())
       {
-        dbDepartments = dbDepartments.Where(d => d.News.Any(dn => request.NewsIds.Contains(dn.NewsId)));
         dbDepartments = dbDepartments.Include(d => d.News.Where(dn => dn.IsActive));
+        dbDepartments = dbDepartments.Where(d => d.News.Any(dn => request.NewsIds.Contains(dn.NewsId)));
       }
 
       if (request.ProjectsIds is not null && request.ProjectsIds.Any())
