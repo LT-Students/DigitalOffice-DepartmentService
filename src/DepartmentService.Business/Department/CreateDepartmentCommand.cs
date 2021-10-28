@@ -66,7 +66,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       if (request.Users != null)
       {
-        await _userRepository.RemoveAsync(request.Users.Select(ur => ur.UserId));
+        await _userRepository.RemoveAsync(request.Users.Select(ur => ur.UserId).ToList());
       }
 
       #endregion

@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.Models.Broker.Models.Company;
+using LT.DigitalOffice.Models.Broker.Models.Position;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {

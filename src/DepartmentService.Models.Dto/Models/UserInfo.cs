@@ -9,7 +9,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public double Rate { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? LeftAtUtc { get; set; }
     public bool IsActive { get; set; }

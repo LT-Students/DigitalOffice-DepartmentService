@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Attributes;
@@ -11,6 +10,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces
   {
     DbDepartmentUser Map(CreateUserRequest request, Guid departmentId);
 
-    DbDepartmentUser Map(Guid userId, Guid departmentId);
+    DbDepartmentUser Map(Guid userId, Guid departmentId, Guid? createdBy = null);
   }
 }

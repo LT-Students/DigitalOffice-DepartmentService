@@ -7,6 +7,7 @@ using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
 using LT.DigitalOffice.Kernel.Extensions;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -82,6 +83,32 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       return await departments.ToListAsync();
+    }
+
+    public async Task<List<DbDepartment>> GetAsync(IGetDepartmentsRequest request)
+    {
+      IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
+
+      if (request.NewsIds is not null && request.NewsIds.Any())
+      {
+        dbDepartments = dbDepartments.Include(d => d.News.Where(dn => dn.IsActive));
+        dbDepartments = dbDepartments.Where(d => d.News.Any(dn => request.NewsIds.Contains(dn.NewsId)));
+      }
+
+      if (request.ProjectsIds is not null && request.ProjectsIds.Any())
+      {
+        dbDepartments = dbDepartments.Include(d => d.Projects.Where(dp => dp.IsActive));
+        dbDepartments = dbDepartments.Where(d => d.Projects.Any(dp => request.ProjectsIds.Contains(dp.ProjectId)));
+      }
+
+      if (request.UsersIds is not null && request.UsersIds.Any())
+      {
+        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => request.UsersIds.Contains(du.UserId)));
+      }
+
+      dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
+
+      return await dbDepartments.ToListAsync();
     }
 
     public async Task<List<DbDepartment>> SearchAsync(string text)

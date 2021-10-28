@@ -3,74 +3,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
+using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.Kernel.Broker;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
-using LT.DigitalOffice.Models.Broker.Models.Company;
-using LT.DigitalOffice.Models.Broker.Requests.Company;
-using LT.DigitalOffice.Models.Broker.Responses.Company;
+using LT.DigitalOffice.Models.Broker.Models.Department;
+using LT.DigitalOffice.Models.Broker.Requests.Department;
+using LT.DigitalOffice.Models.Broker.Responses.Department;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 
 namespace LT.DigitalOffice.DepartmentService.Broker
 {
   public class GetDepartmentsConsumer : IConsumer<IGetDepartmentsRequest>
   {
-    private readonly IDepartmentRepository _repository;
-    private readonly IConnectionMultiplexer _cache;
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly IDepartmentDataMapper _departmentDataMapper;
+    private readonly ICacheNotebook _cacheNotebook;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
 
-    private async Task<List<DepartmentData>> GetDepartment(IGetDepartmentsRequest request)
+    private async Task<List<DepartmentData>> GetDepartmentsAsync(IGetDepartmentsRequest request)
     {
-      List<DbDepartment> dbDepartments = new();
+      List<DbDepartment> dbDepartments = await _departmentRepository.GetAsync(request);
 
-      if (request.DepartmentsIds != null && request.DepartmentsIds.Any())
-      {
-        dbDepartments = await _repository.GetAsync(request.DepartmentsIds, true);
-      }
-
-      return dbDepartments.Select(
-        d => new DepartmentData(
-          d.Id,
-          d.Name,
-          d.Users.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director)?.UserId,
-          d.Users.Select(u => u.UserId).ToList()))
-        .ToList();
+      return dbDepartments.Select(_departmentDataMapper.Map).ToList();
     }
 
     public GetDepartmentsConsumer(
-      IDepartmentRepository repository,
-      IConnectionMultiplexer cache,
+      IDepartmentRepository departmenrRepository,
+      IDepartmentDataMapper departmentDataMapper,
+      ICacheNotebook cacheNotebook,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper)
     {
-      _repository = repository;
-      _cache = cache;
+      _departmentRepository = departmenrRepository;
+      _departmentDataMapper = departmentDataMapper;
+      _cacheNotebook = cacheNotebook;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
     }
 
     public async Task Consume(ConsumeContext<IGetDepartmentsRequest> context)
     {
-      List<DepartmentData> departments = await GetDepartment(context.Message);
+      List<DepartmentData> departmentsData = await GetDepartmentsAsync(context.Message);
 
-      object departmentId = OperationResultWrapper.CreateResponse((_) => IGetDepartmentsResponse.CreateObj(departments), context);
+      object result = OperationResultWrapper.CreateResponse(
+        (_) => IGetDepartmentsResponse.CreateObj(departmentsData), context);
 
-      await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(departmentId);
+      await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(result);
 
-      if (departments != null)
+      if (departmentsData is not null && departmentsData.Any())
       {
-        await _redisHelper.CreateAsync(
-          Cache.Departments,
-          context.Message.DepartmentsIds.GetRedisCacheHashCode(),
-          departments,
-          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+        List<Guid> allGuids = new();
+
+        if (context.Message.NewsIds is not null && context.Message.NewsIds.Any())
+        {
+          allGuids.AddRange(context.Message.NewsIds);
+        }
+
+        if (context.Message.ProjectsIds is not null && context.Message.ProjectsIds.Any())
+        {
+          allGuids.AddRange(context.Message.ProjectsIds);
+        }
+
+        if (context.Message.UsersIds is not null && context.Message.UsersIds.Any())
+        {
+          allGuids.AddRange(context.Message.UsersIds);
+        }
+
+        if (allGuids.Any())
+        {
+          string key = allGuids.GetRedisCacheHashCode();
+
+          await _redisHelper.CreateAsync(
+            Cache.Departments,
+            key,
+            departmentsData,
+            TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+
+          _cacheNotebook.Add(departmentsData.Select(d => d.Id).ToList(), Cache.Departments, key);
+        }
       }
     }
   }

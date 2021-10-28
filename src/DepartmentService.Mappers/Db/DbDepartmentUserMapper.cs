@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
@@ -38,7 +36,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
       };
     }
 
-    public DbDepartmentUser Map(Guid userId, Guid departmentId)
+    public DbDepartmentUser Map(Guid userId, Guid departmentId, Guid? createdBy = null)
     {
       return new DbDepartmentUser()
       {
@@ -47,7 +45,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         DepartmentId = departmentId,
         IsActive = true,
         Role = (int)DepartmentUserRole.Employee,
-        CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
+        CreatedBy = createdBy ?? _httpContextAccessor.HttpContext.GetUserId(),
         CreatedAtUtc = DateTime.UtcNow
       };
     }
