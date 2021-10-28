@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker
   {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDepartmentDataMapper _departmentDataMapper;
-    private readonly ICacheNotebook _cache;
+    private readonly ICacheNotebook _cacheNotebook;
     private readonly IOptions<RedisConfig> _redisConfig;
     private readonly IRedisHelper _redisHelper;
 
@@ -36,13 +36,13 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     public GetDepartmentsConsumer(
       IDepartmentRepository departmenrRepository,
       IDepartmentDataMapper departmentDataMapper,
-      ICacheNotebook cache,
+      ICacheNotebook cacheNotebook,
       IOptions<RedisConfig> redisConfig,
       IRedisHelper redisHelper)
     {
       _departmentRepository = departmenrRepository;
       _departmentDataMapper = departmentDataMapper;
-      _cache = cache;
+      _cacheNotebook = cacheNotebook;
       _redisConfig = redisConfig;
       _redisHelper = redisHelper;
     }
@@ -56,24 +56,37 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
       await context.RespondAsync<IOperationResult<IGetDepartmentsResponse>>(result);
 
-      if (departmentsData is not null)
+      if (departmentsData is not null && departmentsData.Any())
       {
-        List<Guid> departmentsIds = departmentsData.Select(d => d.Id).ToList();
-        string key = departmentsIds.ToString();
+        List<Guid> allGuids = new();
 
-        await _redisHelper.CreateAsync(
-          Cache.Departments,
-          key,
-          departmentsData,
-          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+        if (context.Message.NewsIds is not null && context.Message.NewsIds.Any())
+        {
+          allGuids.AddRange(context.Message.NewsIds);
+        }
 
-        _cache.Add(departmentsIds, Cache.Departments, key);
+        if (context.Message.ProjectsIds is not null && context.Message.ProjectsIds.Any())
+        {
+          allGuids.AddRange(context.Message.ProjectsIds);
+        }
 
-        await _redisHelper.CreateAsync(
-          Cache.Departments,
-          departmentsIds.GetRedisCacheHashCode(),
-          departmentsData,
-          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+        if (context.Message.UsersIds is not null && context.Message.UsersIds.Any())
+        {
+          allGuids.AddRange(context.Message.UsersIds);
+        }
+
+        if (allGuids.Any())
+        {
+          string key = allGuids.GetRedisCacheHashCode();
+
+          await _redisHelper.CreateAsync(
+            Cache.Departments,
+            key,
+            departmentsData,
+            TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+
+          _cacheNotebook.Add(departmentsData.Select(d => d.Id).ToList(), Cache.Departments, key);
+        }
       }
     }
   }
