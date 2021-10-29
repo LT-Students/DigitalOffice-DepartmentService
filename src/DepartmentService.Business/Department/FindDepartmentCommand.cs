@@ -227,6 +227,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
                 imagesData.FirstOrDefault(i => i.ImageId == userData.ImageId),
                 positionsData.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
       }
+      response.TotalCount = totalCount;
 
       response.Status = response.Errors.Any() ?
         OperationResultStatusType.PartialSuccess :

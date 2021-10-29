@@ -65,10 +65,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       return (
-        await _provider.Departments
+        await dbDepartments
+          .Include(d => d.Users.Where(u => u.IsActive))
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
-          .Include(d => d.Users.Where(u => u.IsActive))
           .ToListAsync(),
         await _provider.Departments.CountAsync());
     }
@@ -79,7 +79,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (includeUsers)
       {
-        departments = departments.Include(d => d.Users);
+        departments = departments.Include(d => d.Users.Where(u => u.IsActive));
       }
 
       return await departments.ToListAsync();
