@@ -214,7 +214,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       foreach (DbDepartment dbDepartment in dbDepartments)
       {
-        userData = usersData.FirstOrDefault(u => u.Id == departmentsDirectors[dbDepartment.Id]);
+        userData = departmentsDirectors.ContainsKey(dbDepartment.Id)
+          ? usersData.FirstOrDefault(u => u.Id == departmentsDirectors[dbDepartment.Id])
+          : null;
 
         response.Body.Add(
           _departmentMapper.Map(
@@ -223,10 +225,11 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
               null :
               _userMapper.Map(
                 userData,
-                dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id),
-                imagesData.FirstOrDefault(i => i.ImageId == userData.ImageId),
-                positionsData.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
+                dbDepartment?.Users.FirstOrDefault(du => du.UserId == userData.Id),
+                imagesData?.FirstOrDefault(i => i.ImageId == userData.ImageId),
+                positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
       }
+      response.TotalCount = totalCount;
 
       response.Status = response.Errors.Any() ?
         OperationResultStatusType.PartialSuccess :
