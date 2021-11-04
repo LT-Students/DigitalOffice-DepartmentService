@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Responses.Interfaces;
@@ -23,17 +24,20 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
       IEnumerable<UserInfo> users,
       IEnumerable<ProjectInfo> projects)
     {
-      if (dbDepartment == null)
+      if (dbDepartment is null)
       {
         return null;
       }
 
-      DbDepartmentUser departmentDirector =
-        dbDepartment.Users.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director && u.DepartmentId == dbDepartment.Id);
+      Guid? directorUserId = dbDepartment.Users
+        ?.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director && u.DepartmentId == dbDepartment.Id)
+        ?.UserId;
 
       return new DepartmentResponse
       {
-        Department = _departmentInfoMapper.Map(dbDepartment, users?.FirstOrDefault(u => u.Id == departmentDirector.UserId)),
+        Department = _departmentInfoMapper.Map(
+          dbDepartment,
+          directorUserId is null ? null : users.FirstOrDefault(u => u.Id == directorUserId)),
         Users = users,
         Projects = projects,
       };

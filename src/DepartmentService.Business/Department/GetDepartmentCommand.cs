@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<UserData>> GetUsersDatasAsync(IEnumerable<DbDepartmentUser> departmentUsers, List<string> errors)
     {
-      if (departmentUsers == null || !departmentUsers.Any())
+      if (departmentUsers is null || !departmentUsers.Any())
       {
         return null;
       }
@@ -72,7 +72,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<UserData>> GetUsersDatasThroughBrokerAsync(List<Guid> usersIds, List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return new();
       }
@@ -106,7 +106,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<ProjectData>> GetProjectsDatasAsync(IEnumerable<DbDepartmentProject> departmentProjects, List<string> errors)
     {
-      if (departmentProjects == null || !departmentProjects.Any())
+      if (departmentProjects is null || !departmentProjects.Any())
       {
         return null;
       }
@@ -127,7 +127,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<ProjectData>> GetProjectsDatasThroughBrokerAsync(List<Guid> projectsIds, List<string> errors)
     {
-      if (projectsIds == null || !projectsIds.Any())
+      if (projectsIds is null || !projectsIds.Any())
       {
         return new();
       }
@@ -159,7 +159,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<ImageData>> GetUserImagesAsync(List<Guid> usersIds, List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return null;
       }
@@ -195,7 +195,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<PositionData>> GetPositionsAsync(List<Guid> usersIds, List<string> errors)
     {
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return null;
       }
@@ -270,7 +270,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IEnumerable<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map);
 
       List<UserData> usersData = await GetUsersDatasAsync(dbDepartment.Users, response.Errors);
-      IEnumerable<UserInfo> usersInfo = null;
+      List<UserInfo> usersInfo = null;
 
       if (usersData != null && usersData.Any())
       {
@@ -287,9 +287,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
             _userInfoMapper.Map(
               u,
               dbDepartment.Users.FirstOrDefault(du => du.UserId == u.Id),
-              imagesData.FirstOrDefault(i => i.ImageId == u.ImageId),
-              positionsData.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(u.Id))
-          ));
+              imagesData?.FirstOrDefault(i => i.ImageId == u.ImageId),
+              positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(u.Id))
+          )).ToList();
       }
 
       response.Status = response.Errors.Any() ?
