@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json.Converters;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Enums
 {
