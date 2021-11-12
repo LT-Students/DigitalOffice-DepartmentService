@@ -30,7 +30,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers))
+      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
+        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
@@ -45,7 +46,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       response.Body = await _repository.RemoveAsync(departmentId, usersIds);
       response.Status = OperationResultStatusType.FullSuccess;
 
-      if (response.Body)
+      if (!response.Body)
       {
         response = _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
       }
