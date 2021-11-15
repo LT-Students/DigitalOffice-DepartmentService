@@ -180,8 +180,36 @@ namespace LT.DigitalOffice.DepartmentService
 
     #region private methods
 
+    private (string username, string password) GetRabbitMqCredentials()
+    {
+      static string GetString(string envVar, string formAppsettings, string generated, string fieldName)
+      {
+        string str = Environment.GetEnvironmentVariable(envVar);
+        if (string.IsNullOrEmpty(str))
+        {
+          str = formAppsettings ?? generated;
+
+          Log.Information(
+            formAppsettings == null
+              ? $"Default RabbitMq {fieldName} was used."
+              : $"RabbitMq {fieldName} from appsetings.json was used.");
+        }
+        else
+        {
+          Log.Information($"RabbitMq {fieldName} from environment was used.");
+        }
+
+        return str;
+      }
+
+      return (GetString("RabbitMqUsername", _rabbitMqConfig.Username, $"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}", "Username"),
+        GetString("RabbitMqPassword", _rabbitMqConfig.Password, _serviceInfoConfig.Id, "Password"));
+    }
+
     private void ConfigureMassTransit(IServiceCollection services)
     {
+      (string username, string password) = GetRabbitMqCredentials();
+
       services.AddMassTransit(x =>
       {
         x.AddConsumer<CreateDepartmentEntityConsumer>();
@@ -193,8 +221,8 @@ namespace LT.DigitalOffice.DepartmentService
         {
           cfg.Host(_rabbitMqConfig.Host, "/", host =>
           {
-            host.Username($"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}");
-            host.Password(_serviceInfoConfig.Id);
+            host.Username(username);
+            host.Password(password);
           });
 
           ConfigureEndpoints(context, cfg);
