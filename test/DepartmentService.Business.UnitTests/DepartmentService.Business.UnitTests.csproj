@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DepartmentService.Business\DepartmentService.Business.csproj" />
+    <ProjectReference Include="..\..\src\DepartmentService.Data\DepartmentService.Data.csproj" />
+    <ProjectReference Include="..\..\src\DepartmentService.Mappers\DepartmentService.Mappers.csproj" />
+    <ProjectReference Include="..\..\src\DepartmentService.Models.Db\DepartmentService.Models.Db.csproj" />
+    <ProjectReference Include="..\..\src\DepartmentService.Models.Dto\DepartmentService.Models.Dto.csproj" />
+    <ProjectReference Include="..\..\src\DepartmentService.Validation\DepartmentService.Validation.csproj" />
+  </ItemGroup>
+
+</Project>
