@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentUserRepository _userRepository;
     private readonly IPatchDbDepartmentMapper _mapper;
     private readonly IAccessValidator _accessValidator;
-    private readonly IResponseCreator _responseCreater;
+    private readonly IResponseCreator _responseCreator;
 
     public EditDepartmentCommand(
       IEditDepartmentRequestValidator validator,
@@ -34,26 +34,26 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentUserRepository userRepository,
       IPatchDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
-      IResponseCreator responseCreater)
+      IResponseCreator responseCreator)
     {
       _validator = validator;
       _repository = repository;
       _userRepository = userRepository;
       _mapper = mapper;
       _accessValidator = accessValidator;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> patch)
     {
       if (!(await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments)))
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       if (!_validator.ValidateCustom(patch, out List<string> errors))
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
       OperationResultResponse<bool> response = new();
@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         if (item.path.EndsWith(nameof(EditDepartmentRequest.Name), StringComparison.OrdinalIgnoreCase) &&
             await _repository.NameExistAsync(item.value.ToString()))
         {
-          return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Conflict);
+          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Conflict);
         }
 
         Operation<EditDepartmentRequest> directorOperation = patch.Operations
