@@ -11,11 +11,11 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Responses;
-using LT.DigitalOffice.Kernel.Broker;
-using LT.DigitalOffice.Kernel.Constants;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
@@ -47,7 +47,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IConnectionMultiplexer _cache;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     private async Task<List<UserData>> GetUsersDatasAsync(IEnumerable<DbDepartmentUser> departmentUsers, List<string> errors)
     {
@@ -241,7 +241,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IRequestClient<IGetPositionsRequest> rcGetPositions,
       IConnectionMultiplexer cache,
       ILogger<GetDepartmentCommand> logger,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _logger = logger;
       _cache = cache;

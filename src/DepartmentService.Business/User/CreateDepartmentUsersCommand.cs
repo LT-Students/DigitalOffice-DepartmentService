@@ -8,7 +8,7 @@ using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IDepartmentUsersValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
 
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
@@ -32,7 +32,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       IDepartmentUsersValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreater)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;

@@ -8,7 +8,7 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentUserRepository _userRepository;
     private readonly IPatchDbDepartmentMapper _mapper;
     private readonly IAccessValidator _accessValidator;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
 
     public EditDepartmentCommand(
       IEditDepartmentRequestValidator validator,
@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentUserRepository userRepository,
       IPatchDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreater)
     {
       _validator = validator;
       _repository = repository;

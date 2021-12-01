@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -17,12 +17,12 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
   {
     private readonly IDepartmentUserRepository _repository;
     private readonly IAccessValidator _accessValidator;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreater;
 
     public RemoveDepartmentUsersCommand(
       IDepartmentUserRepository repository,
       IAccessValidator accessValidator,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreater)
     {
       _repository = repository;
       _accessValidator = accessValidator;
