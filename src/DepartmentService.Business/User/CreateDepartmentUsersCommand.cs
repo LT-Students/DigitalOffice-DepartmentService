@@ -7,10 +7,12 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
@@ -44,8 +46,10 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
-        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
+      DbDepartmentUser sender = await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId());
+
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
+        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) && sender != null && sender.DepartmentId == departmentId))
       {
         return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }

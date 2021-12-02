@@ -52,7 +52,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartmentUser.Id;
     }
 
-    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment)
+    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
     {
       IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
 
