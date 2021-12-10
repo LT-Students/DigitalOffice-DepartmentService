@@ -7,10 +7,12 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
-using LT.DigitalOffice.Kernel.AccessValidatorEngine.Interfaces;
+using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
+using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +26,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IDepartmentUsersValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
-    private readonly IResponseCreater _responseCreater;
+    private readonly IResponseCreator _responseCreator;
 
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
@@ -32,29 +34,30 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       IDepartmentUsersValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
-      IResponseCreater responseCreater)
+      IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
       _validator = validator;
       _mapper = mapper;
       _repository = repository;
-      _responseCreater = responseCreater;
+      _responseCreator = responseCreator;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
-        !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
+        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
+        (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
       ValidationResult validationResult = await _validator.ValidateAsync(usersIds);
 
       if (!validationResult.IsValid)
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
       OperationResultResponse<bool> response = new();
@@ -70,7 +73,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       if (!response.Body)
       {
-        return _responseCreater.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
       return response;

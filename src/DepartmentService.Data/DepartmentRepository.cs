@@ -136,7 +136,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       Operation<DbDepartment> deactivatedOperation = request.Operations
         .FirstOrDefault(o => o.path.EndsWith(nameof(DbDepartment.IsActive), StringComparison.OrdinalIgnoreCase));
-      if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()))
+
+      if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()) && dbDepartment.IsActive)
       {
         List<DbDepartmentUser> users = await _provider.DepartmentsUsers
           .Where(u => u.IsActive && u.DepartmentId == dbDepartment.Id)
@@ -146,6 +147,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         {
           user.IsActive = false;
           user.ModifiedAtUtc = DateTime.UtcNow;
+          user.LeftAtUtc = DateTime.UtcNow;
           user.ModifiedBy = editorId;
         }
       }

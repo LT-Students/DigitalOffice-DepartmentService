@@ -10,7 +10,7 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
-using LT.DigitalOffice.Kernel.Broker;
+using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly ILogger<FindDepartmentsCommand> _logger;
     private readonly IBaseFindFilterValidator _baseFindValidator;
-    private readonly IResponseCreater _responseCreator;
+    private readonly IResponseCreator _responseCreator;
 
     private async Task<List<UserData>> GetUsersDataAsync(List<Guid> usersIds, List<string> errors)
     {
@@ -163,7 +163,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetPositionsRequest> rcGetPositions,
       ILogger<FindDepartmentsCommand> logger,
-      IResponseCreater responseCreator)
+      IResponseCreator responseCreator)
     {
       _baseFindValidator = baseFindValidator;
       _repository = repository;
