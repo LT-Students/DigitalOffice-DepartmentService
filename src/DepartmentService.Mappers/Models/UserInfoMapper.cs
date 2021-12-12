@@ -38,9 +38,9 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         LastName = userData.LastName,
         MiddleName = userData.MiddleName,
         IsActive = userData.IsActive,
-        Role = (DepartmentUserRole)dbDepartmentUser.Role,
-        CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,
-        LeftAtUtc = dbDepartmentUser.LeftAtUtc,
+        Role = (DepartmentUserRole)(dbDepartmentUser?.Role),
+        CreatedAtUtc = dbDepartmentUser?.CreatedAtUtc,
+        LeftAtUtc = dbDepartmentUser?.LeftAtUtc,
         AvatarImage = _imageInfoMapper.Map(imageData),
         Position = _positionInfoMapper.Map(positionData)
       };

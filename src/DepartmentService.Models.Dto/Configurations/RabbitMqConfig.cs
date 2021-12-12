@@ -5,6 +5,7 @@ using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
 using LT.DigitalOffice.Models.Broker.Requests.User;
+using LT.DigitalOffice.Models.Broker.Requests.News;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 {
@@ -29,5 +30,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 
     [AutoInjectRequest(typeof(IGetUsersDataRequest))]
     public string GetUsersDataEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IGetNewsRequest))]
+    public string GetNewsDataEndpoint { get; set; }
   }
 }

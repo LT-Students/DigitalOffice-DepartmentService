@@ -8,5 +8,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Responses
     public DepartmentInfo Department { get; set; }
     public IEnumerable<UserInfo> Users { get; set; }
     public IEnumerable<ProjectInfo> Projects { get; set; }
+    public IEnumerable<NewsInfo> News { get; set; }
   }
 }

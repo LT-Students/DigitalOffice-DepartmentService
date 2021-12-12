@@ -22,7 +22,8 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
     public DepartmentResponse Map(
       DbDepartment dbDepartment,
       IEnumerable<UserInfo> users,
-      IEnumerable<ProjectInfo> projects)
+      IEnumerable<ProjectInfo> projects, 
+      IEnumerable<NewsInfo> news)
     {
       if (dbDepartment is null)
       {
@@ -40,6 +41,7 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
           directorUserId is null ? null : users.FirstOrDefault(u => u.Id == directorUserId)),
         Users = users,
         Projects = projects,
+        News = news
       };
     }
   }
