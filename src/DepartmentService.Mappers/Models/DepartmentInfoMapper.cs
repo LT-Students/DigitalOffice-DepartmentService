@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
   public class DepartmentInfoMapper : IDepartmentInfoMapper
   {
-    public DepartmentInfo Map(DbDepartment dbDepartment, UserInfo director)
+    public DepartmentInfo Map(DbDepartment dbDepartment, DepartmentUserInfo director)
     {
       if (dbDepartment == null)
       {

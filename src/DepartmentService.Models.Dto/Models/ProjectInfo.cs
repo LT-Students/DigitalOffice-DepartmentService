@@ -9,5 +9,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
     public string Status { get; set; }
     public string ShortName { get; set; }
     public string ShortDescription { get; set; }
+    public ImageInfo AvatarImage { get; set; }
   }
 }

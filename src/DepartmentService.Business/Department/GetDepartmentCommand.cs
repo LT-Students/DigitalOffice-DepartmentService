@@ -43,7 +43,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly ILogger<GetDepartmentCommand> _logger;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDepartmentResponseMapper _departmentResponseMapper;
-    private readonly IUserInfoMapper _userInfoMapper;
+    private readonly IUserInfoMapper _UserInfoMapper;
+    private readonly IDepartmentUserInfoMapper _departmentUserInfoMapper;
     private readonly IProjectInfoMapper _projectInfoMapper;
     private readonly IRequestClient<IGetImagesRequest> _rcImages;
     private readonly IRequestClient<IGetUsersDataRequest> _rcGetUsersData;
@@ -279,7 +280,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     public GetDepartmentCommand(
       IDepartmentRepository departmentRepository,
       IDepartmentResponseMapper departmentResponseMapper,
-      IUserInfoMapper userInfoMapper,
+      IUserInfoMapper UserInfoMapper,
+      IDepartmentUserInfoMapper departmmentUserInfoMapper,
       IProjectInfoMapper projectInfoMapper,
       INewsInfoMapper newsInfoMapper,
       IRequestClient<IGetImagesRequest> rcImages,
@@ -301,7 +303,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _departmentRepository = departmentRepository;
       _departmentResponseMapper = departmentResponseMapper;
       _projectInfoMapper = projectInfoMapper;
-      _userInfoMapper = userInfoMapper;
+      _UserInfoMapper = UserInfoMapper;
+      _departmentUserInfoMapper = departmmentUserInfoMapper;
       _newsInfoMapper = newsInfoMapper;
       _responseCreator = responseCreator;
     }
@@ -317,24 +320,24 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       }
 
       List<NewsData> newsData = await GetNewsDataAsync(dbDepartment.News, response.Errors);
-     
-
       List<ProjectData> projectData = await GetProjectsDatasAsync(dbDepartment.Projects, response.Errors);
-      IEnumerable<ProjectInfo> projectInfo = projectData?.Select( _projectInfoMapper.Map);
+
 
       List<Guid> usersIds = new();
 
-      if (projectData is not null)
+      if (dbDepartment.Users is not null && dbDepartment.Users.Any())
       {
-        usersIds.AddRange(projectData.SelectMany(p => p.Users?.Select(pu => pu.UserId)).ToList());
+        usersIds.AddRange(dbDepartment.Users.Select(x => x.UserId).ToList());
       }
-      usersIds.AddRange(dbDepartment.Users?.Select(x => x.UserId).ToList());
-      usersIds.AddRange(newsData?.Select(n => n.AuthorId));
-      usersIds.AddRange(newsData?.Select(n => n.SenderId));
 
-     // usersIds.Distinct();
-      List <UserData> usersData = await GetUsersDatasAsync(usersIds.Distinct().ToList(), response.Errors);
+      if (newsData is not null && newsData.Any())
+      {
+        usersIds.AddRange(newsData?.SelectMany(n => new List<Guid>() { n.AuthorId, n.SenderId }));
+      }
+      
+      List<UserData> usersData = await GetUsersDatasAsync(usersIds.Distinct().ToList(), response.Errors);
       List<UserInfo> usersInfo = null;
+      List<DepartmentUserInfo> departmentUsersInfo = null;
 
       if (usersData != null && usersData.Any())
       {
@@ -346,26 +349,31 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           usersData.Where(u => u.ImageId.HasValue).Select(u => u.ImageId.Value).Distinct().ToList(),
           response.Errors);
 
-        usersInfo = usersData.Select(
-          u =>
-            _userInfoMapper.Map(
-              u,
-              dbDepartment.Users.FirstOrDefault(du => du.UserId == u.Id),
-              imagesData?.FirstOrDefault(i => i.ImageId == u.ImageId),
-              positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(u.Id))
+        usersInfo = usersData
+          .Select(u => _UserInfoMapper.Map(u, imagesData?.FirstOrDefault(i => i.ImageId == u.ImageId)))
+          .ToList();
+          
+        departmentUsersInfo = dbDepartment.Users?.Select(
+          du =>
+            _departmentUserInfoMapper.Map(
+              usersInfo.FirstOrDefault(u => u.Id == du.UserId),
+              du,
+              positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(du.UserId))
           )).ToList();
       }
 
-      IEnumerable<NewsInfo> newsInfo = newsData?.Select(newsdata => _newsInfoMapper.Map(
-        newsdata,
-        usersInfo?.FirstOrDefault(ud => newsdata.AuthorId == ud.Id),
-        usersInfo?.FirstOrDefault(ud => newsdata.SenderId == ud.Id)));
+      IEnumerable<NewsInfo> newsInfo = newsData?.Select(nd => _newsInfoMapper.Map(
+        nd,
+        usersInfo?.FirstOrDefault(ud => nd.AuthorId == ud.Id),
+        usersInfo?.FirstOrDefault(ud => nd.SenderId == ud.Id)));
+
+      IEnumerable<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map);
 
       response.Status = response.Errors.Any() ?
         OperationResultStatusType.PartialSuccess :
         OperationResultStatusType.FullSuccess;
 
-      response.Body = _departmentResponseMapper.Map(dbDepartment, usersInfo, projectInfo, newsInfo);
+      response.Body = _departmentResponseMapper.Map(dbDepartment, departmentUsersInfo, projectInfo, newsInfo);
 
       return response;
     }

@@ -21,7 +21,7 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
 
     public DepartmentResponse Map(
       DbDepartment dbDepartment,
-      IEnumerable<UserInfo> users,
+      IEnumerable<DepartmentUserInfo> users,
       IEnumerable<ProjectInfo> projects, 
       IEnumerable<NewsInfo> news)
     {
@@ -38,7 +38,7 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
       {
         Department = _departmentInfoMapper.Map(
           dbDepartment,
-          directorUserId is null ? null : users.FirstOrDefault(u => u.Id == directorUserId)),
+          directorUserId is null ? null : users.FirstOrDefault(u => u.User.Id == directorUserId)),
         Users = users,
         Projects = projects,
         News = news
