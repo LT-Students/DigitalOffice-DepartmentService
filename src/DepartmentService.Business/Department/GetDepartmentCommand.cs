@@ -45,15 +45,17 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentResponseMapper _departmentResponseMapper;
     private readonly IUserInfoMapper _UserInfoMapper;
     private readonly IDepartmentUserInfoMapper _departmentUserInfoMapper;
+    private readonly INewsInfoMapper _newsInfoMapper;
     private readonly IProjectInfoMapper _projectInfoMapper;
     private readonly IRequestClient<IGetImagesRequest> _rcImages;
     private readonly IRequestClient<IGetUsersDataRequest> _rcGetUsersData;
+    private readonly IRequestClient<IGetNewsRequest> _rcGetNews;
     private readonly IRequestClient<IGetProjectsRequest> _rcGetProjects;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IConnectionMultiplexer _cache;
     private readonly IResponseCreator _responseCreator;
-    private readonly IRequestClient<IGetNewsRequest> _rcGetNews;
-    private readonly INewsInfoMapper _newsInfoMapper;
+    
+    
 
     private async Task<List<UserData>> GetUsersDatasAsync(List<Guid> usersIds, List<string> errors)
     {
@@ -112,7 +114,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     {
       if (departmentProjects is null || !departmentProjects.Any())
       {
-        return new();
+        return null;
       }
 
       List<Guid> projectsIds = departmentProjects.Select(x => x.ProjectId).ToList();
@@ -321,7 +323,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       List<NewsData> newsData = await GetNewsDataAsync(dbDepartment.News, response.Errors);
       List<ProjectData> projectData = await GetProjectsDatasAsync(dbDepartment.Projects, response.Errors);
-
 
       List<Guid> usersIds = new();
 
