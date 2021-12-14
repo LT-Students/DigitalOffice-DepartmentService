@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers)
     {
-      if (departmentsUsers == null || !departmentsUsers.Any())
+      if (departmentsUsers is null || !departmentsUsers.Any())
       {
         return false;
       }
