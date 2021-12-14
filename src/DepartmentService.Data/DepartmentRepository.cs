@@ -75,7 +75,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
           .ToListAsync(),
-        await _provider.Departments.CountAsync());
+        await dbDepartments.CountAsync());
     }
 
     public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
