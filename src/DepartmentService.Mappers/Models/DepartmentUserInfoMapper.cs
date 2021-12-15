@@ -26,13 +26,18 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         return null;
       }
 
+      if (dbDepartmentUser == null)
+      {
+        return null;
+      }
+
       return new DepartmentUserInfo
       {
         User = userInfo,
         IsActive = dbDepartmentUser.IsActive,
-        Role = (DepartmentUserRole)(dbDepartmentUser?.Role),
-        CreatedAtUtc = dbDepartmentUser?.CreatedAtUtc,
-        LeftAtUtc = dbDepartmentUser?.LeftAtUtc,
+        Role = (DepartmentUserRole)(dbDepartmentUser.Role),
+        CreatedAtUtc = dbDepartmentUser.CreatedAtUtc,
+        LeftAtUtc = dbDepartmentUser.LeftAtUtc,
         Position = _positionInfoMapper.Map(positionData)
       };
     }
