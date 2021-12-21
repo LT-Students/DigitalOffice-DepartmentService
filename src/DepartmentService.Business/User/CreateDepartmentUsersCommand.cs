@@ -62,7 +62,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       OperationResultResponse<bool> response = new();
 
-      await _repository.RemoveAsync(departmentId, usersIds);
+      await _repository.RemoveAsync(usersIds);
 
       response.Body = await _repository.CreateAsync(
         usersIds.Select(userId => _mapper.Map(userId, departmentId)).ToList());
