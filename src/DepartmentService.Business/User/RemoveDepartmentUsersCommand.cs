@@ -60,7 +60,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       }
       else
       {
-        usersIds.Select(async i => await _cacheNotebook.RemoveAsync(i));
+        await _cacheNotebook.RemoveAsync(departmentId);
       }
 
       return response;
