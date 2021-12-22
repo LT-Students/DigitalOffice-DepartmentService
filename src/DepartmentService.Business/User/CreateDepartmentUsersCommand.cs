@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       OperationResultResponse<bool> response = new();
 
-      await _repository.RemoveAsync(usersIds);
+      List<Guid> changedDepartments = await _repository.RemoveAsync(usersIds);
 
       response.Body = await _repository.CreateAsync(
         usersIds.Select(userId => _mapper.Map(userId, departmentId)).ToList());
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       else
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-        usersIds.Select(async i => await _cacheNotebook.RemoveAsync(i));
+        changedDepartments.Select(async i => await _cacheNotebook.RemoveAsync(departmentId));
       }
 
       return response;
