@@ -7,9 +7,9 @@ using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
 
@@ -21,17 +21,20 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICacheNotebook _cacheNotebook;
 
     public RemoveDepartmentUsersCommand(
       IDepartmentUserRepository repository,
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
-      IHttpContextAccessor httpContextAccessor)
+      IHttpContextAccessor httpContextAccessor,
+      ICacheNotebook cacheNotebook)
     {
       _repository = repository;
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _httpContextAccessor = httpContextAccessor;
+      _cacheNotebook = cacheNotebook;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
@@ -50,11 +53,14 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       OperationResultResponse<bool> response = new();
 
       response.Body = await _repository.RemoveAsync(departmentId, usersIds);
-      response.Status = OperationResultStatusType.FullSuccess;
 
       if (!response.Body)
       {
         response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
+      }
+      else
+      {
+        usersIds.Select(async i => await _cacheNotebook.RemoveAsync(i));
       }
 
       return response;
