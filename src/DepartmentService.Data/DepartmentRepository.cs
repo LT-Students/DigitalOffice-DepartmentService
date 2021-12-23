@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (filter.IncludeNews)
       {
-        dbDepartments = dbDepartments.Include(d => d.News.Where(p => p.IsActive));
+        dbDepartments = dbDepartments.Include(d => d.News.Where(n => n.IsActive));
       }
 
       return await dbDepartments.FirstOrDefaultAsync();

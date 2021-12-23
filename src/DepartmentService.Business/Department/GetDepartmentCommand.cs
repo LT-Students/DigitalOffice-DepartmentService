@@ -54,9 +54,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
     private readonly IConnectionMultiplexer _cache;
     private readonly IResponseCreator _responseCreator;
-    
-    
-
+  
     private async Task<List<UserData>> GetUsersDatasAsync(List<Guid> usersIds, List<string> errors)
     {
       if (usersIds is null || !usersIds.Any())

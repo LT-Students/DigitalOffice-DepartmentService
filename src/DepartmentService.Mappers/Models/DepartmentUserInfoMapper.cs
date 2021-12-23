@@ -21,12 +21,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
       DbDepartmentUser dbDepartmentUser,
       PositionData positionData)
     {
-      if (userInfo == null)
-      {
-        return null;
-      }
-
-      if (dbDepartmentUser == null)
+      if (userInfo is null || dbDepartmentUser is null)
       {
         return null;
       }
