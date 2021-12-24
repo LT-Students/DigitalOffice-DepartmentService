@@ -80,7 +80,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
           .ToListAsync(),
-        await _provider.Departments.CountAsync());
+        await dbDepartments.CountAsync());
     }
 
     public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
@@ -113,7 +113,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (request.UsersIds is not null && request.UsersIds.Any())
       {
-        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => request.UsersIds.Contains(du.UserId)));
+        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && request.UsersIds.Contains(du.UserId)));
       }
 
       dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
@@ -141,7 +141,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       Operation<DbDepartment> deactivatedOperation = request.Operations
         .FirstOrDefault(o => o.path.EndsWith(nameof(DbDepartment.IsActive), StringComparison.OrdinalIgnoreCase));
-      if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()))
+
+      if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()) && dbDepartment.IsActive)
       {
         List<DbDepartmentUser> users = await _provider.DepartmentsUsers
           .Where(u => u.IsActive && u.DepartmentId == dbDepartment.Id)
@@ -151,6 +152,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         {
           user.IsActive = false;
           user.ModifiedAtUtc = DateTime.UtcNow;
+          user.LeftAtUtc = DateTime.UtcNow;
           user.ModifiedBy = editorId;
         }
       }

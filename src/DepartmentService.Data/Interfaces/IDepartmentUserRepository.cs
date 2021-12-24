@@ -18,7 +18,9 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false);
 
-    Task RemoveAsync(List<Guid> usersIds);
+    Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false);
+
+    Task<List<Guid>> RemoveAsync(List<Guid> usersIds);
 
     Task RemoveAsync(Guid userId, Guid removedBy);
 
