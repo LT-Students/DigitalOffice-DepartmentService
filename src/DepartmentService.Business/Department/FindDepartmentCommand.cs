@@ -228,7 +228,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
               null :
               _departmentUserMapper.Map(
                 _userMapper.Map(userData, imagesData.FirstOrDefault(i => i.ImageId == userData.ImageId)),
-                dbDepartment?.Users.FirstOrDefault(du => du.UserId == userData.Id),
+                dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id),
                 positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
       }
       response.TotalCount = totalCount;

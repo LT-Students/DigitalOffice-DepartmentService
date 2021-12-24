@@ -345,7 +345,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           response.Errors);
 
         List<ImageData> imagesData = await GetUserImagesAsync(
-          usersData.Where(u => u.ImageId.HasValue).Select(u => u.ImageId.Value).Distinct().ToList(),
+          usersData.Where(u => u.ImageId.HasValue).Select(u => u.ImageId.Value).ToList(),
           response.Errors);
 
         usersInfo = usersData
