@@ -241,7 +241,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         return new();
       }
 
-      string loggerMessage = $"Can not fet news data for specific news ids '{newsIds}'.";
       try
       {
         Response<IOperationResult<IGetNewsResponse>> response =
@@ -253,13 +252,16 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           return response.Message.Body.News;
         }
 
-        _logger.LogWarning("Errors while getting news by news ids: {NewsId}.\n Errors: {Errors}",
+        _logger.LogWarning("Errors while getting news by news ids: {newsIds}.\n Errors: {Errors}",
           string.Join(", ", newsIds),
           string.Join('\n', response.Message.Errors)); 
       }
       catch(Exception exc)
       {
-        _logger.LogError(exc, loggerMessage);
+        _logger.LogError(
+          exc,
+          "Can not get news data of news ids {NewsIds}.",
+          string.Join(", ", newsIds));
       }
 
       errors.Add("Can not get news data. Please try again later.");
