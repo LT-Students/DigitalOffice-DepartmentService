@@ -260,7 +260,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       {
         _logger.LogError(
           exc,
-          "Can not get news data of news ids {NewsIds}.",
+          "Can not get news data of news ids: {NewsIds}.",
           string.Join(", ", newsIds));
       }
 
