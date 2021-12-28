@@ -236,7 +236,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     private async Task<List<NewsData>> GetNewsDataThroughBrokerAsync(List<Guid> newsIds, List<string> errors)
     {
-      if(newsIds is null || !newsIds.Any())
+      if (newsIds is null || !newsIds.Any())
       {
         return new();
       }
