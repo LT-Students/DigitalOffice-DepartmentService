@@ -8,5 +8,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces
   public interface IDbDepartmentProjectMapper
   {
     DbDepartmentProject Map(Guid projectId, Guid departmentId, Guid CreatedBy);
+    DbDepartmentProject Map(Guid projectId, Guid departmentId);
   }
 }
