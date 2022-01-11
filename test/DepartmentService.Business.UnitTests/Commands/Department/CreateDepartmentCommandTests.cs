@@ -37,11 +37,12 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
       _autoMocker = new();
 
       _autoMocker
-          .Setup<IHttpContextAccessor, int>(a => a.HttpContext.Response.StatusCode)
-          .Returns(200);
+        .Setup<IHttpContextAccessor, int>(a => a.HttpContext.Response.StatusCode)
+        .Returns(200);
 
       _autoMocker
-        .Setup<IResponseCreator, OperationResultResponse<Guid?>>(x => x.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, It.IsAny<List<string>>()))
+        .Setup<IResponseCreator, OperationResultResponse<Guid?>>(
+        x => x.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
           Status = OperationResultStatusType.Failed,
@@ -49,7 +50,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
         });
 
       _autoMocker
-        .Setup<IResponseCreator, OperationResultResponse<Guid?>>(x => x.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden, It.IsAny<List<string>>()))
+        .Setup<IResponseCreator, OperationResultResponse<Guid?>>(
+        x => x.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
           Status = OperationResultStatusType.Failed,
