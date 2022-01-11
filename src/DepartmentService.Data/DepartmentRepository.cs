@@ -57,6 +57,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
       }
 
+      if (filter.IncludeNews)
+      {
+        dbDepartments = dbDepartments.Include(d => d.News.Where(n => n.IsActive));
+      }
+
       return await dbDepartments.FirstOrDefaultAsync();
     }
 

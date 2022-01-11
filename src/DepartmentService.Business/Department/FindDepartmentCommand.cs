@@ -36,6 +36,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentRepository _repository;
     private readonly IDepartmentInfoMapper _departmentMapper;
     private readonly IUserInfoMapper _userMapper;
+    private readonly IDepartmentUserInfoMapper _departmentUserMapper;
     private readonly IRequestClient<IGetUsersDataRequest> _rcGetUsersData;
     private readonly IRequestClient<IGetImagesRequest> _rcGetImages;
     private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
@@ -158,7 +159,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IBaseFindFilterValidator baseFindValidator,
       IDepartmentRepository repository,
       IDepartmentInfoMapper departmentMapper,
-      IUserInfoMapper userMapper,
+      IUserInfoMapper UserMapper,
+      IDepartmentUserInfoMapper departmentUserMapper,
       IRequestClient<IGetUsersDataRequest> rcGetUsersData,
       IRequestClient<IGetImagesRequest> rcGetImages,
       IRequestClient<IGetPositionsRequest> rcGetPositions,
@@ -168,7 +170,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _baseFindValidator = baseFindValidator;
       _repository = repository;
       _departmentMapper = departmentMapper;
-      _userMapper = userMapper;
+      _userMapper = UserMapper;
+      _departmentUserMapper = departmentUserMapper;
       _rcGetUsersData = rcGetUsersData;
       _rcGetImages = rcGetImages;
       _rcGetPositions = rcGetPositions;
@@ -223,10 +226,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
             dbDepartment,
             userData == null ?
               null :
-              _userMapper.Map(
-                userData,
-                dbDepartment?.Users.FirstOrDefault(du => du.UserId == userData.Id),
-                imagesData?.FirstOrDefault(i => i.ImageId == userData.ImageId),
+              _departmentUserMapper.Map(
+                _userMapper.Map(userData, imagesData?.FirstOrDefault(i => i.ImageId == userData.ImageId)),
+                dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id),
                 positionsData?.FirstOrDefault(p => p.Users.Select(u => u.UserId).Contains(userData.Id)))));
       }
       response.TotalCount = totalCount;
