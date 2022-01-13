@@ -57,6 +57,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
       }
 
+      if (filter.IncludeNews)
+      {
+        dbDepartments = dbDepartments.Include(d => d.News.Where(n => n.IsActive));
+      }
+
       return await dbDepartments.FirstOrDefaultAsync();
     }
 
@@ -75,7 +80,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
           .ToListAsync(),
-        await _provider.Departments.CountAsync());
+        await dbDepartments.CountAsync());
     }
 
     public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
@@ -108,7 +113,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (request.UsersIds is not null && request.UsersIds.Any())
       {
-        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => request.UsersIds.Contains(du.UserId)));
+        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && request.UsersIds.Contains(du.UserId)));
       }
 
       dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));

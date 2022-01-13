@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers)
     {
-      if (departmentsUsers == null || !departmentsUsers.Any())
+      if (departmentsUsers is null || !departmentsUsers.Any())
       {
         return false;
       }
@@ -147,7 +147,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .ToListAsync();
     }
 
-    public async Task RemoveAsync(List<Guid> usersIds)
+    public async Task<List<Guid>> RemoveAsync(List<Guid> usersIds)
     {
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
         .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
@@ -164,6 +164,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
         await _provider.SaveAsync();
       }
+
+      return dbDepartmentsUsers.Select(du => du.DepartmentId).ToList();
     }
 
     public async Task RemoveAsync(Guid userId, Guid removedBy)

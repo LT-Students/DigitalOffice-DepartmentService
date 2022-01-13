@@ -13,5 +13,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters
 
     [FromQuery(Name = "includeprojects")]
     public bool IncludeProjects { get; set; } = false;
+
+    [FromQuery(Name = "includenews")]
+    public bool IncludeNews { get; set; } = false;
   }
 }
