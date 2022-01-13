@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
     private ICreateDepartmentCommand _command;
 
     private CreateDepartmentRequest _request;
-    private DbDepartment _department;
+    private DbDepartment _dbDepartment;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -67,7 +67,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
         Users = new()
       };
 
-      _department = new()
+      _dbDepartment = new()
       {
         Id = Guid.NewGuid(),
         CompanyId = Guid.NewGuid(),
@@ -99,11 +99,11 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       _autoMocker
         .Setup<IDbDepartmentMapper, DbDepartment>(x => x.Map(_request))
-        .Returns(_department);
+        .Returns(_dbDepartment);
 
       _autoMocker
-        .Setup<IDepartmentRepository, Task<Guid?>>(x => x.CreateAsync(_department))
-        .ReturnsAsync(_department.Id);
+        .Setup<IDepartmentRepository, Task<Guid?>>(x => x.CreateAsync(_dbDepartment))
+        .ReturnsAsync(_dbDepartment.Id);
     }
 
     [Test]
@@ -174,7 +174,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
     public async Task ShouldReturnFailedResponseWhenRepositoryReturnNullAsync()
     {
       _autoMocker
-        .Setup<IDepartmentRepository, Task<Guid?>>(x => x.CreateAsync(_department))
+        .Setup<IDepartmentRepository, Task<Guid?>>(x => x.CreateAsync(_dbDepartment))
         .ReturnsAsync((Guid?)null);
 
       OperationResultResponse<Guid?> expectedResponse = new()
@@ -208,7 +208,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
       OperationResultResponse<Guid?> expectedResponse = new()
       {
         Status = OperationResultStatusType.FullSuccess,
-        Body = _department.Id
+        Body = _dbDepartment.Id
       };
 
       SerializerAssert.AreEqual(expectedResponse, await _command.ExecuteAsync(_request));
