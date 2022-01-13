@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       _autoMocker
         .Setup<IResponseCreator, OperationResultResponse<Guid?>>(
-        x => x.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, It.IsAny<List<string>>()))
+          x => x.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
           Status = OperationResultStatusType.Failed,
@@ -51,7 +51,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       _autoMocker
         .Setup<IResponseCreator, OperationResultResponse<Guid?>>(
-        x => x.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden, It.IsAny<List<string>>()))
+          x => x.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
           Status = OperationResultStatusType.Failed,
@@ -75,9 +75,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
         Description = "Description",
         IsActive = true,
         CreatedBy = Guid.NewGuid(),
-        CreatedAtUtc = DateTime.UtcNow,
-        ModifiedBy = Guid.NewGuid(),
-        ModifiedAtUtc = DateTime.UtcNow
+        CreatedAtUtc = DateTime.UtcNow
       };
     }
 
