@@ -25,15 +25,13 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           nameof(EditDepartmentRequest.Name),
           nameof(EditDepartmentRequest.Description),
           nameof(EditDepartmentRequest.DirectorId),
-          nameof(EditDepartmentRequest.IsActive),
-          nameof(EditDepartmentRequest.DepartmentId),
+          nameof(EditDepartmentRequest.IsActive)
         });
 
       AddСorrectOperations(nameof(EditDepartmentRequest.Name), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.Description), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.DirectorId), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.IsActive), new() { OperationType.Replace });
-      AddСorrectOperations(nameof(EditDepartmentRequest.DepartmentId), new List<OperationType> { OperationType.Replace });
 
 
       #endregion
@@ -84,21 +82,6 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         new()
         {
           { x => bool.TryParse(x.value?.ToString(), out bool _), "Incorrect format of IsActive." },
-        });
-
-      #endregion
-
-      #region DepartmentId
-
-      AddFailureForPropertyIf(
-        nameof(EditDepartmentRequest.DepartmentId),
-        x => x == OperationType.Replace,
-        new()
-        {
-          {
-            x => x.value == null || Guid.TryParse(x.value.ToString(), out var departmentId),
-            "Incorrect department id value."
-          },
         });
 
       #endregion

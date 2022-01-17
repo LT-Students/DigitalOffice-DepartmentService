@@ -8,6 +8,5 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests
     public string Description { get; set; }
     public Guid DirectorId { get; set; }
     public bool IsActive { get; set; }
-    public Guid? DepartmentId { get; set; }
   }
 }

@@ -37,17 +37,17 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartmentProject.Id;
     }
 
-    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
+    public async Task<DbDepartmentProject> GetAsync(Guid projectId, bool includeDepartment = false)
     {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
+      IQueryable<DbDepartmentProject> dbDepartmentProject = _provider.DepartmentsProjects.AsQueryable();
 
       if (includeDepartment)
       {
-        dbDepartmentUser = dbDepartmentUser.Include(du => du.Department);
+        dbDepartmentProject = dbDepartmentProject.Include(du => du.Department);
       }
 
-      return await dbDepartmentUser
-        .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+      return await dbDepartmentProject
+        .FirstOrDefaultAsync(p => p.IsActive && p.ProjectId == projectId);
     }
 
     public async Task RemoveAsync(Guid projectId)

@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartmentProject dbDepartmentProject);
 
-    Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false);
+    Task<DbDepartmentProject> GetAsync(Guid projectId, bool includeDepartment = false);
 
     Task RemoveAsync(Guid projectId);
   }

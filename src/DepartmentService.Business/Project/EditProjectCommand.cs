@@ -52,11 +52,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
 
       if (request.DepartmentId is not null)
       {
-        response.Body = await _departmentProjectRepository.CreateAsync(
-          _mapper.Map(
-            request.ProjectId,
-            request.DepartmentId.Value,
-            _httpContextAccessor.HttpContext.GetUserId()));
+        response.Body = await _departmentProjectRepository.CreateAsync(_mapper.Map(request));
         response.Status = OperationResultStatusType.FullSuccess;
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
