@@ -7,7 +7,6 @@ using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -21,6 +20,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IAccessValidator _accessValidator;
     private readonly IDbDepartmentProjectMapper _mapper;
     private readonly IDepartmentProjectRepository _departmentProjectRepository;
+    private readonly IDepartmentUserRepository _departmentUserRepository;
     private readonly IResponseCreator _responseCreator;
 
     public EditProjectCommand(
@@ -28,12 +28,14 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       IAccessValidator accessValidator,
       IDbDepartmentProjectMapper mapper,
       IDepartmentProjectRepository departmentProjectRepository,
+      IDepartmentUserRepository departmentUserRepository,
       IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
       _mapper = mapper;
       _departmentProjectRepository = departmentProjectRepository;
+      _departmentUserRepository = departmentUserRepository;
       _responseCreator = responseCreator;
     }
 
@@ -41,7 +43,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
         !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
-        (await _departmentProjectRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == request.DepartmentId))
+        (await _departmentUserRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == request.DepartmentId))
       {
         return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
       }
@@ -53,7 +55,6 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
       if (request.DepartmentId is not null)
       {
         response.Body = await _departmentProjectRepository.CreateAsync(_mapper.Map(request));
-        response.Status = OperationResultStatusType.FullSuccess;
 
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
       }

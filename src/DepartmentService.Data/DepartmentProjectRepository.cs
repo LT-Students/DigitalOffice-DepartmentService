@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
 using LT.DigitalOffice.Kernel.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -35,19 +33,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
       await _provider.SaveAsync();
 
       return dbDepartmentProject.Id;
-    }
-
-    public async Task<DbDepartmentProject> GetAsync(Guid projectId, bool includeDepartment = false)
-    {
-      IQueryable<DbDepartmentProject> dbDepartmentProject = _provider.DepartmentsProjects.AsQueryable();
-
-      if (includeDepartment)
-      {
-        dbDepartmentProject = dbDepartmentProject.Include(du => du.Department);
-      }
-
-      return await dbDepartmentProject
-        .FirstOrDefaultAsync(p => p.IsActive && p.ProjectId == projectId);
     }
 
     public async Task RemoveAsync(Guid projectId)
