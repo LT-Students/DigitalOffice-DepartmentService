@@ -181,7 +181,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
 
         await _provider.SaveAsync();
-      }; 
+      };
     }
 
     public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)
