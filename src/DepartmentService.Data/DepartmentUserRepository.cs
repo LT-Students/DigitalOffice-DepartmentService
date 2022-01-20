@@ -173,7 +173,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
         .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
 
-      if (dbDepartmentUser != null)
+      if (dbDepartmentUser is not null)
       {
         dbDepartmentUser.IsActive = false;
         dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
@@ -181,7 +181,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
 
         await _provider.SaveAsync();
-      };
+      }; 
     }
 
     public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)
