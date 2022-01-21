@@ -45,7 +45,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
