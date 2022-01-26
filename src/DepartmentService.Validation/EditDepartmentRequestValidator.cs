@@ -33,7 +33,6 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
       AddСorrectOperations(nameof(EditDepartmentRequest.DirectorId), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.IsActive), new() { OperationType.Replace });
 
-
       #endregion
 
       #region Name
