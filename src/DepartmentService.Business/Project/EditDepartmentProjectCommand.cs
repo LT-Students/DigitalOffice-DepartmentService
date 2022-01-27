@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(EditDepartmentProjectRequest request)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
+        !(await _accessValidator.HasRightsAsync(Rights.AddRemoveDepartmentData) &&
         (await _departmentUserRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == request.DepartmentId))
       {
         return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
