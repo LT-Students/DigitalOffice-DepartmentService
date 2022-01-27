@@ -13,7 +13,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   {
     [HttpPut("edit")]
     public async Task<OperationResultResponse<Guid?>> EditAsync(
-      [FromServices] IEditProjectCommand command,
+      [FromServices] IEditDepartmentProjectCommand command,
       [FromBody] EditDepartmentProjectRequest request)
     {
       return await command.ExecuteAsync(request);
