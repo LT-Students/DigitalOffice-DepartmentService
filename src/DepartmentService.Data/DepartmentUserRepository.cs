@@ -41,7 +41,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<Guid?> CreateAsync(DbDepartmentUser dbDepartmentUser)
     {
-      if (dbDepartmentUser == null)
+      if (dbDepartmentUser is null)
       {
         return null;
       }
@@ -136,7 +136,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
     {
-      if (usersIds == null)
+      if (usersIds is null)
       {
         return null;
       }
