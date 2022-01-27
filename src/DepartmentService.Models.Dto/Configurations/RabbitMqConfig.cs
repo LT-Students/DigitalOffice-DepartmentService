@@ -14,6 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     public string CreateDepartmentEntityEndpoint { get; set; }
     public string GetDepartmentsEndpoint { get; set; }
     public string GetDepartmentUsersEndpoint { get; set; }
+    public string DisactivateDepartmentUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetProjectsRequest))]

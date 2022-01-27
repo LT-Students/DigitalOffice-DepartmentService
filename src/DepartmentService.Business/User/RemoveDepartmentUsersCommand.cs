@@ -39,13 +39,13 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
       if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
+        !(await _accessValidator.HasRightsAsync(Rights.AddRemoveDepartmentData) &&
         (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
