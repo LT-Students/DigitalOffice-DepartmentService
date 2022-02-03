@@ -140,7 +140,7 @@ namespace LT.DigitalOffice.DepartmentService
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=10000"));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
       services.AddTransient<IRedisHelper, RedisHelper>();
       services.AddTransient<ICacheNotebook, CacheNotebook>();
       services.AddBusinessObjects();
