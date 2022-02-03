@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.DepartmentService.Broker;
@@ -13,6 +14,7 @@ using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using MassTransit;
@@ -32,6 +34,7 @@ namespace LT.DigitalOffice.DepartmentService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly RabbitMqConfig _rabbitMqConfig;
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
@@ -122,7 +125,7 @@ namespace LT.DigitalOffice.DepartmentService
         .AddRabbitMqCheck()
         .AddSqlServer(connStr);
 
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
@@ -137,7 +140,7 @@ namespace LT.DigitalOffice.DepartmentService
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=10000"));
       services.AddTransient<IRedisHelper, RedisHelper>();
       services.AddTransient<ICacheNotebook, CacheNotebook>();
       services.AddBusinessObjects();
@@ -148,6 +151,8 @@ namespace LT.DigitalOffice.DepartmentService
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
       UpdateDatabase(app);
+
+      FlushRedisDatabase(redisConnStr);
 
       app.UseForwardedHeaders();
 
@@ -273,6 +278,27 @@ namespace LT.DigitalOffice.DepartmentService
       using DepartmentServiceDbContext context = serviceScope.ServiceProvider.GetService<DepartmentServiceDbContext>();
 
       context.Database.Migrate();
+    }
+
+    private void FlushRedisDatabase(string redisConnStr)
+    {
+      try
+      {
+        using (ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(redisConnStr + ",allowAdmin=true,connectRetry=1,connectTimeout=2000"))
+        {
+          EndPoint[] endpoints = cm.GetEndPoints(true);
+
+          foreach (EndPoint endpoint in endpoints)
+          {
+            IServer server = cm.GetServer(endpoint);
+            server.FlushDatabase(Cache.Departments);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Log.Error($"Error while flushing Redis database. Text: {ex.Message}");
+      }
     }
 
     #endregion
