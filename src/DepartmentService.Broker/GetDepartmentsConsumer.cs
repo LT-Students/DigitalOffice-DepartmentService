@@ -22,9 +22,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker
   {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDepartmentDataMapper _departmentDataMapper;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
     private readonly IOptions<RedisConfig> _redisConfig;
-    private readonly IRedisHelper _redisHelper;
 
     private async Task<List<DepartmentData>> GetDepartmentsAsync(IGetDepartmentsRequest request)
     {
@@ -36,15 +35,13 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     public GetDepartmentsConsumer(
       IDepartmentRepository departmenrRepository,
       IDepartmentDataMapper departmentDataMapper,
-      ICacheNotebook cacheNotebook,
-      IOptions<RedisConfig> redisConfig,
-      IRedisHelper redisHelper)
+      IGlobalCacheRepository globalCache,
+      IOptions<RedisConfig> redisConfig)
     {
       _departmentRepository = departmenrRepository;
       _departmentDataMapper = departmentDataMapper;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
       _redisConfig = redisConfig;
-      _redisHelper = redisHelper;
     }
 
     public async Task Consume(ConsumeContext<IGetDepartmentsRequest> context)
@@ -79,13 +76,12 @@ namespace LT.DigitalOffice.DepartmentService.Broker
         {
           string key = allGuids.GetRedisCacheHashCode();
 
-          await _redisHelper.CreateAsync(
+          await _globalCache.CreateAsync(
             Cache.Departments,
             key,
             departmentsData,
+            departmentsData.Select(d => d.Id).ToList(),
             TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
-
-          _cacheNotebook.Add(departmentsData.Select(d => d.Id).ToList(), Cache.Departments, key);
         }
       }
     }
