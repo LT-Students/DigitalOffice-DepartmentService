@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
@@ -22,13 +23,11 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
     public async Task Consume(ConsumeContext<IDisactivateUserRequest> context)
     {
-      DbDepartmentUser departmentUser = await _repository.GetAsync(context.Message.UserId);
+      Guid? departmentId = await _repository.RemoveAsync(context.Message.UserId, context.Message.ModifiedBy);
 
-      if (departmentUser is not null)
+      if (departmentId.HasValue)
       {
-        await _repository.RemoveAsync(context.Message.UserId, context.Message.ModifiedBy);
-
-        await _globalCache.RemoveAsync(departmentUser.DepartmentId);
+        await _globalCache.RemoveAsync(departmentId.Value);
       }
     }
   }

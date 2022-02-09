@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.DepartmentService.Broker;
@@ -15,6 +14,7 @@ using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
 using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
 using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
@@ -149,7 +149,7 @@ namespace LT.DigitalOffice.DepartmentService
     {
       UpdateDatabase(app);
 
-      FlushRedisDatabase(redisConnStr);
+      FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
 
       app.UseForwardedHeaders();
 
@@ -275,27 +275,6 @@ namespace LT.DigitalOffice.DepartmentService
       using DepartmentServiceDbContext context = serviceScope.ServiceProvider.GetService<DepartmentServiceDbContext>();
 
       context.Database.Migrate();
-    }
-
-    private void FlushRedisDatabase(string redisConnStr)
-    {
-      try
-      {
-        using (ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(redisConnStr + ",allowAdmin=true,connectRetry=1,connectTimeout=2000"))
-        {
-          EndPoint[] endpoints = cm.GetEndPoints(true);
-
-          foreach (EndPoint endpoint in endpoints)
-          {
-            IServer server = cm.GetServer(endpoint);
-            server.FlushDatabase(Cache.Departments);
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Log.Error($"Error while flushing Redis database. Text: {ex.Message}");
-      }
     }
 
     #endregion
