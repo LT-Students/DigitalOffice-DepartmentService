@@ -149,7 +149,11 @@ namespace LT.DigitalOffice.DepartmentService
     {
       UpdateDatabase(app);
 
-      FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 
