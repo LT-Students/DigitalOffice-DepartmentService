@@ -22,7 +22,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<List<Guid>> RemoveAsync(List<Guid> usersIds);
 
-    Task RemoveAsync(Guid userId, Guid removedBy);
+    Task<Guid?> RemoveAsync(Guid userId, Guid removedBy);
 
     Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds);
 
