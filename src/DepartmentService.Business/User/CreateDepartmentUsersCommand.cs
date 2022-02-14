@@ -26,7 +26,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
     private readonly IResponseCreator _responseCreator;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
       IResponseCreator responseCreator,
-      ICacheNotebook cacheNotebook)
+      IGlobalCacheRepository globalCache)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _mapper = mapper;
       _repository = repository;
       _responseCreator = responseCreator;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
@@ -76,7 +76,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       else
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-        changedDepartments.Select(async i => await _cacheNotebook.RemoveAsync(departmentId));
+        changedDepartments.Select(async i => await _globalCache.RemoveAsync(i));
       }
 
       return response;

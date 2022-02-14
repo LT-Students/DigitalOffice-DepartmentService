@@ -5,7 +5,6 @@ using HealthChecks.UI.Client;
 using LT.DigitalOffice.DepartmentService.Broker;
 using LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
@@ -13,8 +12,9 @@ using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
-using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +32,7 @@ namespace LT.DigitalOffice.DepartmentService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly RabbitMqConfig _rabbitMqConfig;
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
@@ -122,7 +123,7 @@ namespace LT.DigitalOffice.DepartmentService
         .AddRabbitMqCheck()
         .AddSqlServer(connStr);
 
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
@@ -137,9 +138,8 @@ namespace LT.DigitalOffice.DepartmentService
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
-      services.AddTransient<IRedisHelper, RedisHelper>();
-      services.AddTransient<ICacheNotebook, CacheNotebook>();
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
+
       services.AddBusinessObjects();
 
       ConfigureMassTransit(services);
@@ -148,6 +148,12 @@ namespace LT.DigitalOffice.DepartmentService
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
       UpdateDatabase(app);
+
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 

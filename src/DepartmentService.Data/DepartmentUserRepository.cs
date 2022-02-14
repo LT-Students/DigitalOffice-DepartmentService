@@ -168,20 +168,24 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartmentsUsers.Select(du => du.DepartmentId).ToList();
     }
 
-    public async Task RemoveAsync(Guid userId, Guid removedBy)
+    public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)
     {
       DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
         .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
 
-      if (dbDepartmentUser is not null)
+      if (dbDepartmentUser is null)
       {
-        dbDepartmentUser.IsActive = false;
-        dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
-        dbDepartmentUser.ModifiedBy = removedBy;
-        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
+        return null;
+      }
 
-        await _provider.SaveAsync();
-      };
+      dbDepartmentUser.IsActive = false;
+      dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
+      dbDepartmentUser.ModifiedBy = removedBy;
+      dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
+
+      await _provider.SaveAsync();
+
+      return dbDepartmentUser.DepartmentId;
     }
 
     public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)

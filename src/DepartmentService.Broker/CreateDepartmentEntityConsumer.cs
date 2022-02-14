@@ -2,6 +2,7 @@
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using MassTransit;
 
@@ -15,6 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     private readonly IDbDepartmentNewsMapper _newsMapper;
     private readonly IDbDepartmentProjectMapper _projectMapper;
     private readonly IDbDepartmentUserMapper _userMapper;
+    private readonly IGlobalCacheRepository _globalCache;
 
     private async Task<bool> CreateEntityAsync(ICreateDepartmentEntityRequest request)
     {
@@ -57,7 +59,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker
       IDepartmentUserRepository userReposirory,
       IDbDepartmentNewsMapper newsMapper,
       IDbDepartmentProjectMapper projectMapper,
-      IDbDepartmentUserMapper userMapper)
+      IDbDepartmentUserMapper userMapper,
+      IGlobalCacheRepository globalCache)
     {
       _userRepository = userReposirory;
       _projectRepository = projectRepository;
@@ -65,11 +68,14 @@ namespace LT.DigitalOffice.DepartmentService.Broker
       _newsMapper = newsMapper;
       _projectMapper = projectMapper;
       _userMapper = userMapper;
+      _globalCache = globalCache;
     }
 
     public async Task Consume(ConsumeContext<ICreateDepartmentEntityRequest> context)
     {
       object result = OperationResultWrapper.CreateResponse(CreateEntityAsync, context.Message);
+
+      await _globalCache.RemoveAsync(context.Message.DepartmentId);
 
       await context.RespondAsync<IOperationResult<bool>>(result);
     }

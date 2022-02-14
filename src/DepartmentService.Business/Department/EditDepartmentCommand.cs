@@ -13,6 +13,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -27,6 +28,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IPatchDbDepartmentMapper _mapper;
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public EditDepartmentCommand(
       IEditDepartmentRequestValidator validator,
@@ -34,7 +36,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentUserRepository userRepository,
       IPatchDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IGlobalCacheRepository globalCache)
     {
       _validator = validator;
       _repository = repository;
@@ -42,6 +45,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _mapper = mapper;
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> patch)
@@ -78,6 +82,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       response.Body = await _repository.EditAsync(departmentId, _mapper.Map(patch));
       response.Status = response.Body ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed;
+
+      await _globalCache.RemoveAsync(departmentId);
+
       return response;
     }
   }
