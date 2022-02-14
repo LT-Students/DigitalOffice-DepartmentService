@@ -21,6 +21,7 @@ using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.News;
 using LT.DigitalOffice.Models.Broker.Models.Position;
+using LT.DigitalOffice.Models.Broker.Models.Project;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.News;
 using LT.DigitalOffice.Models.Broker.Requests.Position;

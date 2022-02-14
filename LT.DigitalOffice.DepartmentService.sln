@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{0A25BE06-6CBB-41F3-9618-76707A72C0DD}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,35 +18,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1CA25FCA-E2D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EDE9A90F-EBF7-45AA-816D-80E592FA9014}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService", "src\DepartmentService\DepartmentService.csproj", "{6AE341C2-EE02-4C69-8803-87C9A8BB201C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService", "src\DepartmentService\DepartmentService.csproj", "{6AE341C2-EE02-4C69-8803-87C9A8BB201C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Broker", "src\DepartmentService.Broker\DepartmentService.Broker.csproj", "{3B733553-EADE-46C3-BF5C-3EACFDEB6683}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Broker", "src\DepartmentService.Broker\DepartmentService.Broker.csproj", "{3B733553-EADE-46C3-BF5C-3EACFDEB6683}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Business", "src\DepartmentService.Business\DepartmentService.Business.csproj", "{D8BD6599-0FC3-4C86-A8C8-BE3E2EBDFCEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Business", "src\DepartmentService.Business\DepartmentService.Business.csproj", "{D8BD6599-0FC3-4C86-A8C8-BE3E2EBDFCEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Data", "src\DepartmentService.Data\DepartmentService.Data.csproj", "{1A2271F7-578C-4BCF-B79E-4423CDEF5D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Data", "src\DepartmentService.Data\DepartmentService.Data.csproj", "{1A2271F7-578C-4BCF-B79E-4423CDEF5D53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Data.Provider", "src\DepartmentService.Data.Provider\DepartmentService.Data.Provider.csproj", "{A05B9D0A-A742-4E1F-8809-0282EC43E2BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Data.Provider", "src\DepartmentService.Data.Provider\DepartmentService.Data.Provider.csproj", "{A05B9D0A-A742-4E1F-8809-0282EC43E2BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Data.Provider.MsSql.Ef", "src\DepartmentService.Data.Provider.MsSql.Ef\DepartmentService.Data.Provider.MsSql.Ef.csproj", "{1EF7C862-CEEB-494D-B6AE-5AA78B51EEDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Data.Provider.MsSql.Ef", "src\DepartmentService.Data.Provider.MsSql.Ef\DepartmentService.Data.Provider.MsSql.Ef.csproj", "{1EF7C862-CEEB-494D-B6AE-5AA78B51EEDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Mappers", "src\DepartmentService.Mappers\DepartmentService.Mappers.csproj", "{4CDE77C2-77A6-4A68-AAC4-9894A77ED56B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Mappers", "src\DepartmentService.Mappers\DepartmentService.Mappers.csproj", "{4CDE77C2-77A6-4A68-AAC4-9894A77ED56B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Models.Db", "src\DepartmentService.Models.Db\DepartmentService.Models.Db.csproj", "{3D666D82-B731-4196-B879-DF81B2DB6287}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Models.Db", "src\DepartmentService.Models.Db\DepartmentService.Models.Db.csproj", "{3D666D82-B731-4196-B879-DF81B2DB6287}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Models.Dto", "src\DepartmentService.Models.Dto\DepartmentService.Models.Dto.csproj", "{E2B0BDA4-D8F5-4DD6-B05C-E7ADAD4BF804}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Models.Dto", "src\DepartmentService.Models.Dto\DepartmentService.Models.Dto.csproj", "{E2B0BDA4-D8F5-4DD6-B05C-E7ADAD4BF804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Validation", "src\DepartmentService.Validation\DepartmentService.Validation.csproj", "{4F3B9E26-35EC-4F58-A839-C21C089B528B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Validation", "src\DepartmentService.Validation\DepartmentService.Validation.csproj", "{4F3B9E26-35EC-4F58-A839-C21C089B528B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Broker.UnitTests", "test\DepartmentService.Broker.UnitTests\DepartmentService.Broker.UnitTests.csproj", "{459F890F-9A2F-44F6-8F3B-639A4FE97802}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Broker.UnitTests", "test\DepartmentService.Broker.UnitTests\DepartmentService.Broker.UnitTests.csproj", "{459F890F-9A2F-44F6-8F3B-639A4FE97802}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Business.UnitTests", "test\DepartmentService.Business.UnitTests\DepartmentService.Business.UnitTests.csproj", "{64A9B79F-B4B6-45BA-AA04-0E2EFE39BD62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Business.UnitTests", "test\DepartmentService.Business.UnitTests\DepartmentService.Business.UnitTests.csproj", "{64A9B79F-B4B6-45BA-AA04-0E2EFE39BD62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Data.UnitTests", "test\DepartmentService.Data.UnitTests\DepartmentService.Data.UnitTests.csproj", "{2F51B2BF-E15D-498F-BAF7-3A2DE1F7D6CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Data.UnitTests", "test\DepartmentService.Data.UnitTests\DepartmentService.Data.UnitTests.csproj", "{2F51B2BF-E15D-498F-BAF7-3A2DE1F7D6CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Mappers.UnitTests", "test\DepartmentService.Mappers.UnitTests\DepartmentService.Mappers.UnitTests.csproj", "{332272BE-629F-4CD0-8C79-FCB4C8569CA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Mappers.UnitTests", "test\DepartmentService.Mappers.UnitTests\DepartmentService.Mappers.UnitTests.csproj", "{332272BE-629F-4CD0-8C79-FCB4C8569CA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepartmentService.Validation.UnitTests", "test\DepartmentService.Validation.UnitTests\DepartmentService.Validation.UnitTests.csproj", "{0329335E-028E-4EC4-B66F-BCF83123F918}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DepartmentService.Validation.UnitTests", "test\DepartmentService.Validation.UnitTests\DepartmentService.Validation.UnitTests.csproj", "{0329335E-028E-4EC4-B66F-BCF83123F918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

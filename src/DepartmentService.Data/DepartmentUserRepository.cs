@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
     }
 
-    public async Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId)
+      public async Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId)
     {
       List<DbDepartmentUser> directors =
         _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId

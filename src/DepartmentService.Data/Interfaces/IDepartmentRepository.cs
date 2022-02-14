@@ -14,6 +14,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
+    Task<List<DbDepartment>> GetDepartmenDataAsync(List<Guid> departmentIds);
+
     Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false);
 
     Task<DbDepartment> GetAsync(GetDepartmentFilter filter);

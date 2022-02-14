@@ -16,8 +16,9 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     public string GetDepartmentUsersEndpoint { get; set; }
     public string DisactivateDepartmentUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
+    public string FilterDepartmentsEndpoint { get; set; }
 
-    [AutoInjectRequest(typeof(IGetProjectsRequest))]
+  [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetImagesRequest))]
