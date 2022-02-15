@@ -82,7 +82,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .ToListAsync(),
         await dbDepartments.CountAsync());
     }
-    public async Task<List<DbDepartment>> GetDepartmenDataAsync(List<Guid> departmentIds)
+    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentIds)
     {
       return await _provider.Departments.
         Where(d => departmentIds.Contains(d.Id)).Include(d => d.Users.Where(u => u.IsActive))

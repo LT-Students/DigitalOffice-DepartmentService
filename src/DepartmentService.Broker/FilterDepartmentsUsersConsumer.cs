@@ -23,8 +23,10 @@ namespace LT.DigitalOffice.DepartmentService.Broker
         pd => new DepartmentFilteredData(
           pd.Id,
           pd.Name,
-          pd.Users.Where(u => u.IsActive).Select(u => u.UserId).ToList())).ToList();
+          pd.Users.Select(u => u.UserId).ToList()))
+        .ToList();
     }
+
     public FilterDepartmentsUsersConsumer(
       IDepartmentRepository repository)
     {
