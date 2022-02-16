@@ -17,9 +17,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
     public async Task<List<DepartmentFilteredData>> GetDepartmentFilteredData(IFilterDepartmentsRequest request)
     {
-      List<DbDepartment> dbPosition = await _repository.GetAsync(request.DepartmentsIds);
+      List<DbDepartment> dbDepartment = await _repository.GetAsync(request.DepartmentsIds);
 
-      return dbPosition.Select(
+      return dbDepartment.Select(
         pd => new DepartmentFilteredData(
           pd.Id,
           pd.Name,
