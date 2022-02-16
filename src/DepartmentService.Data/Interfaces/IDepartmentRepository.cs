@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
-    Task<List<DbDepartment>> GetAsync(List<Guid> departmentIds);
+    Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds);
 
     Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false);
 

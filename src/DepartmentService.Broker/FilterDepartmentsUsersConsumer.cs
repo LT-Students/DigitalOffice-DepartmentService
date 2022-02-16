@@ -39,7 +39,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
       await context.RespondAsync<IOperationResult<IFilterDepartmentsResponse>>(
         OperationResultWrapper.CreateResponse((_) => IFilterDepartmentsResponse.CreateObj(departmentFilteredData), context));
-
     }
   }
 }
