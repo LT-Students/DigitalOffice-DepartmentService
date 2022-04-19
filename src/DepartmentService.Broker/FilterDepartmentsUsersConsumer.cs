@@ -1,19 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
+using LT.DigitalOffice.Kernel.RedisSupport.Extensions;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Responses.Department;
 using MassTransit;
+using Microsoft.Extensions.Options;
 
 namespace LT.DigitalOffice.DepartmentService.Broker
 {
   public class FilterDepartmentsUsersConsumer : IConsumer<IFilterDepartmentsRequest>
   {
     private readonly IDepartmentRepository _repository;
+    private readonly IOptions<RedisConfig> _redisConfig;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public async Task<List<DepartmentFilteredData>> GetDepartmentFilteredData(IFilterDepartmentsRequest request)
     {
@@ -28,9 +36,13 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     }
 
     public FilterDepartmentsUsersConsumer(
-      IDepartmentRepository repository)
+      IDepartmentRepository repository,
+      IOptions<RedisConfig> redisConfig,
+      IGlobalCacheRepository globalCache)
     {
       _repository = repository;
+      _redisConfig = redisConfig;
+      _globalCache = globalCache;
     }
 
     public async Task Consume(ConsumeContext<IFilterDepartmentsRequest> context)
@@ -39,6 +51,18 @@ namespace LT.DigitalOffice.DepartmentService.Broker
 
       await context.RespondAsync<IOperationResult<IFilterDepartmentsResponse>>(
         OperationResultWrapper.CreateResponse((_) => IFilterDepartmentsResponse.CreateObj(departmentFilteredData), context));
+
+      if (departmentFilteredData is not null)
+      {
+        string key = context.Message.DepartmentsIds.GetRedisCacheHashCode();
+
+        await _globalCache.CreateAsync(
+          Cache.Departments,
+          key,
+          departmentFilteredData,
+          context.Message.DepartmentsIds,
+          TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
+      }
     }
   }
 }
