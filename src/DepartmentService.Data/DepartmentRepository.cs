@@ -69,9 +69,14 @@ namespace LT.DigitalOffice.DepartmentService.Data
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
-      if (!filter.IncludeDeactivated)
+      if (filter.IsActive.HasValue)
       {
-        dbDepartments = dbDepartments.Where(d => d.IsActive);
+        dbDepartments = dbDepartments.Where(d => d.IsActive == filter.IsActive);
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        dbDepartments = filter.IsAscendingSort == true ? dbDepartments.OrderBy(d => d.Name) : dbDepartments.OrderByDescending(d => d.Name);
       }
 
       return (
