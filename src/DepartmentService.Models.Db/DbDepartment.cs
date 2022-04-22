@@ -20,14 +20,11 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public DateTime? ModifiedAtUtc { get; set; }
 
     public ICollection<DbDepartmentUser> Users { get; set; }
-    public ICollection<DbDepartmentNews> News { get; set; }
     public ICollection<DbDepartmentProject> Projects { get; set; }
 
     public DbDepartment()
     {
       Users = new HashSet<DbDepartmentUser>();
-
-      News = new HashSet<DbDepartmentNews>();
 
       Projects = new HashSet<DbDepartmentProject>();
     }
@@ -49,10 +46,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
       builder
         .HasMany(d => d.Users)
-        .WithOne(u => u.Department);
-
-      builder
-        .HasMany(d => d.News)
         .WithOne(u => u.Department);
 
       builder

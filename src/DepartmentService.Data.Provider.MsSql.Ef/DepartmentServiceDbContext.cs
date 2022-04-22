@@ -10,7 +10,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef
   {
     public DbSet<DbDepartment> Departments { get; set; }
     public DbSet<DbDepartmentUser> DepartmentsUsers { get; set; }
-    public DbSet<DbDepartmentNews> DepartmentsNews { get; set; }
     public DbSet<DbDepartmentProject> DepartmentsProjects { get; set; }
 
     public DepartmentServiceDbContext(DbContextOptions<DepartmentServiceDbContext> options)

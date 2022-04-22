@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
-using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
-using LT.DigitalOffice.Models.Broker.Common;
+using LT.DigitalOffice.Models.Broker.Publishing;
 using MassTransit;
 
 namespace LT.DigitalOffice.DepartmentService.Broker
 {
-  public class DisactivateDepartmentUserConsumer : IConsumer<IDisactivateUserRequest>
+  public class DisactivateDepartmentUserConsumer : IConsumer<IDisactivateUserPublish>
   {
     private readonly IDepartmentUserRepository _repository;
     private readonly IGlobalCacheRepository _globalCache;
@@ -21,7 +20,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker
       _globalCache = globalCache;
     }
 
-    public async Task Consume(ConsumeContext<IDisactivateUserRequest> context)
+    public async Task Consume(ConsumeContext<IDisactivateUserPublish> context)
     {
       Guid? departmentId = await _repository.RemoveAsync(context.Message.UserId, context.Message.ModifiedBy);
 
