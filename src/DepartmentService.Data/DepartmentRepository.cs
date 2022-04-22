@@ -76,7 +76,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (filter.IsAscendingSort.HasValue)
       {
-        dbDepartments = filter.IsAscendingSort == true ? dbDepartments.OrderBy(d => d.Name) : dbDepartments.OrderByDescending(d => d.Name);
+        dbDepartments = filter.IsAscendingSort.Value
+          ? dbDepartments.OrderBy(d => d.Name)
+          : dbDepartments.OrderByDescending(d => d.Name);
       }
 
       return (
