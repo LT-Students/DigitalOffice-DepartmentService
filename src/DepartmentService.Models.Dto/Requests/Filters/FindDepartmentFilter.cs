@@ -5,7 +5,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters
 {
   public record FindDepartmentFilter : BaseFindFilter
   {
-    [FromQuery(Name = "includeDeactivated")]
-    public bool IncludeDeactivated { get; set; } = false;
+    [FromQuery(Name = "isAscendingSort")]
+    public bool? IsAscendingSort { get; set; }
+
+    [FromQuery(Name = "isActive")]
+    public bool? IsActive { get; set; }
   }
 }
