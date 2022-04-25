@@ -58,27 +58,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         });
     }
 
-    private void CreateTableDeparmentsNews(MigrationBuilder migrationBuilder)
-    {
-      migrationBuilder.CreateTable(
-        name: DbDepartmentNews.TableName,
-        columns: table => new
-        {
-          Id = table.Column<Guid>(nullable: false),
-          NewsId = table.Column<Guid>(nullable: false),
-          DepartmentId = table.Column<Guid>(nullable: false),
-          IsActive = table.Column<bool>(nullable: false),
-          CreatedBy = table.Column<Guid>(nullable: false),
-          CreatedAtUtc = table.Column<DateTime>(nullable: false),
-          ModifiedBy = table.Column<Guid>(nullable: true),
-          ModifiedAtUtc = table.Column<DateTime>(nullable: true),
-        },
-        constraints: table =>
-        {
-          table.PrimaryKey("PK_DepartmentNews", x => x.Id);
-        });
-    }
-
     private void CreateTableDeparmentsProjects(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.CreateTable(
@@ -108,16 +87,12 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
 
       CreateTableDeparmentsUsers(migrationBuilder);
 
-      CreateTableDeparmentsNews(migrationBuilder);
-
       CreateTableDeparmentsProjects(migrationBuilder);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.DropTable(DbDepartmentUser.TableName);
-
-      migrationBuilder.DropTable(DbDepartmentNews.TableName);
 
       migrationBuilder.DropTable(DbDepartmentProject.TableName);
 

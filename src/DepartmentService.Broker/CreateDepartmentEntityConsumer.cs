@@ -3,35 +3,24 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Department;
 using MassTransit;
 
 namespace LT.DigitalOffice.DepartmentService.Broker
 {
-  public class CreateDepartmentEntityConsumer : IConsumer<ICreateDepartmentEntityRequest>
+  public class CreateDepartmentEntityConsumer : IConsumer<ICreateDepartmentEntityPublish>
   {
-    private readonly IDepartmentNewsRepository _newsRepository;
     private readonly IDepartmentProjectRepository _projectRepository;
     private readonly IDepartmentUserRepository _userRepository;
-    private readonly IDbDepartmentNewsMapper _newsMapper;
     private readonly IDbDepartmentProjectMapper _projectMapper;
     private readonly IDbDepartmentUserMapper _userMapper;
     private readonly IGlobalCacheRepository _globalCache;
 
-    private async Task<bool> CreateEntityAsync(ICreateDepartmentEntityRequest request)
+    private async Task<bool> CreateEntityAsync(ICreateDepartmentEntityPublish request)
     {
       bool response = false;
 
-      if (request.NewsId.HasValue)
-      {
-        response = await _newsRepository.CreateAsync(
-          _newsMapper.Map(
-            request.NewsId.Value,
-            request.DepartmentId,
-            request.CreatedBy))
-          is not null;
-      }
-      else if (request.ProjectId.HasValue)
+      if (request.ProjectId.HasValue)
       {
         response = await _projectRepository.CreateAsync(
           _projectMapper.Map(
@@ -54,24 +43,20 @@ namespace LT.DigitalOffice.DepartmentService.Broker
     }
 
     public CreateDepartmentEntityConsumer(
-      IDepartmentNewsRepository newsRepository,
       IDepartmentProjectRepository projectRepository,
       IDepartmentUserRepository userReposirory,
-      IDbDepartmentNewsMapper newsMapper,
       IDbDepartmentProjectMapper projectMapper,
       IDbDepartmentUserMapper userMapper,
       IGlobalCacheRepository globalCache)
     {
       _userRepository = userReposirory;
       _projectRepository = projectRepository;
-      _newsRepository = newsRepository;
-      _newsMapper = newsMapper;
       _projectMapper = projectMapper;
       _userMapper = userMapper;
       _globalCache = globalCache;
     }
 
-    public async Task Consume(ConsumeContext<ICreateDepartmentEntityRequest> context)
+    public async Task Consume(ConsumeContext<ICreateDepartmentEntityPublish> context)
     {
       object result = OperationResultWrapper.CreateResponse(CreateEntityAsync, context.Message);
 

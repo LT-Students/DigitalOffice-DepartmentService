@@ -57,11 +57,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
       }
 
-      if (filter.IncludeNews)
-      {
-        dbDepartments = dbDepartments.Include(d => d.News.Where(n => n.IsActive));
-      }
-
       return await dbDepartments.FirstOrDefaultAsync();
     }
 
@@ -105,10 +100,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
-      if (request.NewsIds is not null && request.NewsIds.Any())
+      if (request.DepartmentsIds is not null && request.DepartmentsIds.Any())
       {
-        dbDepartments = dbDepartments.Include(d => d.News.Where(dn => dn.IsActive));
-        dbDepartments = dbDepartments.Where(d => d.News.Any(dn => request.NewsIds.Contains(dn.NewsId)));
+        dbDepartments = dbDepartments.Where(d => request.DepartmentsIds.Contains(d.Id));
       }
 
       if (request.ProjectsIds is not null && request.ProjectsIds.Any())

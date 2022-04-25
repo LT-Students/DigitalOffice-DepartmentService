@@ -16,7 +16,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         directorUserId: dbDepartment.Users
           ?.FirstOrDefault(du => du.Role == (int)DepartmentUserRole.Director)
           ?.UserId,
-        newsIds: dbDepartment.News?.Select(dn => dn.NewsId).ToList(),
         projectsIds: dbDepartment.Projects?.Select(dp => dp.ProjectId).ToList(),
         usersIds: dbDepartment.Users?.Select(u => u.UserId).ToList());
     }

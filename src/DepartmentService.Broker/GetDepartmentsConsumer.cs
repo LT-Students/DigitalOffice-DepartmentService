@@ -57,11 +57,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker
       {
         List<Guid> allGuids = new();
 
-        if (context.Message.NewsIds is not null && context.Message.NewsIds.Any())
-        {
-          allGuids.AddRange(context.Message.NewsIds);
-        }
-
         if (context.Message.ProjectsIds is not null && context.Message.ProjectsIds.Any())
         {
           allGuids.AddRange(context.Message.ProjectsIds);

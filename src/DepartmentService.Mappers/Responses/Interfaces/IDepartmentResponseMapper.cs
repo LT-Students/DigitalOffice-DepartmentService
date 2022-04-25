@@ -12,7 +12,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Responses.Interfaces
     DepartmentResponse Map(
       DbDepartment dbDepartment,
       IEnumerable<DepartmentUserInfo> users,
-      IEnumerable<ProjectInfo> projects,
-      IEnumerable<NewsInfo> news);
+      IEnumerable<ProjectInfo> projects);
   }
 }

@@ -13,8 +13,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider
 
     DbSet<DbDepartmentUser> DepartmentsUsers { get; set; }
 
-    DbSet<DbDepartmentNews> DepartmentsNews { get; set; }
-
     DbSet<DbDepartmentProject> DepartmentsProjects { get; set; }
   }
 }
