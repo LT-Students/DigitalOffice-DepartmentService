@@ -76,6 +76,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
           : dbDepartments.OrderByDescending(d => d.Name);
       }
 
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        dbDepartments = dbDepartments.Where(d => d.Name.Contains(filter.NameIncludeSubstring));
+      }
+
       return (
         await dbDepartments
           .Include(d => d.Users.Where(u => u.IsActive))
