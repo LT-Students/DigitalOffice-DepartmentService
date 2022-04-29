@@ -10,5 +10,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters
 
     [FromQuery(Name = "isActive")]
     public bool? IsActive { get; set; }
+
+    [FromQuery(Name = "nameIncludeSubstring")]
+    public string NameIncludeSubstring { get; set; }
   }
 }
