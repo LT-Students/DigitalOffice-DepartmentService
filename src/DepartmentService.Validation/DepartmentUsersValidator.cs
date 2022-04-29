@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation
           RuleFor(users => users)
             .Must(ids => ids.Distinct().Count() == ids.Count())
             .WithMessage("User cannot be added to the deaprtment twice.")
-            .MustAsync(async (ids, _) => ids.Count == (await _userservice.CheckUsersExistenceAsync(ids)).UserIds.Count)
+            .MustAsync(async (ids, _) => ids.Count == (await _userservice.CheckUsersExistenceAsync(ids)).Count)
             .WithMessage("Some users does not exist."));
     }
   }
