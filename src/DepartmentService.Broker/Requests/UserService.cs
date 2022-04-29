@@ -23,12 +23,13 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
     }
 
     public async Task<List<Guid>> CheckUsersExistenceAsync(
-      List<Guid> requestIds)
+      List<Guid> requestIds,
+      List<string> errors = null)
     {
       return (await RequestHandler.ProcessRequest<ICheckUsersExistence, ICheckUsersExistence>(
         _rcCheckUsersExistence,
         ICheckUsersExistence.CreateObj(userIds: requestIds),
-        null,
+        errors,
         _logger))?.UserIds;
     }
   }

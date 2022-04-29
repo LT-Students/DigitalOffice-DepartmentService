@@ -10,6 +10,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces
   public interface IUserService
   {
     Task<List<Guid>> CheckUsersExistenceAsync(
-      List<Guid> usersIds);
+      List<Guid> usersIds,
+      List<string> errors = null);
   }
 }
