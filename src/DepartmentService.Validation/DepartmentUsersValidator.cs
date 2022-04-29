@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
+using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
-using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Models.Broker.Common;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -22,6 +21,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation
     {
       _rcCheckUsersExistence = rcCheckUsersExistence;
       _logger = logger;
+      IUserService _userservice = default;
 
       RuleForEach(users => users)
         .Cascade(CascadeMode.Stop)
@@ -30,32 +30,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation
           RuleFor(users => users)
             .Must(ids => ids.Distinct().Count() == ids.Count())
             .WithMessage("User cannot be added to the deaprtment twice.")
-            .MustAsync(async (ids, _) => await CheckUsersExistenceAsync(ids))
+            .MustAsync(async (ids, _) => ids.Count == (await _userservice.CheckUsersExistenceAsync(ids)).UserIds.Count)
             .WithMessage("Some users does not exist."));
-    }
-
-    private async Task<bool> CheckUsersExistenceAsync(List<Guid> usersIds)
-    {
-      try
-      {
-        Response<IOperationResult<ICheckUsersExistence>> response =
-          await _rcCheckUsersExistence.GetResponse<IOperationResult<ICheckUsersExistence>>(
-            ICheckUsersExistence.CreateObj(usersIds));
-
-        if (response.Message.IsSuccess)
-        {
-          return usersIds.Count == response.Message.Body.UserIds.Count;
-        }
-
-        _logger.LogWarning("Can not find user Ids: {userIds}: " +
-          $"{Environment.NewLine}{string.Join('\n', response.Message.Errors)}");
-      }
-      catch (Exception exc)
-      {
-        _logger.LogError(exc, "Cannot check existing users withs this ids {userIds}");
-      }
-
-      return false;
     }
   }
 }
