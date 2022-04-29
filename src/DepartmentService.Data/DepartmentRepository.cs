@@ -184,7 +184,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> ExistAsync(Guid departmentId)
     {
-      return await _provider.Departments.AnyAsync(x => x.Id == departmentId);
+      return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
     }
   }
 }
