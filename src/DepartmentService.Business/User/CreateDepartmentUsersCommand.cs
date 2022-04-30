@@ -59,7 +59,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(
+          HttpStatusCode.BadRequest, 
+          validationResult.Errors.Select(ValidationFailure => ValidationFailure.ErrorMessage).ToList());
       }
 
       OperationResultResponse<bool> response = new();
