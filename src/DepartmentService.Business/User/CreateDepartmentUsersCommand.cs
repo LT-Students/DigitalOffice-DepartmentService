@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
           HttpStatusCode.BadRequest, 
           validationResult.Errors.Select(ValidationFailure => ValidationFailure.ErrorMessage).ToList());
       }
-
+   
       OperationResultResponse<bool> response = new();
 
       List<Guid> changedDepartments = await _repository.RemoveAsync(usersIds);

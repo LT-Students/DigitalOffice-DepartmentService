@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation
     {
       RuleForEach(users => users)
         .Cascade(CascadeMode.Stop)
-        .NotEmpty().WithMessage("Wrong type of user Id.")
+        .NotEmpty().WithMessage("Users Ids should not be empty.")
         .ChildRules(users =>
           RuleFor(users => users)
             .Must(ids => ids.Distinct().Count() == ids.Count())
