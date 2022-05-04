@@ -64,7 +64,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       #region Deactivated previous department user records
 
-      if (request.Users != null)
+      if (request.Users.Any())
       {
         await _userRepository.RemoveAsync(request.Users.Select(ur => ur.UserId).ToList());
       }

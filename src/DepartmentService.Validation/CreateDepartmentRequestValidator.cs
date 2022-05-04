@@ -32,24 +32,20 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         .NotNull()
         .WithMessage("Users should not be empty.")
         .ChildRules(dus =>
+            dus.When(dus => dus.Any(), () =>
+            {
+                dus.RuleForEach(dus => dus)
+                  .ChildRules(du =>
+                      du.RuleFor(u => u.Role)
+                        .IsInEnum().WithMessage("Wrong type of user role."));
 
-          dus.When(dus => dus.Any(), () =>
-          {
-          dus.RuleForEach(dus => dus)
-                .ChildRules(du =>
-                {
-                  du.RuleFor(u => u.Role)
-                    .IsInEnum().WithMessage("Wrong type of user role.");
-                })),
-
-               RuleFor (dus => dus)
-              .Must(d => d.Where(du => du.Role == Models.Dto.Enums.DepartmentUserRole.Director).Count() < 2)
-              .WithMessage("Only one user can be the department director")
-              .ChildRules(d =>
-                 RuleFor(d => d.Users.Select(user => user.UserId).ToList())
-                  .SetValidator(departmentusersvalidator)
-                 );
-          }));
+                dus.RuleFor(dus => dus)
+                  .Must(dus => dus.Where(u => u.Role == Models.Dto.Enums.DepartmentUserRole.Director).Count() < 2)
+                  .WithMessage("Only one user can be the department director")
+                  .ChildRules(dus =>
+                      dus.RuleFor(dus => dus.Select(u => u.UserId).ToList())
+                        .SetValidator(departmentusersvalidator));
+            }));
     }
   }
 }

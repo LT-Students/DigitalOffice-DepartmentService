@@ -23,7 +23,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
 
     public DbDepartment Map(CreateDepartmentRequest request)
     {
-      if (request == null)
+    if (request == null)
       {
         return null;
       }
