@@ -2,6 +2,7 @@
 using FluentValidation;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
 
 namespace LT.DigitalOffice.DepartmentService.Validation.Department
@@ -30,7 +31,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
 
       RuleFor(request => request.Users)
         .NotNull()
-        .WithMessage("Users should not be empty.")
+        .WithMessage("Users should not be null.")
         .ChildRules(dus =>
             dus.When(dus => dus.Any(), () =>
             {
@@ -40,8 +41,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
                         .IsInEnum().WithMessage("Wrong type of user role."));
 
                 dus.RuleFor(dus => dus)
-                  .Must(dus => dus.Where(u => u.Role == Models.Dto.Enums.DepartmentUserRole.Director).Count() < 2)
-                  .WithMessage("Only one user can be the department director")
+                  .Must(dus => dus.Where(u => u.Role == DepartmentUserRole.Director).Count() < 2)
+                  .WithMessage("Only one user can be the department director.")
                   .ChildRules(dus =>
                       dus.RuleFor(dus => dus.Select(u => u.UserId).ToList())
                         .SetValidator(departmentusersvalidator));
