@@ -76,6 +76,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
           : dbDepartments.OrderByDescending(d => d.Name);
       }
 
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        dbDepartments = dbDepartments.Where(d => d.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+      }
+
       return (
         await dbDepartments
           .Include(d => d.Users.Where(u => u.IsActive))
@@ -179,7 +184,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> ExistAsync(Guid departmentId)
     {
-      return await _provider.Departments.AnyAsync(x => x.Id == departmentId);
+      return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
     }
   }
 }
