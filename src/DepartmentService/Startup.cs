@@ -106,12 +106,12 @@ namespace LT.DigitalOffice.DepartmentService
         connStr = Configuration.GetConnectionString("SQLConnectionString");
 
         Log.Information($"SQL connection string from appsettings.json was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(connStr)}'.");
+          $"Value '{PasswordHider.Hide(connStr)}'.");
       }
       else
       {
         Log.Information($"SQL connection string from environment was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(connStr)}'.");
+          $"Value '{PasswordHider.Hide(connStr)}'.");
       }
 
       services.AddDbContext<DepartmentServiceDbContext>(options =>
@@ -129,12 +129,12 @@ namespace LT.DigitalOffice.DepartmentService
         redisConnStr = Configuration.GetConnectionString("Redis");
 
         Log.Information($"Redis connection string from appsettings.json was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
+          $"Value '{PasswordHider.Hide(redisConnStr)}'");
       }
       else
       {
         Log.Information($"Redis connection string from environment was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
+          $"Value '{PasswordHider.Hide(redisConnStr)}'");
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
