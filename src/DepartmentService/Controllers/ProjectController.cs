@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.Project.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Responses;
@@ -12,7 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   public class ProjectController : ControllerBase
   {
     [HttpPut("edit")]
-    public async Task<OperationResultResponse<Guid?>> EditAsync(
+    public async Task<OperationResultResponse<bool>> EditAsync(
       [FromServices] IEditDepartmentProjectCommand command,
       [FromBody] EditDepartmentProjectRequest request)
     {

@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
-using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
-using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
+using LT.DigitalOffice.DepartmentService.Mappers.Patch.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
+using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
-using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -48,40 +45,32 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _globalCache = globalCache;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> patch)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> request)
     {
-      if (!(await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments)))
+      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (!_validator.ValidateCustom(patch, out List<string> errors))
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
+
+      if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
       OperationResultResponse<bool> response = new();
 
-      foreach (Operation<EditDepartmentRequest> item in patch.Operations)
+      response.Body = await _repository.EditAsync(departmentId, _mapper.Map(request));
+
+      object isActiveOperation = request.Operations.FirstOrDefault(o =>
+        o.path.EndsWith(nameof(EditDepartmentRequest.IsActive), StringComparison.OrdinalIgnoreCase))?.value;
+
+      if (isActiveOperation != null && bool.Parse(isActiveOperation.ToString()))
       {
-        if (item.path.EndsWith(nameof(EditDepartmentRequest.Name), StringComparison.OrdinalIgnoreCase) &&
-            await _repository.NameExistAsync(item.value.ToString()))
-        {
-          return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Conflict);
-        }
-
-        Operation<EditDepartmentRequest> directorOperation = patch.Operations
-          .FirstOrDefault(o => o.path.EndsWith(nameof(EditDepartmentRequest.DirectorId), StringComparison.OrdinalIgnoreCase));
-
-        if (directorOperation != null &&
-          !(await _userRepository.ChangeDirectorAsync(departmentId, Guid.Parse(directorOperation.value?.ToString()))))
-        {
-          response.Errors.Add("Cannot change department director.");
-        }
+        await _userRepository.RemoveAsync(departmentId);
       }
-
-      response.Body = await _repository.EditAsync(departmentId, _mapper.Map(patch));
-      response.Status = response.Body ? OperationResultStatusType.FullSuccess : OperationResultStatusType.Failed;
 
       await _globalCache.RemoveAsync(departmentId);
 

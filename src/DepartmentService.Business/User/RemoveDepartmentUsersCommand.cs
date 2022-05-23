@@ -38,9 +38,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.AddRemoveDepartmentData) &&
-        (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
+      if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
@@ -50,20 +49,14 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
-      OperationResultResponse<bool> response = new();
+      await _repository.RemoveAsync(departmentId, usersIds);
 
-      response.Body = await _repository.RemoveAsync(departmentId, usersIds);
+      await _globalChache.RemoveAsync(departmentId);
 
-      if (!response.Body)
+      return new()
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
-      }
-      else
-      {
-        await _globalChache.RemoveAsync(departmentId);
-      }
-
-      return response;
+        Body = true
+      };
     }
   }
 }

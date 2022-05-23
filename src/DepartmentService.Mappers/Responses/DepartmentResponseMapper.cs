@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.CompanyService.Mappers.Responses
       }
 
       Guid? directorUserId = dbDepartment.Users
-        ?.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Director && u.DepartmentId == dbDepartment.Id)
+        ?.FirstOrDefault(u => u.Role == (int)DepartmentUserRole.Manager)
         ?.UserId;
 
       return new DepartmentResponse

@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Enums
   public enum DepartmentUserRole
   {
     Employee,
-    Director
+    Manager
   }
 }

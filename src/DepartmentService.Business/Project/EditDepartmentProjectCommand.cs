@@ -19,56 +19,46 @@ namespace LT.DigitalOffice.UserService.Business.Commands.User
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
     private readonly IDbDepartmentProjectMapper _mapper;
-    private readonly IDepartmentProjectRepository _departmentProjectRepository;
-    private readonly IDepartmentUserRepository _departmentUserRepository;
+    private readonly IDepartmentProjectRepository _projectRepository;
+    private readonly IDepartmentUserRepository _userRepository;
     private readonly IResponseCreator _responseCreator;
 
     public EditDepartmentProjectCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
       IDbDepartmentProjectMapper mapper,
-      IDepartmentProjectRepository departmentProjectRepository,
-      IDepartmentUserRepository departmentUserRepository,
+      IDepartmentProjectRepository projectRepository,
+      IDepartmentUserRepository userRepository,
       IResponseCreator responseCreator)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
       _mapper = mapper;
-      _departmentProjectRepository = departmentProjectRepository;
-      _departmentUserRepository = departmentUserRepository;
+      _projectRepository = projectRepository;
+      _userRepository = userRepository;
       _responseCreator = responseCreator;
     }
 
-    public async Task<OperationResultResponse<Guid?>> ExecuteAsync(EditDepartmentProjectRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(EditDepartmentProjectRequest request)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.AddRemoveDepartmentData) &&
-        (await _departmentUserRepository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == request.DepartmentId))
+      if (!await _userRepository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden);
+        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      OperationResultResponse<Guid?> response = new();
-
-      await _departmentProjectRepository.RemoveAsync(request.ProjectId);
-
-      if (request.DepartmentId is not null)
+      if (!await _projectRepository.EditAsync(request.ProjectId, request.DepartmentId))
       {
-        response.Body = await _departmentProjectRepository.CreateAsync(
-          _mapper.Map(
-            request.ProjectId,
-            request.DepartmentId.Value,
-            _httpContextAccessor.HttpContext.GetUserId()));
-
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+        await _projectRepository.CreateAsync(
+          _mapper.Map(request.ProjectId, request.DepartmentId.Value, _httpContextAccessor.HttpContext.GetUserId()));
       }
 
-      if (response.Body == default)
-      {
-        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
-      }
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
-      return response;
+      return new()
+      {
+        Body = true
+      };
     }
   }
 }

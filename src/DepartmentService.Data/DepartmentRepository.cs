@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -20,6 +19,23 @@ namespace LT.DigitalOffice.DepartmentService.Data
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    private IQueryable<DbDepartment> CreateGetPredicates(
+      GetDepartmentFilter filter,
+      IQueryable<DbDepartment> dbDepartments)
+    {
+      if (filter.IncludeUsers)
+      {
+        dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
+      }
+
+      if (filter.IncludeProjects)
+      {
+        dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
+      }
+
+      return dbDepartments;
+    }
+
     public DepartmentRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
@@ -30,7 +46,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<Guid?> CreateAsync(DbDepartment dbDepartment)
     {
-      if (dbDepartment == null)
+      if (dbDepartment is null)
       {
         return null;
       }
@@ -43,22 +59,40 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<DbDepartment> GetAsync(GetDepartmentFilter filter)
     {
+      return filter is null
+        ? null
+        : await CreateGetPredicates(filter, _provider.Departments.AsQueryable())
+          .FirstOrDefaultAsync(d => d.Id == filter.DepartmentId);
+    }
+
+    public async Task<List<DbDepartment>> GetAsync(
+      List<Guid> departmentsIds = null,
+      List<Guid> usersIds = null,
+      List<Guid> projectsIds = null)
+    {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
-      dbDepartments = dbDepartments.Where(d => d.Id == filter.DepartmentId);
-
-      if (filter.IncludeUsers)
+      if (departmentsIds is not null && departmentsIds.Any())
       {
-        dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
+        dbDepartments = dbDepartments.Where(d => departmentsIds.Contains(d.Id));
       }
 
-      if (filter.IncludeProjects)
+      if (projectsIds is not null && projectsIds.Any())
       {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
+        dbDepartments = dbDepartments.Include(d => d.Projects.Where(dp => dp.IsActive));
+        dbDepartments = dbDepartments.Where(d => d.Projects.Any(dp => projectsIds.Contains(dp.ProjectId)));
       }
 
-      return await dbDepartments.FirstOrDefaultAsync();
+      if (usersIds is not null && usersIds.Any())
+      {
+        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && usersIds.Contains(du.UserId)));
+      }
+
+      dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
+
+      return await dbDepartments.ToListAsync();
     }
+
 
     public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter)
     {
@@ -89,49 +123,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .ToListAsync(),
         await dbDepartments.CountAsync());
     }
-    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds)
-    {
-      return await _provider.Departments.
-        Where(d => departmentsIds.Contains(d.Id)).Include(d => d.Users.Where(u => u.IsActive))
-        .ToListAsync();
-    }
-
-    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
-    {
-      IQueryable<DbDepartment> departments = _provider.Departments.Where(d => departmentsIds.Contains(d.Id));
-
-      if (includeUsers)
-      {
-        departments = departments.Include(d => d.Users.Where(u => u.IsActive));
-      }
-
-      return await departments.ToListAsync();
-    }
-
-    public async Task<List<DbDepartment>> GetAsync(IGetDepartmentsRequest request)
-    {
-      IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
-
-      if (request.DepartmentsIds is not null && request.DepartmentsIds.Any())
-      {
-        dbDepartments = dbDepartments.Where(d => request.DepartmentsIds.Contains(d.Id));
-      }
-
-      if (request.ProjectsIds is not null && request.ProjectsIds.Any())
-      {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(dp => dp.IsActive));
-        dbDepartments = dbDepartments.Where(d => d.Projects.Any(dp => request.ProjectsIds.Contains(dp.ProjectId)));
-      }
-
-      if (request.UsersIds is not null && request.UsersIds.Any())
-      {
-        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && request.UsersIds.Contains(du.UserId)));
-      }
-
-      dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
-
-      return await dbDepartments.ToListAsync();
-    }
 
     public async Task<List<DbDepartment>> SearchAsync(string text)
     {
@@ -142,9 +133,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request)
     {
-      DbDepartment dbDepartment = _provider.Departments.FirstOrDefault(x => x.Id == departmentId);
+      DbDepartment dbDepartment = await _provider.Departments.FirstOrDefaultAsync(x => x.Id == departmentId);
 
-      if (dbDepartment == null || request == null)
+      if (dbDepartment is null || request is null)
       {
         return false;
       }
@@ -163,9 +154,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
         foreach (DbDepartmentUser user in users)
         {
           user.IsActive = false;
-          user.ModifiedAtUtc = DateTime.UtcNow;
-          user.LeftAtUtc = DateTime.UtcNow;
-          user.ModifiedBy = editorId;
         }
       }
 

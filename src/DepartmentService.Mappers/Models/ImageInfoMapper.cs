@@ -8,20 +8,17 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public ImageInfo Map(ImageData imageData)
     {
-      if (imageData == null)
-      {
-        return null;
-      }
-
-      return new ImageInfo
-      {
-        Id = imageData.ImageId,
-        ParentId = imageData.ParentId,
-        Type = imageData.Type,
-        Content = imageData.Content,
-        Extension = imageData.Extension,
-        Name = imageData.Name
-      };
+      return imageData is null
+        ? null
+        : new ImageInfo
+        {
+          Id = imageData.ImageId,
+          ParentId = imageData.ParentId,
+          Type = imageData.Type,
+          Content = imageData.Content,
+          Extension = imageData.Extension,
+          Name = imageData.Name
+        };
     }
   }
 }

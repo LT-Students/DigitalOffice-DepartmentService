@@ -10,14 +10,16 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public DepartmentData Map(DbDepartment dbDepartment)
     {
-      return new DepartmentData(
-        dbDepartment.Id,
-        dbDepartment.Name,
-        directorUserId: dbDepartment.Users
-          ?.FirstOrDefault(du => du.Role == (int)DepartmentUserRole.Director)
-          ?.UserId,
-        projectsIds: dbDepartment.Projects?.Select(dp => dp.ProjectId).ToList(),
-        usersIds: dbDepartment.Users?.Select(u => u.UserId).ToList());
+      return dbDepartment is null
+        ? null
+        : new DepartmentData(
+          dbDepartment.Id,
+          dbDepartment.Name,
+          directorUserId: dbDepartment.Users
+            ?.FirstOrDefault(du => du.Role == (int)DepartmentUserRole.Manager)
+            ?.UserId,
+          projectsIds: dbDepartment.Projects?.Select(dp => dp.ProjectId).ToList(),
+          usersIds: dbDepartment.Users?.Select(u => u.UserId).ToList());
     }
   }
 }

@@ -24,7 +24,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<Guid?> CreateAsync(DbDepartmentProject dbDepartmentProject)
     {
-      if (dbDepartmentProject == null)
+      if (dbDepartmentProject is null)
       {
         return null;
       }
@@ -35,18 +35,24 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartmentProject.Id;
     }
 
-    public async Task RemoveAsync(Guid projectId)
+    public async Task<bool> EditAsync(Guid projectId, Guid? departmentId)
     {
       DbDepartmentProject dbDepartmentProject = await _provider.DepartmentsProjects
-        .FirstOrDefaultAsync(dp => dp.ProjectId == projectId && dp.IsActive);
+        .FirstOrDefaultAsync(dp => dp.ProjectId == projectId);
 
-      if (dbDepartmentProject != null)
+      if (dbDepartmentProject is null)
       {
-        dbDepartmentProject.IsActive = false;
-        dbDepartmentProject.ModifiedAtUtc = DateTime.UtcNow;
-        dbDepartmentProject.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-        await _provider.SaveAsync();
+        return false;
       }
+
+      dbDepartmentProject.DepartmentId = departmentId.HasValue ? departmentId.Value : dbDepartmentProject.DepartmentId;
+      dbDepartmentProject.IsActive = departmentId.HasValue ? true : false;
+
+      dbDepartmentProject.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
+
+      await _provider.SaveAsync();
+
+      return true;
     }
   }
 }
