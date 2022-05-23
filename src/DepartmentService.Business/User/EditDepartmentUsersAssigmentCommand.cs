@@ -7,7 +7,6 @@ using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
-using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser;
 using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
@@ -43,6 +42,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _responseCreator = responseCreator;
       _globalCache = globalCache;
     }
+
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUserAssignmentRequest request)
     {
       if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())

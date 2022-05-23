@@ -30,7 +30,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser
         })
         .WithMessage("Department users was not found.")
         .Must(request => dbDepartmentUsers.FirstOrDefault(du => du.Assignment == (int)request.Assignment) is null)
-        .WithMessage("Yser already has the role.")
+        .WithMessage("Yser already has the assignment.")
         .Must(request => request.UsersIds.Distinct().Count() == dbDepartmentUsers.Count()
           && dbDepartmentUsers.Where(du => request.UsersIds.Contains(du.UserId)).Count() == dbDepartmentUsers.Count())
         .WithMessage("Some users do not exist.");

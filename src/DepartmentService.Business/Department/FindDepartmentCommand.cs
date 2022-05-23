@@ -11,7 +11,6 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
-using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
@@ -19,11 +18,6 @@ using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Position;
-using LT.DigitalOffice.Models.Broker.Requests.Position;
-using LT.DigitalOffice.Models.Broker.Responses.Position;
-using MassTransit;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
@@ -78,7 +72,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       Dictionary<Guid, Guid> departmentsDirectors =
         dbDepartments
-          .SelectMany(d => d.Users.Where(u => u.Role == (int)DepartmentUserRole.Manager))
+          .SelectMany(d => d.Users.Where(u => u.Assignment == (int)DepartmentUserAssignment.Director))
           .ToDictionary(d => d.DepartmentId, d => d.UserId);
 
       List<UserData> usersData = await _userService.GetUsersDatasAsync(

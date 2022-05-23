@@ -8,6 +8,7 @@ using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
@@ -65,7 +66,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
           validationResult.Errors.Select(ValidationFailure => ValidationFailure.ErrorMessage).ToList());
       }
       
-      if (request.Users.Where(u => u.Assignment == Models.Dto.Enums.DepartmentUserAssignment.Director).Any())
+      if (request.Users.Where(u => u.Assignment == DepartmentUserAssignment.Director).Any())
       {
         await _repository.RemoveDirectorAsync(request.DepartmentId);
       }

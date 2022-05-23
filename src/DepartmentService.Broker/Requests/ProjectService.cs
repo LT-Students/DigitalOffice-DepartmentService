@@ -30,7 +30,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       _globalCache = globalCache;
     }
 
-
     public async Task<List<ProjectData>> GetProjectsAsync(List<Guid> projectsIds, List<string> errors)
     {
       (List<ProjectData> projects, int _) = await _globalCache

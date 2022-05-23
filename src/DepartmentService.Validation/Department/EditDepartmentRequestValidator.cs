@@ -32,14 +32,12 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         {
           nameof(EditDepartmentRequest.Name),
           nameof(EditDepartmentRequest.Description),
-          nameof(EditDepartmentRequest.IsActive),
-          nameof(EditDepartmentRequest.DirectorId)
+          nameof(EditDepartmentRequest.IsActive)
         });
 
       AddСorrectOperations(nameof(EditDepartmentRequest.Name), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.Description), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.IsActive), new() { OperationType.Replace });
-      AddСorrectOperations(nameof(EditDepartmentRequest.DirectorId), new() { OperationType.Replace });
 
       #endregion
 

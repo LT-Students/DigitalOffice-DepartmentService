@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser
         .ChildRules(u =>
           u.RuleFor(u => u.Assignment)
             .IsInEnum()
-            .WithMessage("Wrong type of user role."));
+            .WithMessage("Wrong type of user assignment."));
     }
   }
 }

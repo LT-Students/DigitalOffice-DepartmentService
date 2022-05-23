@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       {
         DbDepartmentUser requestData = null;
 
-        foreach (var du in dbDepartmentsUsers)
+        foreach (DbDepartmentUser du in dbDepartmentsUsers)
         {
           requestData = request.FirstOrDefault(u => u.UserId == du.UserId);
 
