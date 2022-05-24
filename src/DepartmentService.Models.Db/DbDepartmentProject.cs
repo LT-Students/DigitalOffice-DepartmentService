@@ -7,6 +7,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
   public class DbDepartmentProject
   {
     public const string TableName = "DepartmentsProjects";
+    public const string HistoryTableName = "DepartmentsProjectsHistory";
 
     public Guid Id { get; set; }
     public Guid ProjectId { get; set; }
@@ -22,7 +23,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public void Configure(EntityTypeBuilder<DbDepartmentProject> builder)
     {
       builder
-        .ToTable(DbDepartmentProject.TableName, dp => dp.IsTemporal());
+        .ToTable(DbDepartmentProject.TableName, dp => dp.IsTemporal(h =>
+        {
+          h.UseHistoryTable(DbDepartmentProject.HistoryTableName);
+        }));
 
       builder
         .HasKey(u => u.Id);

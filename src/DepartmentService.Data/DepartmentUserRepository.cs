@@ -159,20 +159,19 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartmentUser = dbDepartmentUser.Where(x => x.DepartmentId == request.DepartmentId);
 
-      //TODO add fix
-      /*if (request.ByEntryDate.HasValue)
+      if (request.ByEntryDate.HasValue)
       {
-        dbDepartmentUser = dbDepartmentUser.Where(x =>
+        /*dbDepartmentUser = dbDepartmentUser.Where(x =>
           ((x.PeriodStart.Year * 12 + x.PeriodStart.Month) <=
             (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month)) &&
           (x.IsActive ||
             ((x.LeftAtUtc.Value.Year * 12 + x.LeftAtUtc.Value.Month) >=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));
+            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));*/
       }
       else
       {
         dbDepartmentUser = dbDepartmentUser.Where(x => x.IsActive);
-      }*/
+      }
 
       int totalCount = await dbDepartmentUser.CountAsync();
 
@@ -188,8 +187,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
-
-
 
     public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)
     {
