@@ -11,7 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
 {
   [ApiController]
   [Route("[Controller]")]
-  public class UsersController : ControllerBase
+  public class UserController : ControllerBase
   {
     [HttpPost("create")]
     public async Task<OperationResultResponse<bool>> CreateAsync(

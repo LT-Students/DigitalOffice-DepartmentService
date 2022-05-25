@@ -2,7 +2,7 @@
 {
   public enum DepartmentUserAssignment
   {
-    User,
+    Employee,
     Director
   }
 }

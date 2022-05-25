@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         DepartmentId = departmentId,
         IsActive = true,
         Role = (int)DepartmentUserRole.Employee,
-        Assignment = (int)DepartmentUserAssignment.User,
+        Assignment = (int)DepartmentUserAssignment.Employee,
         CreatedBy = createdBy ?? _httpContextAccessor.HttpContext.GetUserId()
       };
     }

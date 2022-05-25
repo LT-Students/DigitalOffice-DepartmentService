@@ -232,7 +232,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       if (director is not null)
       {
-        director.Assignment = (int)DepartmentUserAssignment.User;
+        director.Assignment = (int)DepartmentUserAssignment.Employee;
         director.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
 
         await _provider.SaveAsync();
