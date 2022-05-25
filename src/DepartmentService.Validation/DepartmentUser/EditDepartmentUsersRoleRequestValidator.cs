@@ -9,7 +9,7 @@ using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser
 {
   public class EditDepartmentUsersRoleRequestValidator
-    : AbstractValidator<EditDepartmentUserRoleRequest>, IEditDepartmentUsersRoleRequestValidator
+    : AbstractValidator<EditDepartmentUsersRoleRequest>, IEditDepartmentUsersRoleRequestValidator
   {
     public EditDepartmentUsersRoleRequestValidator(
       IDepartmentUserRepository _repository)

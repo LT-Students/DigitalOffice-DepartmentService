@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.User.Interfaces
   [AutoInject]
   public interface IEditDepartmentUsersRoleCommand
   {
-    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUserRoleRequest request);
+    Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUsersRoleRequest request);
   }
 }

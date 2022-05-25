@@ -6,7 +6,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interface
 {
   [AutoInject]
   public interface IEditDepartmentUsersRoleRequestValidator
-    : IValidator<EditDepartmentUserRoleRequest>
+    : IValidator<EditDepartmentUsersRoleRequest>
   {
   }
 }

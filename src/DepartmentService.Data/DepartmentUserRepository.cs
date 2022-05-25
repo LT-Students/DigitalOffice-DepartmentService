@@ -165,22 +165,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
 
-      /*if (request.ByEntryDate.HasValue)
-      {
-        //где ((юзерСтарт) <= (первого числа месяца)) и (активен или ((покинул >= первого числа месяца)))
-
-        /*dbDepartmentUser = dbDepartmentUser.Where(x =>
-          ((x.PeriodStart.Year * 12 + x.PeriodStart.Month) <=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month)) &&
-          (x.IsActive ||
-            ((x.LeftAtUtc.Value.Year * 12 + x.LeftAtUtc.Value.Month) >=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));
-      }
-      else
-      {
-        dbDepartmentUser = dbDepartmentUser.Where(x => x.IsActive);
-      }*/
-
       int totalCount = await dbDepartmentUser.CountAsync();
 
       if (request.SkipCount.HasValue)
@@ -216,7 +200,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task RemoveAsync(Guid departmentId, List<Guid> usersIds = null)
     {
-
       IQueryable<DbDepartmentUser> dbDepartmentUsers = _provider.DepartmentsUsers.AsQueryable();
 
       dbDepartmentUsers = dbDepartmentUsers.Where(du => du.DepartmentId == departmentId && du.IsActive);
@@ -226,15 +209,17 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartmentUsers = dbDepartmentUsers.Where(du => usersIds.Contains(du.UserId));
       }
 
-      if (dbDepartmentUsers is not null || dbDepartmentUsers.Any())
+      List<DbDepartmentUser> targetUsers = await dbDepartmentUsers.ToListAsync();
+
+      if (targetUsers is not null || targetUsers.Any())
       {
-        foreach (var du in dbDepartmentUsers)
+        foreach (DbDepartmentUser du in targetUsers)
         {
           du.IsActive = false;
-          du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
-
-          await _provider.SaveAsync();
+          du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId(); 
         }
+
+        await _provider.SaveAsync();
       }
     }
 

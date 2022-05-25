@@ -34,7 +34,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     public async Task<OperationResultResponse<bool>> EditRoleAsync(
       [FromServices] IEditDepartmentUsersRoleCommand command,
       [FromQuery] Guid departmentId,
-      [FromBody] EditDepartmentUserRoleRequest request)
+      [FromBody] EditDepartmentUsersRoleRequest request)
     {
       return await command.ExecuteAsync(departmentId, request);
     }

@@ -42,7 +42,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _globalCache = globalCache;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUserRoleRequest request)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUsersRoleRequest request)
     {
       if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
         && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
