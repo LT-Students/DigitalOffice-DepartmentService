@@ -27,7 +27,9 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
           UserId = request.UserId,
           DepartmentId = departmentId,
           IsActive = true,
-          Role = (int)request.Role,
+          Role = request.Assignment == DepartmentUserAssignment.Director 
+            ? (int)DepartmentUserRole.Manager
+            : (int)request.Role,
           Assignment = (int)request.Assignment,
           CreatedBy = _httpContextAccessor.HttpContext.GetUserId()
         };

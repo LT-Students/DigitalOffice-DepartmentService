@@ -128,6 +128,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       foreach (DbDepartmentUser du in dbDepartmentUsers)
       {
         du.Assignment = (int)assignment;
+        du.Role = assignment == DepartmentUserAssignment.Director ? (int)DepartmentUserRole.Manager : du.Role;
         du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       }
 
