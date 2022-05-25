@@ -7,7 +7,10 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
+using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -22,7 +25,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
-    private readonly IDepartmentUsersValidator _validator;
+    private readonly ICreateDepartmentUsersValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
     private readonly IResponseCreator _responseCreator;
@@ -31,7 +34,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
-      IDepartmentUsersValidator validator,
+      ICreateDepartmentUsersValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
       IResponseCreator responseCreator,
@@ -46,30 +49,36 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _globalCache = globalCache;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(CreateDepartmentUsersRequest request)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.AddRemoveDepartmentData) &&
-        (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
+      if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(usersIds);
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
 
       if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<bool>(
-          HttpStatusCode.BadRequest, 
+          HttpStatusCode.BadRequest,
           validationResult.Errors.Select(ValidationFailure => ValidationFailure.ErrorMessage).ToList());
       }
-   
-      OperationResultResponse<bool> response = new();
+      
+      if (request.Users.Where(u => u.Assignment == DepartmentUserAssignment.Director).Any())
+      {
+        await _repository.RemoveDirectorAsync(request.DepartmentId);
+      }
 
-      List<Guid> changedDepartments = await _repository.RemoveAsync(usersIds);
+      List<DbDepartmentUser> dbDepartmentUsers = request.Users
+        .Select(u => _mapper.Map(u, request.DepartmentId)).ToList();
 
-      response.Body = await _repository.CreateAsync(
-        usersIds.Select(userId => _mapper.Map(userId, departmentId)).ToList());
+      List<Guid> updatedUsersIds = await _repository.EditAsync(dbDepartmentUsers);
+
+
+      OperationResultResponse<bool> response = new(
+        await _repository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList()));
 
       if (!response.Body)
       {
@@ -78,7 +87,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       else
       {
         _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-        changedDepartments.Select(async i => await _globalCache.RemoveAsync(i));
+        //changedDepartments.Select(async i => await _globalCache.RemoveAsync(i)); remove by usersIds
       }
 
       return response;

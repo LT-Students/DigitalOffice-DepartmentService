@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Responses;
 

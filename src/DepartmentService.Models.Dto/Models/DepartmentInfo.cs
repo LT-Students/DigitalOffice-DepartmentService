@@ -6,6 +6,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
   {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public string ShortName { get; set; }
     public string Description { get; set; }
     public int CountUsers { get; set; }
     public bool IsActive { get; set; }

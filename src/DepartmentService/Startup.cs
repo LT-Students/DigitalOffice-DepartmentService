@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
-using LT.DigitalOffice.DepartmentService.Broker;
+using LT.DigitalOffice.DepartmentService.Broker.Consumers;
 using LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.DepartmentService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.0.1.1";
+      Version = "1.0.2.0";
       Description = "DepartmentService is an API that intended to work with Department.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
@@ -14,13 +13,12 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
-    Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds);
-
-    Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false);
-
     Task<DbDepartment> GetAsync(GetDepartmentFilter filter);
 
-    Task<List<DbDepartment>> GetAsync(IGetDepartmentsRequest request);
+    Task<List<DbDepartment>> GetAsync(
+      List<Guid> departmentsIds = null,
+      List<Guid> usersIds = null,
+      List<Guid> projectsIds = null);
 
     Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
 
@@ -29,6 +27,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task<List<DbDepartment>> SearchAsync(string text);
 
     Task<bool> NameExistAsync(string name);
+
+    Task<bool> ShortNameExistAsync(string shortName);
 
     Task<bool> ExistAsync(Guid departmentId);
   }

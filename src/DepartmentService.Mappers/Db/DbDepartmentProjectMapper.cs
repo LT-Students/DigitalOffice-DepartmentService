@@ -14,8 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         ProjectId = projectId,
         DepartmentId = departmentId,
         IsActive = true,
-        CreatedBy = createdBy,
-        CreatedAtUtc = DateTime.UtcNow
+        CreatedBy = createdBy
       };
     }
   }

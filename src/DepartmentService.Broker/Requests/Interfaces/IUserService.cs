@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.Kernel.Attributes;
-using LT.DigitalOffice.Models.Broker.Common;
+using LT.DigitalOffice.Models.Broker.Models;
 
 namespace LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces
 {
@@ -12,5 +12,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces
     Task<List<Guid>> CheckUsersExistenceAsync(
       List<Guid> usersIds,
       List<string> errors = null);
+
+    Task<List<UserData>> GetUsersDatasAsync(List<Guid> usersIds, List<string> errors);
   }
 }

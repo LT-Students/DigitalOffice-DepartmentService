@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;

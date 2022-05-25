@@ -8,8 +8,8 @@ using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
-using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
+using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Enums;
@@ -70,7 +70,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
       _dbDepartment = new()
       {
         Id = Guid.NewGuid(),
-        CompanyId = Guid.NewGuid(),
         Name = "Name",
         Description = "Description",
         IsActive = true,
@@ -107,9 +106,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
     [Test]
     public async Task ShouldReturnFailedResponseWhenUserHasNotRightAsync()
     {
-       _autoMocker
-        .Setup<IAccessValidator, Task<bool>>(x => x.HasRightsAsync(Rights.AddEditRemoveDepartments))
-        .ReturnsAsync(false);
+      _autoMocker
+       .Setup<IAccessValidator, Task<bool>>(x => x.HasRightsAsync(Rights.AddEditRemoveDepartments))
+       .ReturnsAsync(false);
 
       OperationResultResponse<Guid?> expectedResponse = new()
       {

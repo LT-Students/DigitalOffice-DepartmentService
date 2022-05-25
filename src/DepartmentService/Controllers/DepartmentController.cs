@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Responses;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;

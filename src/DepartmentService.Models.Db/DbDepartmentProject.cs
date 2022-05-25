@@ -7,15 +7,13 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
   public class DbDepartmentProject
   {
     public const string TableName = "DepartmentsProjects";
+    public const string HistoryTableName = "DepartmentsProjectsHistory";
 
     public Guid Id { get; set; }
     public Guid ProjectId { get; set; }
     public Guid DepartmentId { get; set; }
-    public Guid CreatedBy { get; set; }
     public bool IsActive { get; set; }
-    public DateTime CreatedAtUtc { get; set; }
-    public Guid? ModifiedBy { get; set; }
-    public DateTime? ModifiedAtUtc { get; set; }
+    public Guid CreatedBy { get; set; }
 
     public DbDepartment Department { get; set; }
   }
@@ -25,7 +23,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public void Configure(EntityTypeBuilder<DbDepartmentProject> builder)
     {
       builder
-        .ToTable(DbDepartmentProject.TableName);
+        .ToTable(DbDepartmentProject.TableName, dp => dp.IsTemporal(h =>
+        {
+          h.UseHistoryTable(DbDepartmentProject.HistoryTableName);
+        }));
 
       builder
         .HasKey(u => u.Id);

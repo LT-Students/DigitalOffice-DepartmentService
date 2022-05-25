@@ -18,9 +18,21 @@ namespace LT.DigitalOffice.DepartmentService.Data
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    private IQueryable<DbDepartmentUser> CreateGetPredicates(
+      bool includeDepartments,
+      IQueryable<DbDepartmentUser> dbDepartmentUsers)
+    {
+      if (includeDepartments)
+      {
+        dbDepartmentUsers = dbDepartmentUsers.Include(du => du.Department);
+      }
+
+      return dbDepartmentUsers;
+    }
+
     public DepartmentUserRepository(
-      IHttpContextAccessor httpContextAccessor,
-      IDataProvider provider)
+      IDataProvider provider,
+      IHttpContextAccessor httpContextAccessor)
     {
       _provider = provider;
       _httpContextAccessor = httpContextAccessor;
@@ -39,85 +51,119 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return true;
     }
 
-    public async Task<Guid?> CreateAsync(DbDepartmentUser dbDepartmentUser)
+    public async Task<List<Guid>> EditAsync(List<DbDepartmentUser> request)
     {
-      if (dbDepartmentUser is null)
+      if (request is null || !request.Any())
       {
         return null;
       }
 
-      _provider.DepartmentsUsers.Add(dbDepartmentUser);
-      await _provider.SaveAsync();
+      IQueryable<DbDepartmentUser> dbDepartmentsUsers = _provider.DepartmentsUsers
+        .Where(du => request.Select(r => r.UserId).Contains(du.UserId));
 
-      return dbDepartmentUser.Id;
-    }
-
-    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
-    {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
-
-      if (includeDepartment)
+      if (dbDepartmentsUsers is not null && dbDepartmentsUsers.Any())
       {
-        dbDepartmentUser = dbDepartmentUser.Include(du => du.Department);
+        DbDepartmentUser requestData = null;
+
+        foreach (DbDepartmentUser du in dbDepartmentsUsers)
+        {
+          requestData = request.FirstOrDefault(u => u.UserId == du.UserId);
+
+          du.DepartmentId = requestData.DepartmentId;
+          du.CreatedBy = requestData.CreatedBy;
+          du.Assignment = requestData.Assignment;
+          du.Role = requestData.Role;
+          du.IsActive = requestData.IsActive;
+        }
+
+        await _provider.SaveAsync();
       }
 
-      return await dbDepartmentUser
-        .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+      return dbDepartmentsUsers?.Select(u => u.UserId).ToList();
     }
 
-    public async Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId)
+    public async Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role)
     {
-      List<DbDepartmentUser> directors =
-        _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId
-          && (du.Role == (int)DepartmentUserRole.Director || du.UserId == newDirectorId)
-          && du.IsActive).ToList();
-
-      if (!directors.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return false;
       }
 
-      DbDepartmentUser prevDirector = directors
-        .FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Director);
-      DbDepartmentUser newDirector = directors
-        .FirstOrDefault(d => d.Role == (int)DepartmentUserRole.Employee);
+      IQueryable<DbDepartmentUser> dbDepartmentsUsers = _provider.DepartmentsUsers
+        .Where(du => usersIds.Contains(du.UserId));
 
-      if (newDirector == null)
+      if (dbDepartmentsUsers is null && dbDepartmentsUsers.Any())
       {
         return false;
       }
 
-      if (prevDirector != null)
+      foreach (DbDepartmentUser du in dbDepartmentsUsers)
       {
-        prevDirector.Role = (int)DepartmentUserRole.Employee;
+        du.Role = (int)role;
+        du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       }
-
-      newDirector.Role = (int)DepartmentUserRole.Director;
 
       await _provider.SaveAsync();
 
       return true;
     }
 
+    public async Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment)
+    {
+      if (usersIds is null || !usersIds.Any())
+      {
+        return false;
+      }
+
+      IQueryable<DbDepartmentUser> dbDepartmentUsers =
+        _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId
+          && usersIds.Contains(du.UserId)
+          && du.IsActive);
+
+      if (dbDepartmentUsers is null || !dbDepartmentUsers.Any())
+      {
+        return false;
+      }
+
+      foreach (DbDepartmentUser du in dbDepartmentUsers)
+      {
+        du.Assignment = (int)assignment;
+        du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
+      }
+
+      await _provider.SaveAsync();
+
+      return true;
+    }
+
+    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
+    {
+      return await
+        CreateGetPredicates(includeDepartment, _provider.DepartmentsUsers.AsQueryable())
+        .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
+    }
+
+    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
+    {
+      return usersIds is null
+        ? new()
+        : await
+          CreateGetPredicates(includeDepartments, _provider.DepartmentsUsers.AsQueryable())
+          .Where(u => u.IsActive && usersIds.Contains(u.UserId))
+          .ToListAsync();
+    }
+
     public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
     {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
+      IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
+        ? _provider.DepartmentsUsers
+            .TemporalBetween(
+              request.ByEntryDate.Value,
+              new DateTime(request.ByEntryDate.Value.Year, request.ByEntryDate.Value.Month + 1, 1))
+            .AsQueryable()
+        : _provider.DepartmentsUsers.AsQueryable();
 
-      dbDepartmentUser = dbDepartmentUser.Where(x => x.DepartmentId == request.DepartmentId);
-
-      if (request.ByEntryDate.HasValue)
-      {
-        dbDepartmentUser = dbDepartmentUser.Where(x =>
-          ((x.CreatedAtUtc.Year * 12 + x.CreatedAtUtc.Month) <=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month)) &&
-          (x.IsActive ||
-            ((x.LeftAtUtc.Value.Year * 12 + x.LeftAtUtc.Value.Month) >=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));
-      }
-      else
-      {
-        dbDepartmentUser = dbDepartmentUser.Where(x => x.IsActive);
-      }
+      dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
 
       int totalCount = await dbDepartmentUser.CountAsync();
 
@@ -134,44 +180,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
 
-    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
-    {
-      if (usersIds is null)
-      {
-        return null;
-      }
-
-      return await _provider.DepartmentsUsers
-        .Include(du => du.Department)
-        .Where(u => u.IsActive && usersIds.Contains(u.UserId))
-        .ToListAsync();
-    }
-
-    public async Task<List<Guid>> RemoveAsync(List<Guid> usersIds)
-    {
-      List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
-        .Where(du => du.IsActive && usersIds.Contains(du.UserId)).ToListAsync();
-
-      if (dbDepartmentsUsers != null && dbDepartmentsUsers.Any())
-      {
-        foreach (DbDepartmentUser du in dbDepartmentsUsers)
-        {
-          du.IsActive = false;
-          du.ModifiedAtUtc = DateTime.UtcNow;
-          du.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-          du.LeftAtUtc = DateTime.UtcNow;
-        };
-
-        await _provider.SaveAsync();
-      }
-
-      return dbDepartmentsUsers.Select(du => du.DepartmentId).ToList();
-    }
-
     public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)
     {
       DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
-        .FirstOrDefaultAsync(du => du.UserId == userId && du.IsActive);
+        .FirstOrDefaultAsync(du => du.UserId == userId);
 
       if (dbDepartmentUser is null)
       {
@@ -179,38 +191,62 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       dbDepartmentUser.IsActive = false;
-      dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
-      dbDepartmentUser.ModifiedBy = removedBy;
-      dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
+      dbDepartmentUser.CreatedBy = removedBy;
 
       await _provider.SaveAsync();
 
       return dbDepartmentUser.DepartmentId;
     }
 
-    public async Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds)
+    public async Task RemoveAsync(Guid departmentId, List<Guid> usersIds = null)
     {
-      List<DbDepartmentUser> dbDepartmentUsers = await _provider.DepartmentsUsers
-        .Where(du => du.IsActive && du.DepartmentId == departmentId && usersIds.Contains(du.UserId))
-        .ToListAsync();
+      IQueryable<DbDepartmentUser> dbDepartmentUsers = _provider.DepartmentsUsers.AsQueryable();
 
-      if (!dbDepartmentUsers.Any())
+      dbDepartmentUsers = dbDepartmentUsers.Where(du => du.DepartmentId == departmentId && du.IsActive);
+
+      if (usersIds is not null && usersIds.Any())
       {
-        return false;
+        dbDepartmentUsers = dbDepartmentUsers.Where(du => usersIds.Contains(du.UserId));
       }
 
-      foreach (DbDepartmentUser dbDepartmentUser in dbDepartmentUsers)
+      List<DbDepartmentUser> targetUsers = await dbDepartmentUsers.ToListAsync();
+
+      if (targetUsers is not null || targetUsers.Any())
       {
-        dbDepartmentUser.IsActive = false;
-        dbDepartmentUser.ModifiedAtUtc = DateTime.UtcNow;
-        dbDepartmentUser.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
-        dbDepartmentUser.LeftAtUtc = DateTime.UtcNow;
+        foreach (DbDepartmentUser du in targetUsers)
+        {
+          du.IsActive = false;
+          du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId(); 
+        }
+
+        await _provider.SaveAsync();
       }
+    }
 
-      _provider.DepartmentsUsers.UpdateRange(dbDepartmentUsers);
-      await _provider.SaveAsync();
+    public async Task RemoveDirectorAsync(Guid departmentId)
+    {
+      DbDepartmentUser director = await
+        _provider.DepartmentsUsers.FirstOrDefaultAsync(du => du.DepartmentId == departmentId
+          && du.Assignment == (int)DepartmentUserAssignment.Director
+          && du.IsActive);
 
-      return true;
+      if (director is not null)
+      {
+        director.Assignment = (int)DepartmentUserAssignment.Employee;
+        director.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
+
+        await _provider.SaveAsync();
+      }
+    }
+
+    public async Task<bool> IsManagerAsync(Guid userId)
+    {
+      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
+        .FirstOrDefaultAsync(du => du.UserId == userId);
+
+      return dbDepartmentUser is not null
+        && dbDepartmentUser.IsActive
+        && dbDepartmentUser.Assignment == (int)DepartmentUserRole.Manager;
     }
   }
 }

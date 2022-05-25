@@ -8,20 +8,18 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public DepartmentInfo Map(DbDepartment dbDepartment, DepartmentUserInfo director)
     {
-      if (dbDepartment == null)
-      {
-        return null;
-      }
-
-      return new DepartmentInfo
-      {
-        Id = dbDepartment.Id,
-        Name = dbDepartment.Name,
-        Description = dbDepartment.Description,
-        Director = director,
-        IsActive = dbDepartment.IsActive,
-        CountUsers = dbDepartment.Users.Count
-      };
+      return dbDepartment is null
+        ? null
+        : new DepartmentInfo
+        {
+          Id = dbDepartment.Id,
+          Name = dbDepartment.Name,
+          ShortName = dbDepartment.ShortName,
+          Description = dbDepartment.Description,
+          Director = director,
+          IsActive = dbDepartment.IsActive,
+          CountUsers = dbDepartment.Users.Count
+        };
     }
   }
 }

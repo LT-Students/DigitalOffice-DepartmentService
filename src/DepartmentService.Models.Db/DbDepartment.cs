@@ -10,8 +10,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public const string TableName = "Departments";
 
     public Guid Id { get; set; }
-    public Guid CompanyId { get; set; }
     public string Name { get; set; }
+    public string ShortName { get; set; }
     public string Description { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
@@ -42,6 +42,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
       builder
         .Property(d => d.Name)
+        .IsRequired();
+
+      builder
+        .Property(d => d.ShortName)
         .IsRequired();
 
       builder
