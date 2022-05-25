@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.Kernel.Database;
+using LT.DigitalOffice.Kernel.EFSupport.Provider;
 using Microsoft.EntityFrameworkCore;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef
