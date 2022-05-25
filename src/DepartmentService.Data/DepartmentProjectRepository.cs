@@ -47,7 +47,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartmentProject.DepartmentId = departmentId.HasValue ? departmentId.Value : dbDepartmentProject.DepartmentId;
       dbDepartmentProject.IsActive = departmentId.HasValue ? true : false;
-
       dbDepartmentProject.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
 
       await _provider.SaveAsync();
