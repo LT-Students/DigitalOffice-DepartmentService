@@ -7,6 +7,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department
   {
     [Required]
     public string Name { get; set; }
+    public string ShortName { get; set; }
     public string Description { get; set; }
     [Required]
     public List<CreateUserRequest> Users { get; set; }

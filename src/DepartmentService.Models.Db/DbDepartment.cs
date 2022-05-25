@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public string ShortName { get; set; }
     public string Description { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }

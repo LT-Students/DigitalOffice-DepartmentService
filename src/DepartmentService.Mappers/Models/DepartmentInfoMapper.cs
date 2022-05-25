@@ -14,6 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         {
           Id = dbDepartment.Id,
           Name = dbDepartment.Name,
+          ShortName = dbDepartment.ShortName,
           Description = dbDepartment.Description,
           Director = director,
           IsActive = dbDepartment.IsActive,

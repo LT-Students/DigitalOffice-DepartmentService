@@ -21,6 +21,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         {
           Id = table.Column<Guid>(nullable: false),
           Name = table.Column<string>(nullable: false),
+          ShortName = table.Column<string>(nullable: false),
           Description = table.Column<string>(nullable: true),
           IsActive = table.Column<bool>(nullable: false),
           CreatedBy = table.Column<Guid>(nullable: false),
@@ -31,6 +32,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         constraints: table =>
         {
           table.PrimaryKey($"PK_{DbDepartment.TableName}", x => x.Id);
+          table.UniqueConstraint($"UX_{nameof(DbDepartment.Name)}_unique", x => x.Name);
+          table.UniqueConstraint($"UX_{nameof(DbDepartment.ShortName)}_unique", x => x.Name);
         });
     }
 

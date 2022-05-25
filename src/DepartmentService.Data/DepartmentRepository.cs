@@ -170,6 +170,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await _provider.Departments.AnyAsync(d => d.Name == name);
     }
 
+    public async Task<bool> ShortNameExistAsync(string shortName)
+    {
+      return await _provider.Departments.AnyAsync(d => d.ShortName == shortName);
+    }
+
     public async Task<bool> ExistAsync(Guid departmentId)
     {
       return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);

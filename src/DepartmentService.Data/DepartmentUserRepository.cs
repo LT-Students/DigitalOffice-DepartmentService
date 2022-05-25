@@ -155,23 +155,31 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
     {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = _provider.DepartmentsUsers.AsQueryable();
+      IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
+        ? _provider.DepartmentsUsers
+            .TemporalBetween(
+              request.ByEntryDate.Value,
+              new DateTime(request.ByEntryDate.Value.Year, request.ByEntryDate.Value.Month + 1, 1))
+            .AsQueryable()
+        : _provider.DepartmentsUsers.AsQueryable();
 
-      dbDepartmentUser = dbDepartmentUser.Where(x => x.DepartmentId == request.DepartmentId);
+      dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
 
-      if (request.ByEntryDate.HasValue)
+      /*if (request.ByEntryDate.HasValue)
       {
+        //где ((юзерСтарт) <= (первого числа месяца)) и (активен или ((покинул >= первого числа месяца)))
+
         /*dbDepartmentUser = dbDepartmentUser.Where(x =>
           ((x.PeriodStart.Year * 12 + x.PeriodStart.Month) <=
             (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month)) &&
           (x.IsActive ||
             ((x.LeftAtUtc.Value.Year * 12 + x.LeftAtUtc.Value.Month) >=
-            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));*/
+            (request.ByEntryDate.Value.Year * 12 + request.ByEntryDate.Value.Month))));
       }
       else
       {
         dbDepartmentUser = dbDepartmentUser.Where(x => x.IsActive);
-      }
+      }*/
 
       int totalCount = await dbDepartmentUser.CountAsync();
 

@@ -25,6 +25,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         {
           Id = Guid.NewGuid(),
           Name = request.Name,
+          ShortName = request.ShortName,
           Description = request.Description,
           IsActive = true,
           CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),

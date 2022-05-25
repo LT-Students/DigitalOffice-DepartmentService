@@ -14,8 +14,14 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
     {
       RuleFor(request => request.Name)
         .Must(n => n.Trim().Length > 2).WithMessage("Department name is too short.")
-        .MaximumLength(100).WithMessage("Department name is too long.")
+        .MaximumLength(300).WithMessage("Department name is too long.")
         .MustAsync(async (request, _) => !await repository.NameExistAsync(request))
+        .WithMessage("The department name is already exists.");
+
+      RuleFor(request => request.ShortName)
+        .Must(n => n.Trim().Length > 2).WithMessage("Department short name is too short.")
+        .MaximumLength(40).WithMessage("Department short name is too long.")
+        .MustAsync(async (request, _) => !await repository.ShortNameExistAsync(request))
         .WithMessage("The department name is already exists.");
 
       When(request => request.Description is not null, () =>

@@ -28,6 +28,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<bool> NameExistAsync(string name);
 
+    Task<bool> ShortNameExistAsync(string shortName);
+
     Task<bool> ExistAsync(Guid departmentId);
   }
 }
