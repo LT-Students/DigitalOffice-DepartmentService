@@ -9,6 +9,8 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Kernel.EFSupport.Extensions;
+using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
@@ -100,28 +102,16 @@ namespace LT.DigitalOffice.DepartmentService
         })
         .AddNewtonsoftJson();
 
-      string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-      if (string.IsNullOrEmpty(connStr))
-      {
-        connStr = Configuration.GetConnectionString("SQLConnectionString");
-
-        Log.Information($"SQL connection string from appsettings.json was used. " +
-          $"Value '{PasswordHider.Hide(connStr)}'.");
-      }
-      else
-      {
-        Log.Information($"SQL connection string from environment was used. " +
-          $"Value '{PasswordHider.Hide(connStr)}'.");
-      }
+      string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<DepartmentServiceDbContext>(options =>
       {
-        options.UseSqlServer(connStr);
+        options.UseSqlServer(dbConnStr);
       });
 
       services.AddHealthChecks()
         .AddRabbitMqCheck()
-        .AddSqlServer(connStr);
+        .AddSqlServer(dbConnStr);
 
       redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
@@ -147,7 +137,7 @@ namespace LT.DigitalOffice.DepartmentService
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
-      UpdateDatabase(app);
+      app.UpdateDatabase<DepartmentServiceDbContext>();
 
       string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
       if (error is not null)
@@ -273,17 +263,6 @@ namespace LT.DigitalOffice.DepartmentService
       {
         ep.ConfigureConsumer<FilterDepartmentsUsersConsumer>(context);
       });
-    }
-
-    private void UpdateDatabase(IApplicationBuilder app)
-    {
-      using IServiceScope serviceScope = app.ApplicationServices
-        .GetRequiredService<IServiceScopeFactory>()
-        .CreateScope();
-
-      using DepartmentServiceDbContext context = serviceScope.ServiceProvider.GetService<DepartmentServiceDbContext>();
-
-      context.Database.Migrate();
     }
 
     #endregion
