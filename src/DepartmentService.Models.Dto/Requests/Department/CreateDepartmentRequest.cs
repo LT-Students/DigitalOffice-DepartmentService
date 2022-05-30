@@ -7,7 +7,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department
   {
     [Required]
     public string Name { get; set; }
-    [Required]
     public string ShortName { get; set; }
     public string Description { get; set; }
     [Required]
