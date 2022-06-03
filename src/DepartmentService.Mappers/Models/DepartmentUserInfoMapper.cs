@@ -2,6 +2,7 @@
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
+using LT.DigitalOffice.Models.Broker.Enums;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {

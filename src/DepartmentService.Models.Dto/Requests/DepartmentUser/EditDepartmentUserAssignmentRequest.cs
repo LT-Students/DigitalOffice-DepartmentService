@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.Models.Broker.Enums;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
 {

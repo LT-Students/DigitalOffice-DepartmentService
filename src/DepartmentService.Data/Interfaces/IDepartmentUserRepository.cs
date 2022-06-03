@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
