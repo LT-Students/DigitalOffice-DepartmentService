@@ -9,12 +9,9 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public DepartmentUserData Map(DbDepartmentUser dbDepartment)
     {
-      if (dbDepartment is null)
-      {
-        return null;
-      }
-
-      return new DepartmentUserData(dbDepartment.UserId, (DepartmentUserRole)dbDepartment.Role);
+      return dbDepartment is null
+        ? null
+        : new DepartmentUserData(dbDepartment.UserId, (DepartmentUserRole)dbDepartment.Role);
     }
   }
 }
