@@ -9,7 +9,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public DepartmentUserData Map(DbDepartmentUser dbDepartment)
     {
-      if (dbDepartment == null)
+      if (dbDepartment is null)
       {
         return null;
       }
