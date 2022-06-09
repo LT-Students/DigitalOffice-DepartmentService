@@ -9,6 +9,7 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Kernel.CustomModelBinderProviders;
 using LT.DigitalOffice.Kernel.EFSupport.Extensions;
 using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -133,6 +134,11 @@ namespace LT.DigitalOffice.DepartmentService
       services.AddBusinessObjects();
 
       ConfigureMassTransit(services);
+
+      services.AddControllers(options =>
+      {
+        options.ModelBinderProviders.Insert(0, new CustomModelBinderProvider());
+      });
     }
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

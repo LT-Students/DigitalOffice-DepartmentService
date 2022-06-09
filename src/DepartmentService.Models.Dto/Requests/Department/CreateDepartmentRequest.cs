@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using LT.DigitalOffice.Kernel.Attributes;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department
 {
+  [Trim]
   public record CreateDepartmentRequest
   {
     [Required]
