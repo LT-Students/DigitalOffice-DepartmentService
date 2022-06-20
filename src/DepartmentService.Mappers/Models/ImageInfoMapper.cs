@@ -1,6 +1,6 @@
 ﻿using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.Models.Broker.Models;
+using LT.DigitalOffice.Models.Broker.Models.Image;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
@@ -14,7 +14,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         {
           Id = imageData.ImageId,
           ParentId = imageData.ParentId,
-          Type = imageData.Type,
           Content = imageData.Content,
           Extension = imageData.Extension,
           Name = imageData.Name
