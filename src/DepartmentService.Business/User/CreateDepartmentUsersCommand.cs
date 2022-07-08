@@ -76,21 +76,12 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       List<Guid> updatedUsersIds = await _repository.EditAsync(dbDepartmentUsers);
 
+      await _repository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
 
-      OperationResultResponse<bool> response = new(
-        await _repository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList()));
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+      //changedDepartments.Select(async i => await _globalCache.RemoveAsync(i)); remove by usersIds
 
-      if (!response.Body)
-      {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
-      }
-      else
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-        //changedDepartments.Select(async i => await _globalCache.RemoveAsync(i)); remove by usersIds
-      }
-
-      return response;
+      return new OperationResultResponse<bool>(body: true);
     }
   }
 }
