@@ -74,11 +74,14 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         {
           string key = allGuids.GetRedisCacheHashCode();
 
+          List<Guid> elementsIds = departmentsData.Select(department => department.Id).ToList();
+          elementsIds.AddRange(departmentsData.Select(department => department.Users).SelectMany(x => x).Select(user => user.UserId));
+
           await _globalCache.CreateAsync(
             Cache.Departments,
             key,
             departmentsData,
-            departmentsData.Select(d => d.Id).ToList(),
+            elementsIds,
             TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
         }
       }
