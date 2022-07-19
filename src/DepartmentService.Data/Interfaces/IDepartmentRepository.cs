@@ -20,6 +20,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
       List<Guid> usersIds = null,
       List<Guid> projectsIds = null);
 
+    Task<List<Tuple<Guid, string, Guid?>>> GetBranchesAsync();
+
     Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
 
     Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request);

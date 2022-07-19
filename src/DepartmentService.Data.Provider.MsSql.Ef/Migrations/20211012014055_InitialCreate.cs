@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(DepartmentServiceDbContext))]
-  [Migration("20211012014055_InitialCreate")]
+  [Migration("20220630014055_InitialCreate")]
 
   public class InitialCreate : Migration
   {
@@ -22,6 +22,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
           Id = table.Column<Guid>(nullable: false),
           Name = table.Column<string>(nullable: false, maxLength: 300),
           ShortName = table.Column<string>(nullable: false, maxLength: 40),
+          ParentId = table.Column<Guid>(nullable: true),
           Description = table.Column<string>(nullable: true),
           IsActive = table.Column<bool>(nullable: false),
           CreatedBy = table.Column<Guid>(nullable: false),

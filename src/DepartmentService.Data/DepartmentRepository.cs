@@ -93,6 +93,12 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await dbDepartments.ToListAsync();
     }
 
+    public async Task<List<Tuple<Guid, string, Guid?>>> GetBranchesAsync()
+    {
+      List<Tuple<Guid, string, Guid?>> departments = await _provider.Departments.Select(x => new Tuple<Guid,string,Guid?>(x.Id, x.Name, x.ParentId)).ToListAsync();
+      
+      return departments;
+    }
 
     public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter)
     {

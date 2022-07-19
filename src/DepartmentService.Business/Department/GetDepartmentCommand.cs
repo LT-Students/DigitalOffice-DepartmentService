@@ -12,7 +12,6 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Responses;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
@@ -103,10 +102,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       }
 
       IEnumerable<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map);
-
-      response.Status = response.Errors.Any() ?
-        OperationResultStatusType.PartialSuccess :
-        OperationResultStatusType.FullSuccess;
 
       response.Body = _departmentResponseMapper.Map(dbDepartment, departmentUsersInfo, projectInfo);
 

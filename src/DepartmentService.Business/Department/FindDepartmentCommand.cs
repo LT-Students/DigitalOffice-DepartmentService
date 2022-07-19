@@ -11,7 +11,6 @@ using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
@@ -102,10 +101,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
                 dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id))));
       }
       response.TotalCount = totalCount;
-
-      response.Status = response.Errors.Any() ?
-        OperationResultStatusType.PartialSuccess :
-        OperationResultStatusType.FullSuccess;
 
       return response;
     }
