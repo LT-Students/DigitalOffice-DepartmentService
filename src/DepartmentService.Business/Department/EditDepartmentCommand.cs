@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Patch.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Constants;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
@@ -14,6 +16,7 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -26,6 +29,18 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
+    private readonly IMemoryCache _cache;
+
+    private void GetArchivedIds(in List<Tuple<Guid, string, string, Guid?>> listDepartments, Guid? idParent, List<Guid> archivedIds)
+    {
+      List<Guid> childrenIds = listDepartments.Where(ld => ld.Item4 == idParent).Select(ld => ld.Item1).ToList();
+      archivedIds.AddRange(childrenIds);
+
+      foreach (var childId in childrenIds)
+      {
+        GetArchivedIds(listDepartments, childId, archivedIds);
+      }
+    }
 
     public EditDepartmentCommand(
       IEditDepartmentRequestValidator validator,
@@ -34,7 +49,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IPatchDbDepartmentMapper mapper,
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
-      IGlobalCacheRepository globalCache)
+      IGlobalCacheRepository globalCache,
+      IMemoryCache cache)
     {
       _validator = validator;
       _repository = repository;
@@ -43,6 +59,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
+      _cache = cache;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> request)
@@ -67,12 +84,20 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       object isActiveOperation = request.Operations.FirstOrDefault(o =>
         o.path.EndsWith(nameof(EditDepartmentRequest.IsActive), StringComparison.OrdinalIgnoreCase))?.value;
 
-      if (isActiveOperation != null && bool.Parse(isActiveOperation.ToString()))
+      if (isActiveOperation != null && bool.TryParse(isActiveOperation.ToString(), out bool isActive) && !isActive)
       {
+        List<Guid> archivedDepartmentsIds = new();
+
         await _userRepository.RemoveAsync(departmentId);
+
+        GetArchivedIds(await _repository.GetDepartmentsTreeAsync(new()), departmentId, archivedDepartmentsIds);
+
+        await _repository.RemoveAsync(archivedDepartmentsIds);
       }
 
       await _globalCache.RemoveAsync(departmentId);
+
+      _cache.Remove(CacheKeys.DepartmentsTree);
 
       return response;
     }

@@ -63,7 +63,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       OperationResultResponse<DepartmentResponse> response = new();
       DbDepartment dbDepartment = await _departmentRepository.GetAsync(filter);
 
-      if (dbDepartment == null)
+      if (dbDepartment is null)
       {
         return _responseCreator.CreateFailureResponse<DepartmentResponse>(HttpStatusCode.NotFound);
       }

@@ -11,6 +11,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
     public Guid Id { get; set; }
     public Guid? ParentId { get; set; }
+    public Guid? CategoryId { get; set; }
     public string Name { get; set; }
     public string ShortName { get; set; }
     public string Description { get; set; }
@@ -19,6 +20,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public DateTime CreatedAtUtc { get; set; }
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }
+
+    public DbCategory Category { get; set; }
 
     public ICollection<DbDepartmentUser> Users { get; set; }
     public ICollection<DbDepartmentProject> Projects { get; set; }
@@ -56,6 +59,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
       builder
         .HasMany(d => d.Projects)
         .WithOne(u => u.Department);
+
+      builder
+        .HasOne(d => d.Category)
+        .WithMany(u => u.Departments);
     }
   }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(DepartmentServiceDbContext))]
-  [Migration("20220630014055_InitialCreate")]
+  [Migration("20220729014055_InitialCreate")]
 
   public class InitialCreate : Migration
   {
@@ -22,9 +22,10 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
           Id = table.Column<Guid>(nullable: false),
           Name = table.Column<string>(nullable: false, maxLength: 300),
           ShortName = table.Column<string>(nullable: false, maxLength: 40),
-          ParentId = table.Column<Guid>(nullable: true),
           Description = table.Column<string>(nullable: true),
           IsActive = table.Column<bool>(nullable: false),
+          CategoryId = table.Column<Guid>(nullable: true),
+          ParentId = table.Column<Guid>(nullable: true),
           CreatedBy = table.Column<Guid>(nullable: false),
           CreatedAtUtc = table.Column<DateTime>(nullable: false),
           ModifiedBy = table.Column<Guid>(nullable: true),
@@ -35,6 +36,23 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
           table.PrimaryKey($"PK_{DbDepartment.TableName}", x => x.Id);
           table.UniqueConstraint($"UX_{DbDepartment.TableName}_Name_unique", x => x.Name);
           table.UniqueConstraint($"UX_{DbDepartment.TableName}_ShortName_unique", x => x.ShortName);
+        });
+    }
+
+    private void CreateTableCategories(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.CreateTable(
+        name: DbCategory.TableName,
+        columns: table => new
+        {
+          Id = table.Column<Guid>(nullable: false),
+          Name = table.Column<string>(nullable: false),
+          CreatedBy = table.Column<Guid>(nullable: false),
+          CreatedAtUtc = table.Column<DateTime>(nullable: false)
+        },
+        constraints: table =>
+        {
+          table.PrimaryKey($"PK_{DbCategory.TableName}", x => x.Id);
         });
     }
 
@@ -106,6 +124,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
     {
       CreateTableDeparments(migrationBuilder);
 
+      CreateTableCategories(migrationBuilder);
+
       CreateTableDeparmentsUsers(migrationBuilder);
 
       CreateTableDeparmentsProjects(migrationBuilder);
@@ -114,6 +134,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
     protected override void Down(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.DropTable(DbDepartmentUser.TableName);
+
+      migrationBuilder.DropTable(DbCategory.TableName);
 
       migrationBuilder.DropTable(DbDepartmentProject.TableName);
 

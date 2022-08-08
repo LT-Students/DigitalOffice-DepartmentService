@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
@@ -30,14 +29,6 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
       [FromQuery] GetDepartmentFilter filter)
     {
       return await command.ExecuteAsync(filter);
-    }
-
-    [HttpGet("getbranch")]
-    public async Task<OperationResultResponse<List<BranchInfo>>> GetBranchesAsync(
-      [FromServices] IGetBranchCommand command
-      )
-    {
-      return await command.ExecuteAsync();
     }
 
     [HttpGet("find")]
