@@ -6,6 +6,7 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Category.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Category;
 using LT.DigitalOffice.DepartmentService.Validation.Category.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
@@ -56,7 +57,11 @@ namespace LT.DigitalOffice.DepartmentService.Business.Category
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
-      OperationResultResponse<Guid?> response = new(body: await _categoryRepository.CreateAsync(_mapper.Map(request)));
+      DbCategory dbCategory = _mapper.Map(request);
+
+      await _categoryRepository.CreateAsync(dbCategory);
+
+      OperationResultResponse<Guid?> response = new(body: dbCategory.Id);
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
       return response.Body == default

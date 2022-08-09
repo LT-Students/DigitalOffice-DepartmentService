@@ -7,5 +7,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Category.Filter
   {
     [FromQuery(Name = "nameincludesubstring")]
     public string NameIncludeSubstring { get; set; }
+
+    [FromQuery(Name = "isAscendingSort")]
+    public bool? IsAscendingSort { get; set; }
   }
 }

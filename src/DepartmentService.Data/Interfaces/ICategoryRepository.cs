@@ -10,12 +10,10 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   [AutoInject]
   public interface ICategoryRepository
   {
-    Task<Guid?> CreateAsync(DbCategory category);
+    Task CreateAsync(DbCategory category);
 
-    Task<bool> RemoveAsync(Guid categoryId);
+    Task<(List<DbCategory> dbCategories, int totalCount)> FindAsync(FindCategoriesFilter filter);
 
-    Task<(List<DbCategory> dbCategories, int totalCount)> FindCategoriesAsync(FindCategoriesFilter filter);
-
-    Task<bool> DoesCategoryAlreadyExistAsync(string categoryName);
+    Task<bool> DoesAlreadyExistAsync(string categoryName);
   }
 }

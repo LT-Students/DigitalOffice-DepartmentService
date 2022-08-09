@@ -43,11 +43,11 @@ namespace LT.DigitalOffice.DepartmentService.Business.Category
 
       FindResultResponse<CategoryInfo> response = new();
 
-      (List<DbCategory> dbCategories, int totalCount) = await _categoryRepository.FindCategoriesAsync(filter);
+      (List<DbCategory> dbCategories, int totalCount) = await _categoryRepository.FindAsync(filter);
 
       response.TotalCount = totalCount;
 
-      response.Body = dbCategories.Select(c => _mapper.Map(c)).ToList();
+      response.Body = dbCategories.Select(_mapper.Map).ToList();
 
       return response;
     }

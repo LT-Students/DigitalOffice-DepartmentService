@@ -15,8 +15,7 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     [HttpGet("get")]
     public async Task<OperationResultResponse<List<DepartmentsTreeInfo>>> GetDepartmentsTreeAsync(
       [FromServices] IGetDepartmentsTreeCommand command,
-      [FromQuery] FindDepartmentFilter filter
-      )
+      [FromQuery] FindDepartmentFilter filter)
     {
       return await command.ExecuteAsync(filter);
     }

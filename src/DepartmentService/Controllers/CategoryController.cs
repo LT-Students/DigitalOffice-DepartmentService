@@ -28,13 +28,5 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     {
       return await command.ExecuteAsync(request);
     }
-
-    [HttpPost("remove")]
-    public async Task<OperationResultResponse<bool>> RemoveAsync(
-      [FromServices] IRemoveCategoryCommand command,
-      [FromBody] RemoveCategoryRequest request)
-    {
-      return await command.ExecuteAsync(request);
-    }
   }
 }

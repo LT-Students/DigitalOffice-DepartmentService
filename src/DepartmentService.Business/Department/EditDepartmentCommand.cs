@@ -36,7 +36,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       List<Guid> childrenIds = listDepartments.Where(ld => ld.Item4 == idParent).Select(ld => ld.Item1).ToList();
       archivedIds.AddRange(childrenIds);
 
-      foreach (var childId in childrenIds)
+      foreach (Guid childId in childrenIds)
       {
         GetArchivedIds(listDepartments, childId, archivedIds);
       }

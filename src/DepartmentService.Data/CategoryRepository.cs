@@ -20,44 +20,43 @@ namespace LT.DigitalOffice.DepartmentService.Data
       _provider = provider;
     }
 
-    public async Task<Guid?> CreateAsync(DbCategory category)
+    public Task CreateAsync(DbCategory category)
     {
       _provider.Categories.Add(category);
-      await _provider.SaveAsync();
-
-      return category.Id;
-    }
-
-    public async Task<bool> RemoveAsync(Guid categoryId)
-    {
-      DbCategory category = await _provider.Categories.Where(t => t.Id == categoryId).FirstOrDefaultAsync();
       
-      _provider.Categories.Remove(category);
-      await _provider.SaveAsync();
-
-      return true;
+      return _provider.SaveAsync();
     }
 
-    public async Task<(List<DbCategory> dbCategories, int totalCount)> FindCategoriesAsync(FindCategoriesFilter filter)
+    public async Task<(List<DbCategory> dbCategories, int totalCount)> FindAsync(FindCategoriesFilter filter)
     {
       if (filter is null)
       {
         return (null, default);
       }
 
-      IQueryable<DbCategory> query = _provider.Categories.AsQueryable();
+      IQueryable<DbCategory> dbCategories = _provider.Categories.AsQueryable();
 
       if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
       {
-        query = query.Where(g => g.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+        dbCategories = dbCategories.Where(g => g.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        dbCategories = filter.IsAscendingSort.Value
+          ? dbCategories.OrderBy(d => d.Name)
+          : dbCategories.OrderByDescending(d => d.Name);
       }
 
       return (
-        await query.Skip(filter.SkipCount).Take(filter.TakeCount).ToListAsync(),
-        await query.CountAsync());
+        await dbCategories
+          .Skip(filter.SkipCount)
+          .Take(filter.TakeCount)
+          .ToListAsync(),
+        await dbCategories.CountAsync());
     }
 
-    public Task<bool> DoesCategoryAlreadyExistAsync(string categoryName)
+    public Task<bool> DoesAlreadyExistAsync(string categoryName)
     {
       return _provider.Categories.AnyAsync(s => s.Name.ToLower() == categoryName.ToLower());
     }
