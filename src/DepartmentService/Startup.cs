@@ -5,6 +5,7 @@ using HealthChecks.UI.Client;
 using LT.DigitalOffice.DepartmentService.Broker.Consumers;
 using LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
@@ -94,6 +95,7 @@ namespace LT.DigitalOffice.DepartmentService
       services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
       services.AddHttpContextAccessor();
+      services.AddMemoryCache();
 
       services
         .AddControllers()
@@ -126,6 +128,18 @@ namespace LT.DigitalOffice.DepartmentService
       {
         Log.Information($"Redis connection string from environment was used. " +
           $"Value '{PasswordHider.Hide(redisConnStr)}'");
+      }
+
+      if (int.TryParse(Environment.GetEnvironmentVariable("MemoryCacheLiveInMinutes"), out int memoryCacheLifetime))
+      {
+        services.Configure<MemoryCacheConfig>(options =>
+        {
+          options.CacheLiveInMinutes = memoryCacheLifetime;
+        });
+      }
+      else
+      {
+        services.Configure<MemoryCacheConfig>(Configuration.GetSection(MemoryCacheConfig.SectionName));
       }
 
       services.AddSingleton<IConnectionMultiplexer>(

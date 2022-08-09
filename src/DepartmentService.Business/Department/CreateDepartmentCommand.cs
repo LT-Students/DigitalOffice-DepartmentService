@@ -8,6 +8,7 @@ using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Constants;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
@@ -15,6 +16,7 @@ using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -28,6 +30,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
+    private readonly IMemoryCache _cache;
 
     public CreateDepartmentCommand(
       ICreateDepartmentRequestValidator validator,
@@ -37,7 +40,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentUserRepository userRepository,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IMemoryCache cache)
     {
       _validator = validator;
       _departmentMapper = departmentMapper;
@@ -47,6 +51,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
+      _cache = cache;
     }
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateDepartmentRequest request)
@@ -81,6 +86,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       List<Guid> updatedUsersIds = await _userRepository.EditAsync(dbDepartmentUsers);
       await _userRepository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
+
+      _cache.Remove(CacheKeys.DepartmentsTree);
 
       return response;
     }
