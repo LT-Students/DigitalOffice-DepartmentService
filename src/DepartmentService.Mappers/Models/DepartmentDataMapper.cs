@@ -22,7 +22,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
           dbDepartment.Id,
           dbDepartment.Name,
           dbDepartment.ShortName,
-          projectsIds: dbDepartment.Projects?.Select(dp => dp.ProjectId).ToList(),
           users: dbDepartment.Users?.Select(_departmentUserDataMapper.Map).ToList());
     }
   }
