@@ -45,7 +45,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
           x => x.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
-          Status = OperationResultStatusType.Failed,
           Errors = new() { "Request is not correct." }
         });
 
@@ -54,7 +53,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
           x => x.CreateFailureResponse<Guid?>(HttpStatusCode.Forbidden, It.IsAny<List<string>>()))
         .Returns(new OperationResultResponse<Guid?>()
         {
-          Status = OperationResultStatusType.Failed,
           Errors = new() { "Not enough rights." }
         });
 
@@ -112,7 +110,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       OperationResultResponse<Guid?> expectedResponse = new()
       {
-        Status = OperationResultStatusType.Failed,
         Errors = new List<string> { "Not enough rights." }
       };
 
@@ -144,7 +141,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       OperationResultResponse<Guid?> expectedResponse = new()
       {
-        Status = OperationResultStatusType.Failed,
         Errors = new List<string> { "Request is not correct." }
       };
 
@@ -176,7 +172,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
 
       OperationResultResponse<Guid?> expectedResponse = new()
       {
-        Status = OperationResultStatusType.Failed,
         Errors = new List<string> { "Request is not correct." }
       };
 
@@ -204,7 +199,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.UnitTests.Commands.Departm
     {
       OperationResultResponse<Guid?> expectedResponse = new()
       {
-        Status = OperationResultStatusType.FullSuccess,
         Body = _dbDepartment.Id
       };
 

@@ -33,6 +33,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
       }
 
+      if (filter.IncludeCategory)
+      {
+        dbDepartments = dbDepartments.Include(d => d.Category);
+      }
+
       return dbDepartments;
     }
 
@@ -93,7 +98,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await dbDepartments.ToListAsync();
     }
 
-
     public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter)
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
@@ -117,6 +121,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       return (
         await dbDepartments
+          .Include(d => d.Category)
           .Include(d => d.Users.Where(u => u.IsActive))
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
@@ -178,6 +183,39 @@ namespace LT.DigitalOffice.DepartmentService.Data
     public async Task<bool> ExistAsync(Guid departmentId)
     {
       return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
+    }
+
+    public async Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync(FindDepartmentFilter filter)
+    {
+      IQueryable<DbDepartment> departments = _provider.Departments.AsQueryable();
+
+      if (filter.IsActive.HasValue)
+      {
+        departments = departments.Where(d => d.IsActive == filter.IsActive);
+      }
+
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        departments = departments.Where(d => d.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        departments = filter.IsAscendingSort.Value
+          ? departments.OrderBy(d => d.Name)
+          : departments.OrderByDescending(d => d.Name);
+      }
+
+      return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
+    }
+
+    public async Task RemoveAsync(List<Guid> departmentsIds)
+    {
+      List<DbDepartment> dbDepartments = await _provider.Departments.Where(d => departmentsIds.Contains(d.Id)).ToListAsync();
+
+      dbDepartments.ForEach(x => x.IsActive = false);
+
+      await _provider.SaveAsync();
     }
   }
 }

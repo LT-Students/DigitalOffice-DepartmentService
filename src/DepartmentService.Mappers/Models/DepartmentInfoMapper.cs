@@ -6,6 +6,14 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
 {
   public class DepartmentInfoMapper : IDepartmentInfoMapper
   {
+    private readonly ICategoryInfoMapper _categoryInfoMapper;
+
+    public DepartmentInfoMapper(
+      ICategoryInfoMapper categoryInfoMapper)
+    {
+      _categoryInfoMapper = categoryInfoMapper;
+    }
+
     public DepartmentInfo Map(DbDepartment dbDepartment, DepartmentUserInfo director)
     {
       return dbDepartment is null
@@ -18,6 +26,8 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
           Description = dbDepartment.Description,
           Director = director,
           IsActive = dbDepartment.IsActive,
+          ParentId = dbDepartment.ParentId,
+          Category = _categoryInfoMapper.Map(dbDepartment.Category),
           CountUsers = dbDepartment.Users.Count
         };
     }

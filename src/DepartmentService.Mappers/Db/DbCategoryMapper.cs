@@ -1,37 +1,31 @@
 ﻿using System;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Category;
 using LT.DigitalOffice.Kernel.Extensions;
 using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Db
 {
-  public class DbDepartmentMapper : IDbDepartmentMapper
+  public class DbCategoryMapper : IDbCategoryMapper
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DbDepartmentMapper(
-      IHttpContextAccessor httpContextAccessor)
+    public DbCategoryMapper(IHttpContextAccessor httpContextAccessor)
     {
       _httpContextAccessor = httpContextAccessor;
     }
 
-    public DbDepartment Map(CreateDepartmentRequest request)
+    public DbCategory Map(CreateCategoryRequest request)
     {
       return request is null
         ? null
-        : new DbDepartment
+        : new DbCategory
         {
           Id = Guid.NewGuid(),
           Name = request.Name,
-          ShortName = request.ShortName,
-          Description = request.Description,
-          IsActive = true,
-          ParentId = request.ParentId,
-          CategoryId = request.CategoryId,
           CreatedBy = _httpContextAccessor.HttpContext.GetUserId(),
-          CreatedAtUtc = DateTime.UtcNow
+          CreatedAtUtc = DateTime.UtcNow,
         };
     }
   }
