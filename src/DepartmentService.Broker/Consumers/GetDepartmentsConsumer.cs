@@ -29,8 +29,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
     {
       List<DbDepartment> dbDepartments = await _departmentRepository.GetAsync(
         departmentsIds: request.DepartmentsIds,
-        usersIds: request.UsersIds,
-        projectsIds: request.ProjectsIds);
+        usersIds: request.UsersIds);
 
       return dbDepartments.Select(_departmentDataMapper.Map).ToList();
     }
@@ -59,11 +58,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
       if (departmentsData is not null && departmentsData.Any())
       {
         List<Guid> allGuids = new();
-
-        if (context.Message.ProjectsIds is not null && context.Message.ProjectsIds.Any())
-        {
-          allGuids.AddRange(context.Message.ProjectsIds);
-        }
 
         if (context.Message.UsersIds is not null && context.Message.UsersIds.Any())
         {
