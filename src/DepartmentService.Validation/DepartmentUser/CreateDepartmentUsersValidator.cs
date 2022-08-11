@@ -16,7 +16,11 @@ namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser
         .MustAsync(async (i, _) => await repository.ExistAsync(i))
         .WithMessage("The department id does not exist.");
 
+
+
       RuleFor(request => request.Users)
+        .NotEmpty()
+        .WithMessage("List of users must contain at least one user.")
         .SetValidator(usersValidator);
     }
   }
