@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
+using LT.DigitalOffice.Models.Broker.Models.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Responses.Department;
 using MassTransit;
@@ -13,9 +17,15 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
     private async Task<object> FindUsersAsync(IGetDepartmentsUsersRequest request)
     {
-      //(List<Guid> userIds, int totalCount) = await _repository.GetAsync(request);
+      List<DbDepartmentUser> departmentsUsers = await _repository.GetAsync(request);
 
-      return null;//IGetDepartmentsUsersResponse.CreateObj(userIds, totalCount);
+      return IGetDepartmentsUsersResponse.CreateObj(
+        departmentsUsers.Select(du =>
+          new DepartmentUserExtendedData(
+            userId: du.UserId,
+            departmentId: du.DepartmentId,
+            isActive: du.IsActive))
+        .ToList());
     }
 
     public GetDepartmentUsersConsumer(

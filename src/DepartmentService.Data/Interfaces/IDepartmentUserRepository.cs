@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment);
 
-    Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentsUsersRequest request);
+    Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request);
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false);
 
