@@ -11,7 +11,7 @@ using MassTransit;
 
 namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 {
-  public class GetDepartmentUsersConsumer : IConsumer<IGetDepartmentsUsersRequest>
+  public class GetDepartmentsUsersConsumer : IConsumer<IGetDepartmentsUsersRequest>
   {
     private readonly IDepartmentUserRepository _repository;
 
@@ -28,7 +28,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         .ToList());
     }
 
-    public GetDepartmentUsersConsumer(
+    public GetDepartmentsUsersConsumer(
       IDepartmentUserRepository repository)
     {
       _repository = repository;
