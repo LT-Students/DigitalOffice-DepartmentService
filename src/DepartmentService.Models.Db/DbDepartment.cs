@@ -24,13 +24,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public DbCategory Category { get; set; }
 
     public ICollection<DbDepartmentUser> Users { get; set; }
-    public ICollection<DbDepartmentProject> Projects { get; set; }
 
     public DbDepartment()
     {
       Users = new HashSet<DbDepartmentUser>();
-
-      Projects = new HashSet<DbDepartmentProject>();
     }
   }
 
@@ -54,10 +51,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
 
       builder
         .HasMany(d => d.Users)
-        .WithOne(u => u.Department);
-
-      builder
-        .HasMany(d => d.Projects)
         .WithOne(u => u.Department);
 
       builder

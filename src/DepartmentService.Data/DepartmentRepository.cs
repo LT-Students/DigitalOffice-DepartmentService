@@ -28,11 +28,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
         dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
       }
 
-      if (filter.IncludeProjects)
-      {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
-      }
-
       if (filter.IncludeCategory)
       {
         dbDepartments = dbDepartments.Include(d => d.Category);
@@ -72,20 +67,13 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<List<DbDepartment>> GetAsync(
       List<Guid> departmentsIds = null,
-      List<Guid> usersIds = null,
-      List<Guid> projectsIds = null)
+      List<Guid> usersIds = null)
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
       if (departmentsIds is not null && departmentsIds.Any())
       {
         dbDepartments = dbDepartments.Where(d => departmentsIds.Contains(d.Id));
-      }
-
-      if (projectsIds is not null && projectsIds.Any())
-      {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(dp => dp.IsActive));
-        dbDepartments = dbDepartments.Where(d => d.Projects.Any(dp => projectsIds.Contains(dp.ProjectId)));
       }
 
       if (usersIds is not null && usersIds.Any())

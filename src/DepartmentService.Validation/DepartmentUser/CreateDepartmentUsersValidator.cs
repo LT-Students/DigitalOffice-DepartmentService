@@ -17,6 +17,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.DepartmentUser
         .WithMessage("The department id does not exist.");
 
       RuleFor(request => request.Users)
+        .NotEmpty()
+        .WithMessage("List of users must contain at least one user.")
         .SetValidator(usersValidator);
     }
   }

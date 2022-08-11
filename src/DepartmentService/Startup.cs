@@ -231,10 +231,10 @@ namespace LT.DigitalOffice.DepartmentService
 
       services.AddMassTransit(x =>
       {
-        x.AddConsumer<CreateDepartmentEntityConsumer>();
+        x.AddConsumer<CreateDepartmentUserConsumer>();
         x.AddConsumer<GetDepartmentsConsumer>();
         x.AddConsumer<DisactivateDepartmentUserConsumer>();
-        x.AddConsumer<GetDepartmentUsersConsumer>();
+        x.AddConsumer<GetDepartmentsUsersConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
         x.AddConsumer<FilterDepartmentsUsersConsumer>();
 
@@ -259,9 +259,9 @@ namespace LT.DigitalOffice.DepartmentService
       IBusRegistrationContext context,
       IRabbitMqBusFactoryConfigurator cfg)
     {
-      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentEntityEndpoint, ep =>
+      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentUserEndpoint, ep =>
       {
-        ep.ConfigureConsumer<CreateDepartmentEntityConsumer>(context);
+        ep.ConfigureConsumer<CreateDepartmentUserConsumer>(context);
       });
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsEndpoint, ep =>
       {
@@ -271,9 +271,9 @@ namespace LT.DigitalOffice.DepartmentService
       {
         ep.ConfigureConsumer<DisactivateDepartmentUserConsumer>(context);
       });
-      cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentUsersEndpoint, ep =>
+      cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsUsersEndpoint, ep =>
       {
-        ep.ConfigureConsumer<GetDepartmentUsersConsumer>(context);
+        ep.ConfigureConsumer<GetDepartmentsUsersConsumer>(context);
       });
       cfg.ReceiveEndpoint(_rabbitMqConfig.SearchDepartmentEndpoint, ep =>
       {

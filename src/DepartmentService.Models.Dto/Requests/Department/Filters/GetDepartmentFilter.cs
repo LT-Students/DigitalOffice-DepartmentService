@@ -11,9 +11,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filt
     [FromQuery(Name = "includeusers")]
     public bool IncludeUsers { get; set; } = false;
 
-    [FromQuery(Name = "includeprojects")]
-    public bool IncludeProjects { get; set; } = false;
-
     [FromQuery(Name = "includecategory")]
     public bool IncludeCategory { get; set; } = true;
   }

@@ -10,9 +10,9 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 {
   public class RabbitMqConfig : BaseRabbitMqConfig
   {
-    public string CreateDepartmentEntityEndpoint { get; set; }
+    public string CreateDepartmentUserEndpoint { get; set; }
     public string GetDepartmentsEndpoint { get; set; }
-    public string GetDepartmentUsersEndpoint { get; set; }
+    public string GetDepartmentsUsersEndpoint { get; set; }
     public string DisactivateDepartmentUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
     public string FilterDepartmentsEndpoint { get; set; }

@@ -155,31 +155,20 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .ToListAsync();
     }
 
-    public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
+    public async Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request)
     {
       IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
         ? _provider.DepartmentsUsers
             .TemporalBetween(
               request.ByEntryDate.Value,
-              new DateTime(request.ByEntryDate.Value.Year, request.ByEntryDate.Value.Month + 1, 1))
+              request.ByEntryDate.Value.AddMonths(1))
+            .Where(u => u.IsActive).Distinct()
             .AsQueryable()
-        : _provider.DepartmentsUsers.AsQueryable();
+        : _provider.DepartmentsUsers.AsQueryable().Where(du => du.IsActive);
 
-      dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
+      dbDepartmentUser = dbDepartmentUser.Where(du => request.DepartmentsIds.Contains(du.DepartmentId));
 
-      int totalCount = await dbDepartmentUser.CountAsync();
-
-      if (request.SkipCount.HasValue)
-      {
-        dbDepartmentUser = dbDepartmentUser.Skip(request.SkipCount.Value);
-      }
-
-      if (request.TakeCount.HasValue)
-      {
-        dbDepartmentUser = dbDepartmentUser.Take(request.TakeCount.Value);
-      }
-
-      return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
+      return await dbDepartmentUser.ToListAsync();
     }
 
     public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)

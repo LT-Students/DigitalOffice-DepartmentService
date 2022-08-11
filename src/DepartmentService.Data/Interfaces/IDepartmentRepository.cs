@@ -17,8 +17,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<List<DbDepartment>> GetAsync(
       List<Guid> departmentsIds = null,
-      List<Guid> usersIds = null,
-      List<Guid> projectsIds = null);
+      List<Guid> usersIds = null);
 
     Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
 
