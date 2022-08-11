@@ -90,36 +90,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
     }
 
-    private void CreateTableDeparmentsProjects(MigrationBuilder migrationBuilder)
-    {
-      migrationBuilder.CreateTable(
-        name: DbDepartmentProject.TableName,
-        columns: table => new
-        {
-          Id = table.Column<Guid>(nullable: false),
-          ProjectId = table.Column<Guid>(nullable: false),
-          DepartmentId = table.Column<Guid>(nullable: false),
-          IsActive = table.Column<bool>(nullable: false),
-          CreatedBy = table.Column<Guid>(nullable: false),
-          PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart"),
-          PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-            .Annotation("SqlServer:IsTemporal", true)
-            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart")
-        },
-        constraints: table =>
-        {
-          table.PrimaryKey($"PK_{DbDepartmentProject.TableName}", x => x.Id);
-        })
-        .Annotation("SqlServer:IsTemporal", true)
-        .Annotation("SqlServer:TemporalHistoryTableName", $"{DbDepartmentProject.TableName}History")
-        .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-        .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
-    }
-
     #endregion
 
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -129,8 +99,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
       CreateTableCategories(migrationBuilder);
 
       CreateTableDeparmentsUsers(migrationBuilder);
-
-      CreateTableDeparmentsProjects(migrationBuilder);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
@@ -138,8 +106,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
       migrationBuilder.DropTable(DbDepartmentUser.TableName);
 
       migrationBuilder.DropTable(DbCategory.TableName);
-
-      migrationBuilder.DropTable(DbDepartmentProject.TableName);
 
       migrationBuilder.DropTable(DbDepartment.TableName);
     }

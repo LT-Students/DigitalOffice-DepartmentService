@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.Broker;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -9,15 +7,15 @@ using MassTransit;
 
 namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 {
-  public class GetDepartmentUsersConsumer : IConsumer<IGetDepartmentUsersRequest>
+  public class GetDepartmentUsersConsumer : IConsumer<IGetDepartmentsUsersRequest>
   {
     private readonly IDepartmentUserRepository _repository;
 
-    private async Task<object> FindUsersAsync(IGetDepartmentUsersRequest request)
+    private async Task<object> FindUsersAsync(IGetDepartmentsUsersRequest request)
     {
-      (List<Guid> userIds, int totalCount) = await _repository.GetAsync(request);
+      //(List<Guid> userIds, int totalCount) = await _repository.GetAsync(request);
 
-      return IGetDepartmentUsersResponse.CreateObj(userIds, totalCount);
+      return null;//IGetDepartmentsUsersResponse.CreateObj(userIds, totalCount);
     }
 
     public GetDepartmentUsersConsumer(
@@ -26,11 +24,11 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
       _repository = repository;
     }
 
-    public async Task Consume(ConsumeContext<IGetDepartmentUsersRequest> context)
+    public async Task Consume(ConsumeContext<IGetDepartmentsUsersRequest> context)
     {
       object result = OperationResultWrapper.CreateResponse(FindUsersAsync, context.Message);
 
-      await context.RespondAsync<IOperationResult<IGetDepartmentUsersResponse>>(result);
+      await context.RespondAsync<IOperationResult<IGetDepartmentsUsersResponse>>(result);
     }
   }
 }

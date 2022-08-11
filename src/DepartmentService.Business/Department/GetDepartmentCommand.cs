@@ -16,7 +16,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
-using LT.DigitalOffice.Models.Broker.Models.Project;
 using StackExchange.Redis;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
@@ -27,10 +26,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentResponseMapper _departmentResponseMapper;
     private readonly IUserInfoMapper _UserInfoMapper;
     private readonly IDepartmentUserInfoMapper _departmentUserInfoMapper;
-    private readonly IProjectInfoMapper _projectInfoMapper;
     private readonly IUserService _userService;
     private readonly IImageService _imageService;
-    private readonly IProjectService _projectService;
     private readonly IConnectionMultiplexer _cache;
     private readonly IResponseCreator _responseCreator;
 
@@ -39,20 +36,16 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentResponseMapper departmentResponseMapper,
       IUserInfoMapper UserInfoMapper,
       IDepartmentUserInfoMapper departmmentUserInfoMapper,
-      IProjectInfoMapper projectInfoMapper,
       IUserService userService,
       IImageService imageService,
-      IProjectService projectService,
       IConnectionMultiplexer cache,
       IResponseCreator responseCreator)
     {
       _cache = cache;
       _userService = userService;
       _imageService = imageService;
-      _projectService = projectService;
       _departmentRepository = departmentRepository;
       _departmentResponseMapper = departmentResponseMapper;
-      _projectInfoMapper = projectInfoMapper;
       _UserInfoMapper = UserInfoMapper;
       _departmentUserInfoMapper = departmmentUserInfoMapper;
       _responseCreator = responseCreator;
@@ -67,9 +60,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       {
         return _responseCreator.CreateFailureResponse<DepartmentResponse>(HttpStatusCode.NotFound);
       }
-
-      List<ProjectData> projectData = await _projectService
-        .GetProjectsAsync(dbDepartment.Projects.Select(dp => dp.ProjectId).ToList(), response.Errors);
 
       List<Guid> usersIds = new();
 
@@ -101,9 +91,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           ).ToList();
       }
 
-      IEnumerable<ProjectInfo> projectInfo = projectData?.Select(_projectInfoMapper.Map);
-
-      response.Body = _departmentResponseMapper.Map(dbDepartment, departmentUsersInfo, projectInfo);
+      response.Body = _departmentResponseMapper.Map(dbDepartment, departmentUsersInfo);
 
       return response;
     }

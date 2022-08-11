@@ -155,7 +155,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .ToListAsync();
     }
 
-    public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request)
+    public async Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentsUsersRequest request)
     {
       IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
         ? _provider.DepartmentsUsers
@@ -165,19 +165,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
             .AsQueryable()
         : _provider.DepartmentsUsers.AsQueryable();
 
-      dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
+      //dbDepartmentUser = dbDepartmentUser.Where(du => du.DepartmentId == request.DepartmentId && du.IsActive);
 
       int totalCount = await dbDepartmentUser.CountAsync();
-
-      if (request.SkipCount.HasValue)
-      {
-        dbDepartmentUser = dbDepartmentUser.Skip(request.SkipCount.Value);
-      }
-
-      if (request.TakeCount.HasValue)
-      {
-        dbDepartmentUser = dbDepartmentUser.Take(request.TakeCount.Value);
-      }
 
       return (await dbDepartmentUser.Select(x => x.UserId).ToListAsync(), totalCount);
     }
