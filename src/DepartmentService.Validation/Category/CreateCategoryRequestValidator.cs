@@ -10,7 +10,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Category
     public CreateCategoryRequestValidator(ICategoryRepository categoryRepository)
     {
       RuleFor(category => category.Name)
-        .MustAsync(async (name, _) => !await categoryRepository.DoesAlreadyExistAsync(name))
+        .MustAsync(async (name, _) => !await categoryRepository.ExistAsync(name))
         .WithMessage("Department category with this name already exists.");
     }
   }

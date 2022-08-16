@@ -56,9 +56,14 @@ namespace LT.DigitalOffice.DepartmentService.Data
         await dbCategories.CountAsync());
     }
 
-    public Task<bool> DoesAlreadyExistAsync(string categoryName)
+    public Task<bool> ExistAsync(string categoryName)
     {
       return _provider.Categories.AnyAsync(s => s.Name.ToLower() == categoryName.ToLower());
+    }
+
+    public Task<bool> IdExistAsync(Guid categoryId)
+    {
+      return _provider.Categories.AnyAsync(x => x.Id == categoryId);
     }
   }
 }

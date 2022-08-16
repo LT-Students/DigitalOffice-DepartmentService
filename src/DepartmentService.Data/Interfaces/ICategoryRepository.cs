@@ -14,6 +14,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<(List<DbCategory> dbCategories, int totalCount)> FindAsync(FindCategoriesFilter filter);
 
-    Task<bool> DoesAlreadyExistAsync(string categoryName);
+    Task<bool> ExistAsync(string categoryName);
+
+    Task<bool> IdExistAsync(Guid categoryId);
   }
 }
