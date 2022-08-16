@@ -57,7 +57,7 @@ namespace LT.DigitalOffice.DepartmentService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.0.2.0";
+      Version = "1.0.3.0";
       Description = "DepartmentService is an API that intended to work with Department.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";

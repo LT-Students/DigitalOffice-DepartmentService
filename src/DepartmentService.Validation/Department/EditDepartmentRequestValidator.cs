@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Validators;
@@ -12,7 +13,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
 {
   public class EditDepartmentRequestValidator : BaseEditRequestValidator<EditDepartmentRequest>, IEditDepartmentRequestValidator
   {
-    private readonly IDepartmentRepository _repository;
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly ICategoryRepository _categoryRepository;
 
     private async Task HandleInternalPropertyValidation(
       Operation<EditDepartmentRequest> requestedOperation,
@@ -29,13 +31,15 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           nameof(EditDepartmentRequest.Name),
           nameof(EditDepartmentRequest.ShortName),
           nameof(EditDepartmentRequest.Description),
-          nameof(EditDepartmentRequest.IsActive)
+          nameof(EditDepartmentRequest.IsActive),
+          nameof(EditDepartmentRequest.CategoryId)
         });
 
       AddСorrectOperations(nameof(EditDepartmentRequest.Name), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.ShortName), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.Description), new() { OperationType.Replace });
       AddСorrectOperations(nameof(EditDepartmentRequest.IsActive), new() { OperationType.Replace });
+      AddСorrectOperations(nameof(EditDepartmentRequest.CategoryId), new() { OperationType.Replace });
 
       #endregion
 
@@ -59,7 +63,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           {
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
-            && !await _repository.NameExistAsync(x.value?.ToString()),
+            && !await _departmentRepository.NameExistAsync(x.value?.ToString()),
             "The department name already exist."
           },
         });
@@ -86,7 +90,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           {
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
-            && !await _repository.ShortNameExistAsync(x.value?.ToString()),
+            && !await _departmentRepository.ShortNameExistAsync(x.value?.ToString()),
             "The department short name already exist."
           },
         });
@@ -116,12 +120,39 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         });
 
       #endregion
+
+      #region CategoryId
+
+      await AddFailureForPropertyIfAsync(
+        nameof(EditDepartmentRequest.CategoryId),
+        x => x == OperationType.Replace,
+        new()
+        {
+          {
+            async (x) =>
+            {
+              if (x.value?.ToString() is null)
+              {
+                return true;
+              }
+
+              return Guid.TryParse(x.value.ToString(), out Guid categoryId)
+                ? await _categoryRepository.IdExistAsync(categoryId)
+                : false;
+            },
+            "Category id doesn`t exist."
+          }
+        });
     }
 
+      #endregion
+
     public EditDepartmentRequestValidator(
-      IDepartmentRepository repository)
+      IDepartmentRepository departmentRepository,
+      ICategoryRepository categoryRepository)
     {
-      _repository = repository;
+      _departmentRepository = departmentRepository;
+      _categoryRepository = categoryRepository;
 
       RuleForEach(request => request.Operations)
         .CustomAsync(async (x, context, token) => await HandleInternalPropertyValidation(x, context));
