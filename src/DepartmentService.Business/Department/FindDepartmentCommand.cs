@@ -26,7 +26,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentRepository _repository;
     private readonly IDepartmentInfoMapper _departmentMapper;
     private readonly IUserInfoMapper _userMapper;
-    private readonly IDepartmentUserInfoMapper _departmentUserMapper;
     private readonly IUserService _userService;
     private readonly IImageService _imageService;
     private readonly IBaseFindFilterValidator _baseFindValidator;
@@ -37,7 +36,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentRepository repository,
       IDepartmentInfoMapper departmentMapper,
       IUserInfoMapper UserMapper,
-      IDepartmentUserInfoMapper departmentUserMapper,
       IUserService userService,
       IImageService imageService,
       IResponseCreator responseCreator)
@@ -46,7 +44,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _repository = repository;
       _departmentMapper = departmentMapper;
       _userMapper = UserMapper;
-      _departmentUserMapper = departmentUserMapper;
       _userService = userService;
       _imageService = imageService;
       _responseCreator = responseCreator;
@@ -60,13 +57,11 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           HttpStatusCode.BadRequest, errors);
       }
 
-      FindResultResponse<DepartmentInfo> response = new() { Body = new() };
-
       (List<DbDepartment> dbDepartments, int totalCount) = await _repository.FindAsync(filter);
 
       if (dbDepartments is null || !dbDepartments.Any())
       {
-        return response;
+        return new FindResultResponse<DepartmentInfo>(body: new List<DepartmentInfo>(), errors: errors);
       }
 
       Dictionary<Guid, Guid> departmentsDirectors =
@@ -76,33 +71,30 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       List<UserData> usersData = await _userService.GetUsersDatasAsync(
         departmentsDirectors.Values.ToList(),
-        response.Errors);
+        errors);
 
       List<ImageInfo> images = await _imageService.GetImagesAsync(
         usersData?.Where(ud => ud.ImageId.HasValue)?.Select(ud => ud.ImageId.Value).ToList(),
         ImageSource.User,
-        response.Errors);
+        errors);
 
       UserData userData = null;
 
-      foreach (DbDepartment dbDepartment in dbDepartments)
-      {
-        userData = departmentsDirectors.ContainsKey(dbDepartment.Id)
-          ? usersData.FirstOrDefault(u => u.Id == departmentsDirectors[dbDepartment.Id])
-          : null;
+      return new FindResultResponse<DepartmentInfo>(
+        totalCount: totalCount,
+        body: dbDepartments.Select(d =>
+        {
+          userData = departmentsDirectors.ContainsKey(d.Id)
+            ? usersData.FirstOrDefault(u => u.Id == departmentsDirectors[d.Id])
+            : null;
 
-        response.Body.Add(
-          _departmentMapper.Map(
-            dbDepartment,
-            userData == null ?
-              null :
-              _departmentUserMapper.Map(
-                _userMapper.Map(userData, images?.FirstOrDefault(i => i.Id == userData.ImageId)),
-                dbDepartment.Users.FirstOrDefault(du => du.UserId == userData.Id))));
-      }
-      response.TotalCount = totalCount;
-
-      return response;
+          return _departmentMapper.Map(
+            d,
+            _userMapper.Map(
+              d.Users?.FirstOrDefault(u => u.Assignment == (int)DepartmentUserAssignment.Director),
+              userData,
+              images?.FirstOrDefault(i => i.Id == userData.ImageId), null));
+        }).ToList());
     }
   }
 }

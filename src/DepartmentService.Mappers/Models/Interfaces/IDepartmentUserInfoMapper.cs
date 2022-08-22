@@ -8,7 +8,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces
   public interface IDepartmentUserInfoMapper
   {
     DepartmentUserInfo Map(
-      UserInfo userInfo,
       DbDepartmentUser dbDepartmentUser);
   }
 }

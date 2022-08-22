@@ -30,12 +30,12 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       _logger = logger;
     }
 
-    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, ImageSource sourse, List<string> errors)
+    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, ImageSource imageSourse, List<string> errors)
     {
       return imagesIds is null || !imagesIds.Any()
         ? null
         : (await _rcGetImages.ProcessRequest<IGetImagesRequest, IGetImagesResponse>(
-            IGetImagesRequest.CreateObj(imagesIds, sourse),
+            IGetImagesRequest.CreateObj(imagesIds, imageSourse),
             errors,
             _logger))?.ImagesData.Select(_mapper.Map).ToList();
     }

@@ -10,6 +10,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces
   [AutoInject]
   public interface IImageService
   {
-    Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, ImageSource sourse, List<string> errors);
+    Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, ImageSource imageSourse, List<string> errors);
   }
 }

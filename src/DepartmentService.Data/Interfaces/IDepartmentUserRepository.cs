@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
 using LT.DigitalOffice.Kernel.Attributes;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -19,6 +20,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role);
 
     Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment);
+
+    Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter);
 
     Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request);
 

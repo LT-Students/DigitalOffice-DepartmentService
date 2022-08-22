@@ -6,6 +6,7 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
@@ -138,10 +139,28 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return true;
     }
 
-    public async Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
+    public Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter)
     {
-      return await
-        CreateGetPredicates(includeDepartment, _provider.DepartmentsUsers.AsQueryable())
+      IQueryable<DbDepartmentUser> departmentUsersQuery = _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId);
+
+      if (filter.IsActive.HasValue)
+      {
+        departmentUsersQuery = departmentUsersQuery.Where(pu => pu.IsActive == filter.IsActive.Value);
+      }
+
+      if (filter.DepartmentUserRoleAscendingSort.HasValue)
+      {
+        departmentUsersQuery = filter.DepartmentUserRoleAscendingSort.Value
+          ? departmentUsersQuery.OrderBy(d => d.Assignment).ThenBy(d => d.Role)
+          : departmentUsersQuery.OrderByDescending(d => d.Assignment).ThenByDescending(d => d.Role);
+      }
+
+      return departmentUsersQuery.ToListAsync();
+    }
+
+    public Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
+    {
+      return CreateGetPredicates(includeDepartment, _provider.DepartmentsUsers.AsQueryable())
         .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
     }
 
@@ -155,7 +174,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .ToListAsync();
     }
 
-    public async Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request)
+    public Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request)
     {
       IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
         ? _provider.DepartmentsUsers
@@ -168,7 +187,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartmentUser = dbDepartmentUser.Where(du => request.DepartmentsIds.Contains(du.DepartmentId));
 
-      return await dbDepartmentUser.ToListAsync();
+      return dbDepartmentUser.ToListAsync();
     }
 
     public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)
