@@ -1,6 +1,4 @@
 ﻿using System;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
-using LT.DigitalOffice.Models.Broker.Enums;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
 {
@@ -11,8 +9,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
     public string MiddleName { get; set; }
     public string LastName { get; set; }
     public bool IsActive { get; set; }
-    public DepartmentUserAssignment Assignment { get; set; }
-    public DepartmentUserRole Role { get; set; }
+    public DepartmentUserInfo DepartmentUsers { get; set; }
     public ImageInfo AvatarImage { get; set; }
     public PositionInfo Position { get; set; }
   }

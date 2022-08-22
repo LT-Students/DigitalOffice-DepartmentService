@@ -34,8 +34,12 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         MiddleName = userData.MiddleName,
         IsActive = dbDepartmentUser.IsActive,
         AvatarImage = image,
-        Assignment = (DepartmentUserAssignment)dbDepartmentUser.Assignment,
-        Role = (DepartmentUserRole)dbDepartmentUser.Role,
+        DepartmentUsers = new DepartmentUserInfo()
+        {
+          UserId = userData.Id,
+          Assignment = (DepartmentUserAssignment)dbDepartmentUser.Assignment,
+          Role = (DepartmentUserRole)dbDepartmentUser.Role
+        },
         Position = userPosition is null
           ? null
           : new()
