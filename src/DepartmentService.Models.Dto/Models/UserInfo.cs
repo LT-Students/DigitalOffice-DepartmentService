@@ -8,8 +8,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
     public string FirstName { get; set; }
     public string MiddleName { get; set; }
     public string LastName { get; set; }
-    public bool IsActive { get; set; }
-    public DepartmentUserInfo DepartmentUsers { get; set; }
+    public DepartmentUserInfo DepartmentUser { get; set; }
     public ImageInfo AvatarImage { get; set; }
     public PositionInfo Position { get; set; }
   }
