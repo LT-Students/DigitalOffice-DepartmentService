@@ -7,6 +7,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces
   [AutoInject]
   public interface IDepartmentInfoMapper
   {
-    DepartmentInfo Map(DbDepartment dbDepartment, DepartmentUserInfo director);
+    DepartmentInfo Map(DbDepartment dbDepartment, UserInfo director);
   }
 }

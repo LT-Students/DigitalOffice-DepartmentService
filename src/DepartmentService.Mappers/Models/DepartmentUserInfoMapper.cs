@@ -9,15 +9,13 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   public class DepartmentUserInfoMapper : IDepartmentUserInfoMapper
   {
     public DepartmentUserInfo Map(
-      UserInfo userInfo,
       DbDepartmentUser dbDepartmentUser)
     {
-      return userInfo is null || dbDepartmentUser is null
+      return dbDepartmentUser is null
         ? null
         : new DepartmentUserInfo
         {
-          User = userInfo,
-          IsActive = dbDepartmentUser.IsActive,
+          UserId = dbDepartmentUser.UserId,
           Role = (DepartmentUserRole)dbDepartmentUser.Role,
           Assignment = (DepartmentUserAssignment)dbDepartmentUser.Assignment
         };

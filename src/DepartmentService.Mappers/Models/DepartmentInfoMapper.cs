@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
       _categoryInfoMapper = categoryInfoMapper;
     }
 
-    public DepartmentInfo Map(DbDepartment dbDepartment, DepartmentUserInfo director)
+    public DepartmentInfo Map(DbDepartment dbDepartment, UserInfo director)
     {
       return dbDepartment is null
         ? null
@@ -23,12 +23,11 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
           Id = dbDepartment.Id,
           Name = dbDepartment.Name,
           ShortName = dbDepartment.ShortName,
-          Description = dbDepartment.Description,
-          Director = director,
           IsActive = dbDepartment.IsActive,
           ParentId = dbDepartment.ParentId,
+          CountUsers = dbDepartment.Users.Count,
           Category = _categoryInfoMapper.Map(dbDepartment.Category),
-          CountUsers = dbDepartment.Users.Count
+          Director = director
         };
     }
   }
