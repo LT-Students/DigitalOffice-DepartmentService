@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
-using LT.DigitalOffice.DepartmentService.Broker;
+using LT.DigitalOffice.DepartmentService.Broker.Consumers;
 using LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
@@ -10,11 +10,15 @@ using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
+using LT.DigitalOffice.Kernel.CustomModelBinderProviders;
+using LT.DigitalOffice.Kernel.EFSupport.Extensions;
+using LT.DigitalOffice.Kernel.EFSupport.Helpers;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Middlewares.ApiInformation;
+using LT.DigitalOffice.Kernel.RedisSupport.Configurations;
+using LT.DigitalOffice.Kernel.RedisSupport.Constants;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers;
-using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +36,7 @@ namespace LT.DigitalOffice.DepartmentService
   public class Startup : BaseApiInfo
   {
     public const string CorsPolicyName = "LtDoCorsPolicy";
+    private string redisConnStr;
 
     private readonly RabbitMqConfig _rabbitMqConfig;
     private readonly BaseServiceInfoConfig _serviceInfoConfig;
@@ -52,7 +57,7 @@ namespace LT.DigitalOffice.DepartmentService
         .GetSection(BaseRabbitMqConfig.SectionName)
         .Get<RabbitMqConfig>();
 
-      Version = "1.0.0.0";
+      Version = "1.0.3.0";
       Description = "DepartmentService is an API that intended to work with Department.";
       StartTime = DateTime.UtcNow;
       ApiName = $"LT Digital Office - {_serviceInfoConfig.Name}";
@@ -90,6 +95,7 @@ namespace LT.DigitalOffice.DepartmentService
       services.Configure<BaseServiceInfoConfig>(Configuration.GetSection(BaseServiceInfoConfig.SectionName));
 
       services.AddHttpContextAccessor();
+      services.AddMemoryCache();
 
       services
         .AddControllers()
@@ -99,55 +105,65 @@ namespace LT.DigitalOffice.DepartmentService
         })
         .AddNewtonsoftJson();
 
-      string connStr = Environment.GetEnvironmentVariable("ConnectionString");
-      if (string.IsNullOrEmpty(connStr))
-      {
-        connStr = Configuration.GetConnectionString("SQLConnectionString");
-
-        Log.Information($"SQL connection string from appsettings.json was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(connStr)}'.");
-      }
-      else
-      {
-        Log.Information($"SQL connection string from environment was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(connStr)}'.");
-      }
+      string dbConnStr = ConnectionStringHandler.Get(Configuration);
 
       services.AddDbContext<DepartmentServiceDbContext>(options =>
       {
-        options.UseSqlServer(connStr);
+        options.UseSqlServer(dbConnStr);
       });
 
       services.AddHealthChecks()
         .AddRabbitMqCheck()
-        .AddSqlServer(connStr);
+        .AddSqlServer(dbConnStr);
 
-      string redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
+      redisConnStr = Environment.GetEnvironmentVariable("RedisConnectionString");
       if (string.IsNullOrEmpty(redisConnStr))
       {
         redisConnStr = Configuration.GetConnectionString("Redis");
 
         Log.Information($"Redis connection string from appsettings.json was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
+          $"Value '{PasswordHider.Hide(redisConnStr)}'");
       }
       else
       {
         Log.Information($"Redis connection string from environment was used. " +
-          $"Value '{HidePasswordHelper.HidePassword(redisConnStr)}'");
+          $"Value '{PasswordHider.Hide(redisConnStr)}'");
+      }
+
+      if (int.TryParse(Environment.GetEnvironmentVariable("MemoryCacheLiveInMinutes"), out int memoryCacheLifetime))
+      {
+        services.Configure<MemoryCacheConfig>(options =>
+        {
+          options.CacheLiveInMinutes = memoryCacheLifetime;
+        });
+      }
+      else
+      {
+        services.Configure<MemoryCacheConfig>(Configuration.GetSection(MemoryCacheConfig.SectionName));
       }
 
       services.AddSingleton<IConnectionMultiplexer>(
-        x => ConnectionMultiplexer.Connect(redisConnStr));
-      services.AddTransient<IRedisHelper, RedisHelper>();
-      services.AddTransient<ICacheNotebook, CacheNotebook>();
+        x => ConnectionMultiplexer.Connect(redisConnStr + ",abortConnect=false,connectRetry=1,connectTimeout=2000"));
+
       services.AddBusinessObjects();
 
       ConfigureMassTransit(services);
+
+      services.AddControllers(options =>
+      {
+        options.ModelBinderProviders.Insert(0, new CustomModelBinderProvider());
+      });
     }
 
     public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
     {
-      UpdateDatabase(app);
+      app.UpdateDatabase<DepartmentServiceDbContext>();
+
+      string error = FlushRedisDbHelper.FlushDatabase(redisConnStr, Cache.Departments);
+      if (error is not null)
+      {
+        Log.Error(error);
+      }
 
       app.UseForwardedHeaders();
 
@@ -215,10 +231,12 @@ namespace LT.DigitalOffice.DepartmentService
 
       services.AddMassTransit(x =>
       {
-        x.AddConsumer<CreateDepartmentEntityConsumer>();
+        x.AddConsumer<CreateDepartmentUserConsumer>();
         x.AddConsumer<GetDepartmentsConsumer>();
+        x.AddConsumer<DisactivateDepartmentUserConsumer>();
+        x.AddConsumer<GetDepartmentsUsersConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
-        x.AddConsumer<GetDepartmentUsersConsumer>();
+        x.AddConsumer<FilterDepartmentsUsersConsumer>();
 
         x.UsingRabbitMq((context, cfg) =>
         {
@@ -241,33 +259,30 @@ namespace LT.DigitalOffice.DepartmentService
       IBusRegistrationContext context,
       IRabbitMqBusFactoryConfigurator cfg)
     {
-      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentEntityEndpoint, ep =>
+      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentUserEndpoint, ep =>
       {
-        ep.ConfigureConsumer<CreateDepartmentEntityConsumer>(context);
+        ep.ConfigureConsumer<CreateDepartmentUserConsumer>(context);
       });
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsEndpoint, ep =>
       {
         ep.ConfigureConsumer<GetDepartmentsConsumer>(context);
       });
+      cfg.ReceiveEndpoint(_rabbitMqConfig.DisactivateDepartmentUserEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<DisactivateDepartmentUserConsumer>(context);
+      });
+      cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsUsersEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<GetDepartmentsUsersConsumer>(context);
+      });
       cfg.ReceiveEndpoint(_rabbitMqConfig.SearchDepartmentEndpoint, ep =>
       {
         ep.ConfigureConsumer<SearchDepartmentsConsumer>(context);
       });
-      cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentUsersEndpoint, ep =>
+      cfg.ReceiveEndpoint(_rabbitMqConfig.FilterDepartmentsEndpoint, ep =>
       {
-        ep.ConfigureConsumer<GetDepartmentUsersConsumer>(context);
+        ep.ConfigureConsumer<FilterDepartmentsUsersConsumer>(context);
       });
-    }
-
-    private void UpdateDatabase(IApplicationBuilder app)
-    {
-      using IServiceScope serviceScope = app.ApplicationServices
-        .GetRequiredService<IServiceScopeFactory>()
-        .CreateScope();
-
-      using DepartmentServiceDbContext context = serviceScope.ServiceProvider.GetService<DepartmentServiceDbContext>();
-
-      context.Database.Migrate();
     }
 
     #endregion

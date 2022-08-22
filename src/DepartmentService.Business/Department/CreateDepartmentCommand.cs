@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -6,43 +7,51 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
-using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Constants;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
+using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
-using LT.DigitalOffice.Kernel.Enums;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
   public class CreateDepartmentCommand : ICreateDepartmentCommand
   {
-    private readonly IDepartmentRepository _repository;
-    private readonly IDepartmentUserRepository _userRepository;
     private readonly ICreateDepartmentRequestValidator _validator;
-    private readonly IDbDepartmentMapper _mapper;
+    private readonly IDbDepartmentMapper _departmentMapper;
+    private readonly IDbDepartmentUserMapper _userMapper;
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly IDepartmentUserRepository _userRepository;
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
+    private readonly IMemoryCache _cache;
 
     public CreateDepartmentCommand(
-      IDepartmentRepository repository,
-      IDepartmentUserRepository userRepository,
       ICreateDepartmentRequestValidator validator,
-      IDbDepartmentMapper mapper,
+      IDbDepartmentMapper departmentMapper,
+      IDbDepartmentUserMapper userMapper,
+      IDepartmentRepository departmentRepository,
+      IDepartmentUserRepository userRepository,
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
-      IResponseCreator responseCreator)
+      IResponseCreator responseCreator,
+      IMemoryCache cache)
     {
-      _repository = repository;
-      _userRepository = userRepository;
       _validator = validator;
-      _mapper = mapper;
+      _departmentMapper = departmentMapper;
+      _userMapper = userMapper;
+      _departmentRepository = departmentRepository;
+      _userRepository = userRepository;
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
+      _cache = cache;
     }
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateDepartmentRequest request)
@@ -56,30 +65,29 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest,
+        return _responseCreator.CreateFailureResponse<Guid?>(
+          HttpStatusCode.BadRequest,
           validationResult.Errors.Select(vf => vf.ErrorMessage).ToList());
       }
 
       OperationResultResponse<Guid?> response = new();
 
-      #region Deactivated previous department user records
+      response.Body = await _departmentRepository.CreateAsync(_departmentMapper.Map(request));
 
-      if (request.Users != null)
+      if (response.Body is null)
       {
-        await _userRepository.RemoveAsync(request.Users.Select(ur => ur.UserId).ToList());
+        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
+        return response;
       }
-
-      #endregion
-
-      response.Body = await _repository.CreateAsync(_mapper.Map(request));
-      response.Status = OperationResultStatusType.FullSuccess;
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
 
-      if (response.Body == null)
-      {
-        response = _responseCreator.CreateFailureResponse<Guid?>(HttpStatusCode.BadRequest);
-      }
+      List<DbDepartmentUser> dbDepartmentUsers = request.Users.Select(u => _userMapper.Map(u, response.Body.Value)).ToList();
+
+      List<Guid> updatedUsersIds = await _userRepository.EditAsync(dbDepartmentUsers);
+      await _userRepository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
+
+      _cache.Remove(CacheKeys.DepartmentsTree);
 
       return response;
     }

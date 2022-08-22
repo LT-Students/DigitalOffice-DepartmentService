@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
 using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Requests.Department;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
@@ -12,20 +15,26 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<bool> CreateAsync(List<DbDepartmentUser> departmentsUsers);
 
-    Task<Guid?> CreateAsync(DbDepartmentUser dbDepartmentUser);
+    Task<List<Guid>> EditAsync(List<DbDepartmentUser> request);
 
-    Task<(List<Guid> usersIds, int totalCount)> GetAsync(IGetDepartmentUsersRequest request);
+    Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role);
+
+    Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment);
+
+    Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter);
+
+    Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request);
 
     Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false);
 
     Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false);
 
-    Task<List<Guid>> RemoveAsync(List<Guid> usersIds);
+    Task<Guid?> RemoveAsync(Guid userId, Guid removedBy);
 
-    Task RemoveAsync(Guid userId, Guid removedBy);
+    Task RemoveAsync(Guid departmentId, List<Guid> usersIds = null);
 
-    Task<bool> RemoveAsync(Guid departmentId, IEnumerable<Guid> usersIds);
+    Task RemoveDirectorAsync(Guid departmentId);
 
-    Task<bool> ChangeDirectorAsync(Guid departmentId, Guid newDirectorId);
+    Task<bool> IsManagerAsync(Guid userId);
   }
 }

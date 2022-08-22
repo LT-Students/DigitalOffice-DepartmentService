@@ -10,22 +10,35 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 {
   public class RabbitMqConfig : BaseRabbitMqConfig
   {
-    public string CreateDepartmentEntityEndpoint { get; set; }
+    public string CreateDepartmentUserEndpoint { get; set; }
     public string GetDepartmentsEndpoint { get; set; }
-    public string GetDepartmentUsersEndpoint { get; set; }
+    public string GetDepartmentsUsersEndpoint { get; set; }
+    public string DisactivateDepartmentUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
+    public string FilterDepartmentsEndpoint { get; set; }
+
+    //project
 
     [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
 
+    //image
+
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
+
+    //position
 
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
 
+    //user
+
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
     public string CheckUsersExistenceEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IFilteredUsersDataRequest))]
+    public string FilterUsersDataEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetUsersDataRequest))]
     public string GetUsersDataEndpoint { get; set; }

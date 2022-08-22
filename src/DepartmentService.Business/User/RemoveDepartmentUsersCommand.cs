@@ -21,49 +21,42 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalChache;
 
     public RemoveDepartmentUsersCommand(
       IDepartmentUserRepository repository,
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
       IHttpContextAccessor httpContextAccessor,
-      ICacheNotebook cacheNotebook)
+      IGlobalCacheRepository globalCache)
     {
       _repository = repository;
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _httpContextAccessor = httpContextAccessor;
-      _cacheNotebook = cacheNotebook;
+      _globalChache = globalCache;
     }
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
-        (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
+      if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      if (usersIds == null || !usersIds.Any())
+      if (usersIds is null || !usersIds.Any())
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
       }
 
-      OperationResultResponse<bool> response = new();
+      await _repository.RemoveAsync(departmentId, usersIds);
 
-      response.Body = await _repository.RemoveAsync(departmentId, usersIds);
+      await _globalChache.RemoveAsync(departmentId);
 
-      if (!response.Body)
+      return new()
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.NotFound);
-      }
-      else
-      {
-        await _cacheNotebook.RemoveAsync(departmentId);
-      }
-
-      return response;
+        Body = true
+      };
     }
   }
 }

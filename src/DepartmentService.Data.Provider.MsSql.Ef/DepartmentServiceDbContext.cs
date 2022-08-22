@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.Kernel.Database;
+using LT.DigitalOffice.Kernel.EFSupport.Provider;
 using Microsoft.EntityFrameworkCore;
 
 namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef
@@ -10,8 +10,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef
   {
     public DbSet<DbDepartment> Departments { get; set; }
     public DbSet<DbDepartmentUser> DepartmentsUsers { get; set; }
-    public DbSet<DbDepartmentNews> DepartmentsNews { get; set; }
-    public DbSet<DbDepartmentProject> DepartmentsProjects { get; set; }
+    public DbSet<DbCategory> Categories { get; set; }
 
     public DepartmentServiceDbContext(DbContextOptions<DepartmentServiceDbContext> options)
       : base(options)

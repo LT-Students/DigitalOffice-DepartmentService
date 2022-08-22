@@ -10,9 +10,9 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces
   public interface IUserInfoMapper
   {
     UserInfo Map(
-      UserData userData,
       DbDepartmentUser dbDepartmentUser,
-      ImageData imageData,
-      PositionData positionData);
+      UserData userData,
+      ImageInfo image,
+      PositionData userPosition);
   }
 }

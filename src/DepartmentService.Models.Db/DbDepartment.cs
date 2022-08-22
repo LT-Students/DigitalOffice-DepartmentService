@@ -10,8 +10,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public const string TableName = "Departments";
 
     public Guid Id { get; set; }
-    public Guid CompanyId { get; set; }
+    public Guid? ParentId { get; set; }
+    public Guid? CategoryId { get; set; }
     public string Name { get; set; }
+    public string ShortName { get; set; }
     public string Description { get; set; }
     public bool IsActive { get; set; }
     public Guid CreatedBy { get; set; }
@@ -19,17 +21,13 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public Guid? ModifiedBy { get; set; }
     public DateTime? ModifiedAtUtc { get; set; }
 
+    public DbCategory Category { get; set; }
+
     public ICollection<DbDepartmentUser> Users { get; set; }
-    public ICollection<DbDepartmentNews> News { get; set; }
-    public ICollection<DbDepartmentProject> Projects { get; set; }
 
     public DbDepartment()
     {
       Users = new HashSet<DbDepartmentUser>();
-
-      News = new HashSet<DbDepartmentNews>();
-
-      Projects = new HashSet<DbDepartmentProject>();
     }
   }
 
@@ -48,16 +46,16 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
         .IsRequired();
 
       builder
+        .Property(d => d.ShortName)
+        .IsRequired();
+
+      builder
         .HasMany(d => d.Users)
         .WithOne(u => u.Department);
 
       builder
-        .HasMany(d => d.News)
-        .WithOne(u => u.Department);
-
-      builder
-        .HasMany(d => d.Projects)
-        .WithOne(u => u.Department);
+        .HasOne(d => d.Category)
+        .WithMany(u => u.Departments);
     }
   }
 }

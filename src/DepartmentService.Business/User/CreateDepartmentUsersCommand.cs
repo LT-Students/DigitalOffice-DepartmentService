@@ -7,7 +7,10 @@ using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
-using LT.DigitalOffice.DepartmentService.Validation.Interfaces;
+using LT.DigitalOffice.DepartmentService.Models.Db;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
+using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Extensions;
@@ -22,20 +25,20 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IAccessValidator _accessValidator;
-    private readonly IDepartmentUsersValidator _validator;
+    private readonly ICreateDepartmentUsersValidator _validator;
     private readonly IDbDepartmentUserMapper _mapper;
     private readonly IDepartmentUserRepository _repository;
     private readonly IResponseCreator _responseCreator;
-    private readonly ICacheNotebook _cacheNotebook;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public CreateDepartmentUsersCommand(
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
-      IDepartmentUsersValidator validator,
+      ICreateDepartmentUsersValidator validator,
       IDbDepartmentUserMapper mapper,
       IDepartmentUserRepository repository,
       IResponseCreator responseCreator,
-      ICacheNotebook cacheNotebook)
+      IGlobalCacheRepository globalCache)
     {
       _httpContextAccessor = httpContextAccessor;
       _accessValidator = accessValidator;
@@ -43,43 +46,43 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _mapper = mapper;
       _repository = repository;
       _responseCreator = responseCreator;
-      _cacheNotebook = cacheNotebook;
+      _globalCache = globalCache;
     }
 
-    public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, List<Guid> usersIds)
+    public async Task<OperationResultResponse<bool>> ExecuteAsync(CreateDepartmentUsersRequest request)
     {
-      if (!await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments) &&
-        !(await _accessValidator.HasRightsAsync(Rights.EditDepartmentUsers) &&
-        (await _repository.GetAsync(_httpContextAccessor.HttpContext.GetUserId()))?.DepartmentId == departmentId))
+      if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+        && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(usersIds);
+      ValidationResult validationResult = await _validator.ValidateAsync(request);
 
       if (!validationResult.IsValid)
       {
-        return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
+        return _responseCreator.CreateFailureResponse<bool>(
+          HttpStatusCode.BadRequest,
+          validationResult.Errors.Select(ValidationFailure => ValidationFailure.ErrorMessage).ToList());
       }
-
-      OperationResultResponse<bool> response = new();
-
-      List<Guid> changedDepartments = await _repository.RemoveAsync(usersIds);
-
-      response.Body = await _repository.CreateAsync(
-        usersIds.Select(userId => _mapper.Map(userId, departmentId)).ToList());
-
-      if (!response.Body)
+      
+      if (request.Users.Where(u => u.Assignment == DepartmentUserAssignment.Director).Any())
       {
-        response = _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest);
-      }
-      else
-      {
-        _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-        changedDepartments.Select(async i => await _cacheNotebook.RemoveAsync(departmentId));
+        await _repository.RemoveDirectorAsync(request.DepartmentId);
       }
 
-      return response;
+      List<DbDepartmentUser> dbDepartmentUsers = request.Users
+        .Select(u => _mapper.Map(u, request.DepartmentId)).ToList();
+
+      List<Guid> updatedUsersIds = await _repository.EditAsync(dbDepartmentUsers);
+
+      await _repository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
+
+      _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
+      updatedUsersIds.Select(userId => _globalCache.RemoveAsync(userId));
+      await _globalCache.RemoveAsync(request.DepartmentId);
+
+      return new OperationResultResponse<bool>(body: true);
     }
   }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
 {
   [DbContext(typeof(DepartmentServiceDbContext))]
-  [Migration("20211012014055_InitialCreate")]
+  [Migration("20220729014055_InitialCreate")]
 
   public class InitialCreate : Migration
   {
@@ -20,10 +20,12 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         columns: table => new
         {
           Id = table.Column<Guid>(nullable: false),
-          CompanyId = table.Column<Guid>(nullable: false),
-          Name = table.Column<string>(nullable: false),
+          Name = table.Column<string>(nullable: false, maxLength: 300),
+          ShortName = table.Column<string>(nullable: false, maxLength: 40),
           Description = table.Column<string>(nullable: true),
           IsActive = table.Column<bool>(nullable: false),
+          CategoryId = table.Column<Guid>(nullable: true),
+          ParentId = table.Column<Guid>(nullable: true),
           CreatedBy = table.Column<Guid>(nullable: false),
           CreatedAtUtc = table.Column<DateTime>(nullable: false),
           ModifiedBy = table.Column<Guid>(nullable: true),
@@ -31,7 +33,28 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
         },
         constraints: table =>
         {
-          table.PrimaryKey("PK_Departments", x => x.Id);
+          table.PrimaryKey($"PK_{DbDepartment.TableName}", x => x.Id);
+          table.UniqueConstraint($"UX_{DbDepartment.TableName}_Name_unique", x => x.Name);
+          table.UniqueConstraint($"UX_{DbDepartment.TableName}_ShortName_unique", x => x.ShortName);
+        });
+    }
+
+    private void CreateTableCategories(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.CreateTable(
+        name: DbCategory.TableName,
+        columns: table => new
+        {
+          Id = table.Column<Guid>(nullable: false),
+          Name = table.Column<string>(nullable: false),
+          CreatedBy = table.Column<Guid>(nullable: false),
+          CreatedAtUtc = table.Column<DateTime>(nullable: false),
+          ModifiedBy = table.Column<Guid>(nullable: true),
+          ModifiedAtUtc = table.Column<DateTime>(nullable: true)
+        },
+        constraints: table =>
+        {
+          table.PrimaryKey($"PK_{DbCategory.TableName}", x => x.Id);
         });
     }
 
@@ -45,59 +68,26 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
           UserId = table.Column<Guid>(nullable: false),
           DepartmentId = table.Column<Guid>(nullable: false),
           Role = table.Column<int>(nullable: false),
+          Assignment = table.Column<int>(nullable: false),
           IsActive = table.Column<bool>(nullable: false),
           CreatedBy = table.Column<Guid>(nullable: false),
-          CreatedAtUtc = table.Column<DateTime>(nullable: false),
-          ModifiedBy = table.Column<Guid>(nullable: true),
-          ModifiedAtUtc = table.Column<DateTime>(nullable: true),
-          LeftAtUtc = table.Column<DateTime>(nullable: true)
+          PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart"),
+          PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
+            .Annotation("SqlServer:IsTemporal", true)
+            .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+            .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart")
         },
         constraints: table =>
         {
-          table.PrimaryKey("PK_DepartmentUser", x => x.Id);
-        });
-    }
-
-    private void CreateTableDeparmentsNews(MigrationBuilder migrationBuilder)
-    {
-      migrationBuilder.CreateTable(
-        name: DbDepartmentNews.TableName,
-        columns: table => new
-        {
-          Id = table.Column<Guid>(nullable: false),
-          NewsId = table.Column<Guid>(nullable: false),
-          DepartmentId = table.Column<Guid>(nullable: false),
-          IsActive = table.Column<bool>(nullable: false),
-          CreatedBy = table.Column<Guid>(nullable: false),
-          CreatedAtUtc = table.Column<DateTime>(nullable: false),
-          ModifiedBy = table.Column<Guid>(nullable: true),
-          ModifiedAtUtc = table.Column<DateTime>(nullable: true),
-        },
-        constraints: table =>
-        {
-          table.PrimaryKey("PK_DepartmentNews", x => x.Id);
-        });
-    }
-
-    private void CreateTableDeparmentsProjects(MigrationBuilder migrationBuilder)
-    {
-      migrationBuilder.CreateTable(
-        name: DbDepartmentProject.TableName,
-        columns: table => new
-        {
-          Id = table.Column<Guid>(nullable: false),
-          ProjectId = table.Column<Guid>(nullable: false),
-          DepartmentId = table.Column<Guid>(nullable: false),
-          IsActive = table.Column<bool>(nullable: false),
-          CreatedBy = table.Column<Guid>(nullable: false),
-          CreatedAtUtc = table.Column<DateTime>(nullable: false),
-          ModifiedBy = table.Column<Guid>(nullable: true),
-          ModifiedAtUtc = table.Column<DateTime>(nullable: true),
-        },
-        constraints: table =>
-        {
-          table.PrimaryKey("PK_DepartmentProject", x => x.Id);
-        });
+          table.PrimaryKey($"PK_{DbDepartmentUser.TableName}", x => x.Id);
+        })
+        .Annotation("SqlServer:IsTemporal", true)
+        .Annotation("SqlServer:TemporalHistoryTableName", $"{DbDepartmentUser.TableName}History")
+        .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
+        .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
     }
 
     #endregion
@@ -106,20 +96,16 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef.Migrations
     {
       CreateTableDeparments(migrationBuilder);
 
+      CreateTableCategories(migrationBuilder);
+
       CreateTableDeparmentsUsers(migrationBuilder);
-
-      CreateTableDeparmentsNews(migrationBuilder);
-
-      CreateTableDeparmentsProjects(migrationBuilder);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.DropTable(DbDepartmentUser.TableName);
 
-      migrationBuilder.DropTable(DbDepartmentNews.TableName);
-
-      migrationBuilder.DropTable(DbDepartmentProject.TableName);
+      migrationBuilder.DropTable(DbCategory.TableName);
 
       migrationBuilder.DropTable(DbDepartment.TableName);
     }

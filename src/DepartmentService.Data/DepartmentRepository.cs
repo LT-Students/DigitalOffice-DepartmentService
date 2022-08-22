@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Filters;
+using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Extensions;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -20,6 +19,23 @@ namespace LT.DigitalOffice.DepartmentService.Data
     private readonly IDataProvider _provider;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    private IQueryable<DbDepartment> CreateGetPredicates(
+      GetDepartmentFilter filter,
+      IQueryable<DbDepartment> dbDepartments)
+    {
+      if (filter.IncludeUsers)
+      {
+        dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
+      }
+
+      if (filter.IncludeCategory)
+      {
+        dbDepartments = dbDepartments.Include(d => d.Category);
+      }
+
+      return dbDepartments;
+    }
+
     public DepartmentRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
@@ -30,7 +46,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<Guid?> CreateAsync(DbDepartment dbDepartment)
     {
-      if (dbDepartment == null)
+      if (dbDepartment is null)
       {
         return null;
       }
@@ -43,77 +59,62 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<DbDepartment> GetAsync(GetDepartmentFilter filter)
     {
+      return filter is null
+        ? null
+        : await CreateGetPredicates(filter, _provider.Departments.AsQueryable())
+          .FirstOrDefaultAsync(d => d.Id == filter.DepartmentId);
+    }
+
+    public async Task<List<DbDepartment>> GetAsync(
+      List<Guid> departmentsIds = null,
+      List<Guid> usersIds = null)
+    {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
-      dbDepartments = dbDepartments.Where(d => d.Id == filter.DepartmentId);
-
-      if (filter.IncludeUsers)
+      if (departmentsIds is not null && departmentsIds.Any())
       {
-        dbDepartments = dbDepartments.Include(d => d.Users.Where(u => u.IsActive));
+        dbDepartments = dbDepartments.Where(d => departmentsIds.Contains(d.Id));
       }
 
-      if (filter.IncludeProjects)
+      if (usersIds is not null && usersIds.Any())
       {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(p => p.IsActive));
+        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && usersIds.Contains(du.UserId)));
       }
 
-      return await dbDepartments.FirstOrDefaultAsync();
+      dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
+
+      return await dbDepartments.ToListAsync();
     }
 
     public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter)
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
-      if (!filter.IncludeDeactivated)
+      if (filter.IsActive.HasValue)
       {
-        dbDepartments = dbDepartments.Where(d => d.IsActive);
+        dbDepartments = dbDepartments.Where(d => d.IsActive == filter.IsActive);
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        dbDepartments = filter.IsAscendingSort.Value
+          ? dbDepartments.OrderBy(d => d.Name)
+          : dbDepartments.OrderByDescending(d => d.Name);
+      }
+
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        dbDepartments = dbDepartments.Where(d => d.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
       }
 
       return (
         await dbDepartments
+          .Include(d => d.Category)
           .Include(d => d.Users.Where(u => u.IsActive))
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
           .ToListAsync(),
         await dbDepartments.CountAsync());
-    }
-
-    public async Task<List<DbDepartment>> GetAsync(List<Guid> departmentsIds, bool includeUsers = false)
-    {
-      IQueryable<DbDepartment> departments = _provider.Departments.Where(d => departmentsIds.Contains(d.Id));
-
-      if (includeUsers)
-      {
-        departments = departments.Include(d => d.Users.Where(u => u.IsActive));
-      }
-
-      return await departments.ToListAsync();
-    }
-
-    public async Task<List<DbDepartment>> GetAsync(IGetDepartmentsRequest request)
-    {
-      IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
-
-      if (request.NewsIds is not null && request.NewsIds.Any())
-      {
-        dbDepartments = dbDepartments.Include(d => d.News.Where(dn => dn.IsActive));
-        dbDepartments = dbDepartments.Where(d => d.News.Any(dn => request.NewsIds.Contains(dn.NewsId)));
-      }
-
-      if (request.ProjectsIds is not null && request.ProjectsIds.Any())
-      {
-        dbDepartments = dbDepartments.Include(d => d.Projects.Where(dp => dp.IsActive));
-        dbDepartments = dbDepartments.Where(d => d.Projects.Any(dp => request.ProjectsIds.Contains(dp.ProjectId)));
-      }
-
-      if (request.UsersIds is not null && request.UsersIds.Any())
-      {
-        dbDepartments = dbDepartments.Where(d => d.Users.Any(du => du.IsActive && request.UsersIds.Contains(du.UserId)));
-      }
-
-      dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
-
-      return await dbDepartments.ToListAsync();
     }
 
     public async Task<List<DbDepartment>> SearchAsync(string text)
@@ -125,9 +126,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public async Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request)
     {
-      DbDepartment dbDepartment = _provider.Departments.FirstOrDefault(x => x.Id == departmentId);
+      DbDepartment dbDepartment = await _provider.Departments.FirstOrDefaultAsync(x => x.Id == departmentId);
 
-      if (dbDepartment == null || request == null)
+      if (dbDepartment is null || request is null)
       {
         return false;
       }
@@ -146,9 +147,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
         foreach (DbDepartmentUser user in users)
         {
           user.IsActive = false;
-          user.ModifiedAtUtc = DateTime.UtcNow;
-          user.LeftAtUtc = DateTime.UtcNow;
-          user.ModifiedBy = editorId;
         }
       }
 
@@ -165,9 +163,47 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await _provider.Departments.AnyAsync(d => d.Name == name);
     }
 
+    public async Task<bool> ShortNameExistAsync(string shortName)
+    {
+      return await _provider.Departments.AnyAsync(d => d.ShortName == shortName);
+    }
+
     public async Task<bool> ExistAsync(Guid departmentId)
     {
-      return await _provider.Departments.AnyAsync(x => x.Id == departmentId);
+      return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
+    }
+
+    public async Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync(FindDepartmentFilter filter)
+    {
+      IQueryable<DbDepartment> departments = _provider.Departments.AsQueryable();
+
+      if (filter.IsActive.HasValue)
+      {
+        departments = departments.Where(d => d.IsActive == filter.IsActive);
+      }
+
+      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
+      {
+        departments = departments.Where(d => d.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
+      }
+
+      if (filter.IsAscendingSort.HasValue)
+      {
+        departments = filter.IsAscendingSort.Value
+          ? departments.OrderBy(d => d.Name)
+          : departments.OrderByDescending(d => d.Name);
+      }
+
+      return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
+    }
+
+    public async Task RemoveAsync(List<Guid> departmentsIds)
+    {
+      List<DbDepartment> dbDepartments = await _provider.Departments.Where(d => departmentsIds.Contains(d.Id)).ToListAsync();
+
+      dbDepartments.ForEach(x => x.IsActive = false);
+
+      await _provider.SaveAsync();
     }
   }
 }
