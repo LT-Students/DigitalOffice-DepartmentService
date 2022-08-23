@@ -214,6 +214,15 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
     }
 
+    public async Task RemoveAsync(List<Guid> departmentIds)
+    {
+      List<DbDepartmentUser> dbDepartmentUsers = await _provider.DepartmentsUsers.Where(du => departmentIds.Contains(du.DepartmentId)).ToListAsync();
+
+      _provider.DepartmentsUsers.RemoveRange(dbDepartmentUsers);
+
+      await _provider.SaveAsync();
+    }
+
     public async Task RemoveDirectorAsync(Guid departmentId)
     {
       DbDepartmentUser director = await
