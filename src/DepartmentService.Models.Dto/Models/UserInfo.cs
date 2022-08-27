@@ -6,8 +6,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Models
   {
     public Guid Id { get; set; }
     public string FirstName { get; set; }
-    public string LastName { get; set; }
     public string MiddleName { get; set; }
-    public ImageInfo Avatar { get; set; }
+    public string LastName { get; set; }
+    public DepartmentUserInfo DepartmentUser { get; set; }
+    public ImageInfo AvatarImage { get; set; }
+    public PositionInfo Position { get; set; }
   }
 }

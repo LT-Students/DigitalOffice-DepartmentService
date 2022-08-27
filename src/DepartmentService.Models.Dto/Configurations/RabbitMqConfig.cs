@@ -19,17 +19,28 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     public string FilterDepartmentsEndpoint { get; set; }
     public string GetDepartmentUserRoleEndpoint { get; set; }
 
+    //project
+
     [AutoInjectRequest(typeof(IGetProjectsRequest))]
     public string GetProjectsEndpoint { get; set; }
+
+    //image
 
     [AutoInjectRequest(typeof(IGetImagesRequest))]
     public string GetImagesEndpoint { get; set; }
 
+    //position
+
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
 
+    //user
+
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
     public string CheckUsersExistenceEndpoint { get; set; }
+
+    [AutoInjectRequest(typeof(IFilteredUsersDataRequest))]
+    public string FilterUsersDataEndpoint { get; set; }
 
     [AutoInjectRequest(typeof(IGetUsersDataRequest))]
     public string GetUsersDataEndpoint { get; set; }
