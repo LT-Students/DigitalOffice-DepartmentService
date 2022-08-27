@@ -237,7 +237,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
     {
       List<DbDepartmentUser> dbDepartmentUsers = await _provider.DepartmentsUsers.Where(du => departmentIds.Contains(du.DepartmentId)).ToListAsync();
 
-      _provider.DepartmentsUsers.RemoveRange(dbDepartmentUsers);
+      foreach (DbDepartmentUser dbDepartmentUser in dbDepartmentUsers)
+      {
+        dbDepartmentUser.IsActive = false;
+        dbDepartmentUser.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
+      }
 
       await _provider.SaveAsync();
     }
