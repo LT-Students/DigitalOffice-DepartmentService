@@ -237,6 +237,7 @@ namespace LT.DigitalOffice.DepartmentService
         x.AddConsumer<GetDepartmentsUsersConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
         x.AddConsumer<FilterDepartmentsUsersConsumer>();
+        x.AddConsumer<GetDepartmentUserRoleConsumer>();
 
         x.UsingRabbitMq((context, cfg) =>
         {
@@ -282,6 +283,10 @@ namespace LT.DigitalOffice.DepartmentService
       cfg.ReceiveEndpoint(_rabbitMqConfig.FilterDepartmentsEndpoint, ep =>
       {
         ep.ConfigureConsumer<FilterDepartmentsUsersConsumer>(context);
+      });
+      cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentUserRoleEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<GetDepartmentUserRoleConsumer>(context);
       });
     }
 

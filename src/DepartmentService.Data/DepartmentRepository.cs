@@ -9,7 +9,6 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.EntityFrameworkCore;
 
 namespace LT.DigitalOffice.DepartmentService.Data
@@ -133,26 +132,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
         return false;
       }
 
-      Guid editorId = _httpContextAccessor.HttpContext.GetUserId();
-
-      Operation<DbDepartment> deactivatedOperation = request.Operations
-        .FirstOrDefault(o => o.path.EndsWith(nameof(DbDepartment.IsActive), StringComparison.OrdinalIgnoreCase));
-
-      if (deactivatedOperation != null && !bool.Parse(deactivatedOperation.value.ToString()) && dbDepartment.IsActive)
-      {
-        List<DbDepartmentUser> users = await _provider.DepartmentsUsers
-          .Where(u => u.IsActive && u.DepartmentId == dbDepartment.Id)
-          .ToListAsync();
-
-        foreach (DbDepartmentUser user in users)
-        {
-          user.IsActive = false;
-        }
-      }
-
       request.ApplyTo(dbDepartment);
-      dbDepartment.ModifiedBy = editorId;
+      dbDepartment.ModifiedBy = _httpContextAccessor.HttpContext.GetUserId();
       dbDepartment.ModifiedAtUtc = DateTime.UtcNow;
+
       await _provider.SaveAsync();
 
       return true;
@@ -180,18 +163,6 @@ namespace LT.DigitalOffice.DepartmentService.Data
       if (filter.IsActive.HasValue)
       {
         departments = departments.Where(d => d.IsActive == filter.IsActive);
-      }
-
-      if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
-      {
-        departments = departments.Where(d => d.Name.ToLower().Contains(filter.NameIncludeSubstring.ToLower()));
-      }
-
-      if (filter.IsAscendingSort.HasValue)
-      {
-        departments = filter.IsAscendingSort.Value
-          ? departments.OrderBy(d => d.Name)
-          : departments.OrderByDescending(d => d.Name);
       }
 
       return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
