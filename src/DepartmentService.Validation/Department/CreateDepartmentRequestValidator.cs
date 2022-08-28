@@ -14,7 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
       ICreateUsersValidator usersValidator)
     {
       RuleFor(request => request.Name)
-        .Must(n => n.Trim().Length > 2).WithMessage("Department name is too short.")
+        .Must(n => n.Trim().Length > 1).WithMessage("Department name is too short.")
         .MaximumLength(300).WithMessage("Department name is too long.")
         .MustAsync(async (request, _) => !await departmentRepository.NameExistAsync(request))
         .WithMessage("The department name is already exists.");
