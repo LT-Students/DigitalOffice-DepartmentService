@@ -20,7 +20,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         .WithMessage("The department name is already exists.");
 
       RuleFor(request => request.ShortName)
-        .Must(n => n.Trim().Length > 2).WithMessage("Department short name is too short.")
+        .Must(n => n.Trim().Length > 1).WithMessage("Department short name is too short.")
         .MaximumLength(40).WithMessage("Department short name is too long.")
         .MustAsync(async (request, _) => !await departmentRepository.ShortNameExistAsync(request))
         .WithMessage("The department name is already exists.");
