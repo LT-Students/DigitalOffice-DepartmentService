@@ -20,14 +20,14 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
     private async Task<object> CheckUserRoleAsync(IGetDepartmentUserRoleRequest request)
     {
-      DbDepartmentUser departmentUser = await _departmentUserRepository.GetAsync(request.UserId);;
+      DbDepartmentUser departmentUser = await _departmentUserRepository.GetAsync(request.UserId);
 
-      if (departmentUser.DepartmentId == request.DepartmentId)
+      if (departmentUser?.DepartmentId == request.DepartmentId)
       {
         return IGetDepartmentUserRoleResponse.CreateObj((DepartmentUserRole?)departmentUser.Role);
       }
 
-      if (departmentUser.DepartmentId != request.DepartmentId)
+      if (departmentUser is not null)
       {
         List<Guid> departmentsChildrenIds = new();
 
