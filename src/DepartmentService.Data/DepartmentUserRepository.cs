@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Db;
@@ -82,6 +83,21 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       return dbDepartmentsUsers?.Select(u => u.UserId).ToList();
+    }
+
+    public async Task<Guid?> ActivateAsync(IActivateUserPublish request)
+    {
+      DbDepartmentUser user = await _provider.DepartmentsUsers.FirstOrDefaultAsync(u => u.UserId == request.UserId && !u.IsActive);
+
+      if (user is null)
+      {
+        return null;
+      }
+
+      user.IsActive = true;
+      await _provider.SaveAsync();
+
+      return user.DepartmentId;
     }
 
     public async Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role)

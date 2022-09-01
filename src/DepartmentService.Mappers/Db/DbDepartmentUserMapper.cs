@@ -5,6 +5,7 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Models.Broker.Enums;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Department;
 using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Db
@@ -36,17 +37,19 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
         };
     }
 
-    public DbDepartmentUser Map(Guid userId, Guid departmentId, Guid? createdBy = null)
+    public DbDepartmentUser Map(ICreateDepartmentUserPublish request)
     {
-      return new DbDepartmentUser()
+      return request is null
+        ? default
+        : new DbDepartmentUser()
       {
         Id = Guid.NewGuid(),
-        UserId = userId,
-        DepartmentId = departmentId,
-        IsActive = true,
+        UserId = request.UserId,
+        DepartmentId = request.DepartmentId,
+        IsActive = request.IsActive,
         Role = (int)DepartmentUserRole.Employee,
         Assignment = (int)DepartmentUserAssignment.Employee,
-        CreatedBy = createdBy ?? _httpContextAccessor.HttpContext.GetUserId()
+        CreatedBy = request.CreatedBy
       };
     }
   }
