@@ -8,6 +8,7 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Extensions;
+using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
 using LT.DigitalOffice.Kernel.BrokerSupport.Middlewares.Token;
 using LT.DigitalOffice.Kernel.Configurations;
 using LT.DigitalOffice.Kernel.CustomModelBinderProviders;
@@ -199,41 +200,17 @@ namespace LT.DigitalOffice.DepartmentService
 
     #region private methods
 
-    private (string username, string password) GetRabbitMqCredentials()
-    {
-      static string GetString(string envVar, string formAppsettings, string generated, string fieldName)
-      {
-        string str = Environment.GetEnvironmentVariable(envVar);
-        if (string.IsNullOrEmpty(str))
-        {
-          str = formAppsettings ?? generated;
-
-          Log.Information(
-            formAppsettings == null
-              ? $"Default RabbitMq {fieldName} was used."
-              : $"RabbitMq {fieldName} from appsetings.json was used.");
-        }
-        else
-        {
-          Log.Information($"RabbitMq {fieldName} from environment was used.");
-        }
-
-        return str;
-      }
-
-      return (GetString("RabbitMqUsername", _rabbitMqConfig.Username, $"{_serviceInfoConfig.Name}_{_serviceInfoConfig.Id}", "Username"),
-        GetString("RabbitMqPassword", _rabbitMqConfig.Password, _serviceInfoConfig.Id, "Password"));
-    }
-
     private void ConfigureMassTransit(IServiceCollection services)
     {
-      (string username, string password) = GetRabbitMqCredentials();
+      (string username, string password) = RabbitMqCredentialsHelper
+        .Get(_rabbitMqConfig, _serviceInfoConfig);
 
       services.AddMassTransit(x =>
       {
         x.AddConsumer<CreateDepartmentUserConsumer>();
         x.AddConsumer<GetDepartmentsConsumer>();
         x.AddConsumer<DisactivateDepartmentUserConsumer>();
+        x.AddConsumer<ActivateDepartmentUserConsumer>();
         x.AddConsumer<GetDepartmentsUsersConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
         x.AddConsumer<FilterDepartmentsUsersConsumer>();
@@ -264,26 +241,37 @@ namespace LT.DigitalOffice.DepartmentService
       {
         ep.ConfigureConsumer<CreateDepartmentUserConsumer>(context);
       });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsEndpoint, ep =>
       {
         ep.ConfigureConsumer<GetDepartmentsConsumer>(context);
       });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.DisactivateDepartmentUserEndpoint, ep =>
       {
         ep.ConfigureConsumer<DisactivateDepartmentUserConsumer>(context);
       });
+
+      cfg.ReceiveEndpoint(_rabbitMqConfig.ActivateDepartmentUserEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<ActivateDepartmentUserConsumer>(context);
+      });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsUsersEndpoint, ep =>
       {
         ep.ConfigureConsumer<GetDepartmentsUsersConsumer>(context);
       });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.SearchDepartmentEndpoint, ep =>
       {
         ep.ConfigureConsumer<SearchDepartmentsConsumer>(context);
       });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.FilterDepartmentsEndpoint, ep =>
       {
         ep.ConfigureConsumer<FilterDepartmentsUsersConsumer>(context);
       });
+
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentUserRoleEndpoint, ep =>
       {
         ep.ConfigureConsumer<GetDepartmentUserRoleConsumer>(context);

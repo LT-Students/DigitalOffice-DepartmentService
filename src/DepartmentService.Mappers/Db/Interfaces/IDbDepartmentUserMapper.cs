@@ -2,6 +2,7 @@
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests;
 using LT.DigitalOffice.Kernel.Attributes;
+using LT.DigitalOffice.Models.Broker.Publishing.Subscriber.Department;
 
 namespace LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces
 {
@@ -10,6 +11,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces
   {
     DbDepartmentUser Map(CreateUserRequest request, Guid departmentId);
 
-    DbDepartmentUser Map(Guid userId, Guid departmentId, Guid? createdBy = null);
+    DbDepartmentUser Map(ICreateDepartmentUserPublish request);
   }
 }
