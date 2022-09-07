@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
@@ -151,11 +152,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       await _provider.SaveAsync();
-
       return true;
     }
 
-    public Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter)
+    public Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter, CancellationToken cancellationToken = default)
     {
       IQueryable<DbDepartmentUser> departmentUsersQuery = _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId);
 
@@ -171,7 +171,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           : departmentUsersQuery.OrderByDescending(d => d.Assignment).ThenByDescending(d => d.Role);
       }
 
-      return departmentUsersQuery.ToListAsync();
+      return departmentUsersQuery.ToListAsync(cancellationToken);
     }
 
     public Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)

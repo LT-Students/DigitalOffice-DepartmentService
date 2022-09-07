@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DepartmentService.Broker\DepartmentService.Broker.csproj" />
     <ProjectReference Include="..\DepartmentService.Business\DepartmentService.Business.csproj" />
-    <ProjectReference Include="..\DepartmentService.Data.Provider.MsSql.Ef\DepartmentService.Data.Provider.MsSql.Ef.csproj" />
     <ProjectReference Include="..\DepartmentService.Data\DepartmentService.Data.csproj" />
     <ProjectReference Include="..\DepartmentService.Mappers\DepartmentService.Mappers.csproj" />
     <ProjectReference Include="..\DepartmentService.Models.Db\DepartmentService.Models.Db.csproj" />

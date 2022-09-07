@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
@@ -10,6 +11,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.User.Interfaces
   [AutoInject]
   public interface IFindDepartmentUsersCommand
   {
-    Task<FindResultResponse<UserInfo>> ExecuteAsync(Guid departmentId, FindDepartmentUsersFilter filter);
+    Task<FindResultResponse<UserInfo>> ExecuteAsync(
+      Guid departmentId,
+      FindDepartmentUsersFilter filter,
+      CancellationToken cancellationToken);
   }
 }

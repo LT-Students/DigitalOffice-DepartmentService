@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
@@ -27,9 +28,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _responseCreator = responseCreator;
     }
 
-    public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter)
+    public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
-      DbDepartment dbDepartment = await _departmentRepository.GetAsync(filter);
+      DbDepartment dbDepartment = await _departmentRepository.GetAsync(filter, cancellationToken);
 
       if (dbDepartment is null)
       {

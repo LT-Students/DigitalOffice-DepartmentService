@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.Helpers;
@@ -32,7 +33,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
 
     public async Task<List<PositionData>> GetPositionsAsync(
       List<Guid> usersIds,
-      List<string> errors = null)
+      List<string> errors = null,
+      CancellationToken cancellationToken = default)
     {
       if (usersIds is null)
       {

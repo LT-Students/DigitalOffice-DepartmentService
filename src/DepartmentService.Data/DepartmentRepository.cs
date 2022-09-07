@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Provider;
@@ -56,12 +57,12 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartment.Id;
     }
 
-    public async Task<DbDepartment> GetAsync(GetDepartmentFilter filter)
+    public async Task<DbDepartment> GetAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
       return filter is null
         ? null
         : await CreateGetPredicates(filter, _provider.Departments.AsQueryable())
-          .FirstOrDefaultAsync(d => d.Id == filter.DepartmentId);
+          .FirstOrDefaultAsync(d => d.Id == filter.DepartmentId, cancellationToken);
     }
 
     public async Task<List<DbDepartment>> GetAsync(
@@ -85,7 +86,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await dbDepartments.ToListAsync();
     }
 
-    public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter)
+    public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
       IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
 
@@ -112,8 +113,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
           .Include(d => d.Users.Where(u => u.IsActive))
           .Skip(filter.SkipCount)
           .Take(filter.TakeCount)
-          .ToListAsync(),
-        await dbDepartments.CountAsync());
+          .ToListAsync(cancellationToken),
+        await dbDepartments.CountAsync(cancellationToken));
     }
 
     public async Task<List<DbDepartment>> SearchAsync(string text)

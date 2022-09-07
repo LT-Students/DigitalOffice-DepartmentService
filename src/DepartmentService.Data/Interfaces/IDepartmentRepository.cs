@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
@@ -13,13 +14,13 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
-    Task<DbDepartment> GetAsync(GetDepartmentFilter filter);
+    Task<DbDepartment> GetAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default);
 
     Task<List<DbDepartment>> GetAsync(
       List<Guid> departmentsIds = null,
       List<Guid> usersIds = null);
 
-    Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
+    Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter, CancellationToken cancellationToken = default);
 
     Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request);
 

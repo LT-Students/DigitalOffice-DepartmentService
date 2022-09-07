@@ -11,6 +11,9 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
     [FromQuery(Name = "ascendingSort")]
     public bool? AscendingSort { get; set; } = null;
 
+    [FromQuery(Name = "fullnameincludesubstring")]
+    public string FullNameIncludeSubstring { get; set; }
+
     [FromQuery(Name = "departmentUserRoleAscendingSort")]
     public bool? DepartmentUserRoleAscendingSort { get; set; } = null;
 

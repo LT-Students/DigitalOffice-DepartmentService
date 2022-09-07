@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
@@ -49,7 +50,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _responseCreator = responseCreator;
     }
 
-    public async Task<FindResultResponse<DepartmentInfo>> ExecuteAsync(FindDepartmentFilter filter)
+    public async Task<FindResultResponse<DepartmentInfo>> ExecuteAsync(FindDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
       if (!_baseFindValidator.ValidateCustom(filter, out List<string> errors))
       {
@@ -57,7 +58,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           HttpStatusCode.BadRequest, errors);
       }
 
-      (List<DbDepartment> dbDepartments, int totalCount) = await _repository.FindAsync(filter);
+      (List<DbDepartment> dbDepartments, int totalCount) = await _repository.FindAsync(filter, cancellationToken);
 
       if (dbDepartments is null || !dbDepartments.Any())
       {
@@ -71,12 +72,14 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       List<UserData> usersData = await _userService.GetUsersDatasAsync(
         departmentsDirectors.Values.ToList(),
-        errors);
+        errors,
+        cancellationToken);
 
       List<ImageInfo> images = await _imageService.GetImagesAsync(
         usersData?.Where(ud => ud.ImageId.HasValue)?.Select(ud => ud.ImageId.Value).ToList(),
         ImageSource.User,
-        errors);
+        errors,
+        cancellationToken);
 
       UserData userData = null;
 
