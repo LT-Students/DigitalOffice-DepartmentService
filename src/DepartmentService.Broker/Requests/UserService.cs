@@ -30,9 +30,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
     {
       List<object> additionalArgs = new() { filter.SkipCount, filter.TakeCount };
 
-      if (filter.AscendingSort.HasValue)
+      if (filter.IsAscendingSort.HasValue)
       {
-        additionalArgs.Add(filter.AscendingSort.Value);
+        additionalArgs.Add(filter.IsAscendingSort.Value);
       }
 
       return usersIds.GetRedisCacheHashCode(additionalArgs.ToArray());
@@ -115,7 +115,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
             usersIds: usersIds,
             skipCount: filter.SkipCount,
             takeCount: filter.TakeCount,
-            ascendingSort: filter.AscendingSort,
+            ascendingSort: filter.IsAscendingSort,
             fullNameIncludeSubstring: filter.FullNameIncludeSubstring),
           logger: _logger);
 

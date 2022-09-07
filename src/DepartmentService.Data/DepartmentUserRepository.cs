@@ -147,7 +147,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       foreach (DbDepartmentUser du in dbDepartmentUsers)
       {
         du.Assignment = (int)assignment;
-        du.Role = assignment == DepartmentUserAssignment.Director ? (int)DepartmentUserRole.Manager : du.Role;
+        du.Role = assignment == DepartmentUserAssignment.Director ? (int)DepartmentUserRole.Manager : (int)DepartmentUserRole.Employee;
         du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       }
 
@@ -272,6 +272,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       if (director is not null)
       {
         director.Assignment = (int)DepartmentUserAssignment.Employee;
+        director.Role = (int)DepartmentUserRole.Employee;
         director.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
 
         await _provider.SaveAsync();

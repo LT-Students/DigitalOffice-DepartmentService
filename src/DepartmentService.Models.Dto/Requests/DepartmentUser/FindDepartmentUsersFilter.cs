@@ -8,8 +8,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
     [FromQuery(Name = "isActive")]
     public bool? IsActive { get; set; }
 
-    [FromQuery(Name = "ascendingSort")]
-    public bool? AscendingSort { get; set; } = null;
+    [FromQuery(Name = "isAscendingSort")]
+    public bool? IsAscendingSort { get; set; } = null;
 
     [FromQuery(Name = "fullnameincludesubstring")]
     public string FullNameIncludeSubstring { get; set; }
