@@ -13,6 +13,6 @@ namespace LT.DigitalOffice.DepartmentService.Data.Provider
 
     DbSet<DbDepartmentUser> DepartmentsUsers { get; set; }
 
-    public DbSet<DbCategory> Categories { get; set; }
+    DbSet<DbCategory> Categories { get; set; }
   }
 }

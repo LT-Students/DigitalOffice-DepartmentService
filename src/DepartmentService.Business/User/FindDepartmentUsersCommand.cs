@@ -50,7 +50,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     public async Task<FindResultResponse<UserInfo>> ExecuteAsync(
       Guid departmentId,
       FindDepartmentUsersFilter filter,
-      CancellationToken cancellationToken)
+      CancellationToken cancellationToken = default)
     {
       if (!_baseFindFilterValidator.ValidateCustom(filter, out List<string> errors))
       {

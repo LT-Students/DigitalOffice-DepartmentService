@@ -14,6 +14,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.User.Interfaces
     Task<FindResultResponse<UserInfo>> ExecuteAsync(
       Guid departmentId,
       FindDepartmentUsersFilter filter,
-      CancellationToken cancellationToken);
+      CancellationToken cancellationToken = default);
   }
 }

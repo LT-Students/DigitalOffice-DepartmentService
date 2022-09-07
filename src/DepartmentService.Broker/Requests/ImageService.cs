@@ -35,7 +35,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       List<Guid> imagesIds,
       ImageSource imageSourse,
       List<string> errors,
-      CancellationToken cancellationToken)
+      CancellationToken cancellationToken = default)
     {
       return imagesIds is null || !imagesIds.Any()
         ? null
