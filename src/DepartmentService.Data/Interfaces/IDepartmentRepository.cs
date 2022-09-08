@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<bool> ExistAsync(Guid departmentId);
 
-    Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync(FindDepartmentFilter filter);
+    Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync();
 
     Task RemoveAsync(List<Guid> departmentsIds);
   }

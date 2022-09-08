@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
       {
         List<Guid> departmentsChildrenIds = new();
 
-        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(new()), departmentUser.DepartmentId, departmentsChildrenIds);
+        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(), departmentUser.DepartmentId, departmentsChildrenIds);
 
         if (departmentsChildrenIds is not null && departmentsChildrenIds.Contains(request.DepartmentId))
         {

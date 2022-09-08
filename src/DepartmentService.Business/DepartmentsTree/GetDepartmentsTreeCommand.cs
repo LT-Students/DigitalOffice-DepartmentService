@@ -6,7 +6,6 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Constants;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -28,13 +27,13 @@ namespace LT.DigitalOffice.DepartmentService.Business.DepartmentsTree
       _cache = cache;
     }
 
-    public async Task<OperationResultResponse<List<DepartmentsTreeInfo>>> ExecuteAsync(FindDepartmentFilter filter)
+    public async Task<OperationResultResponse<List<DepartmentsTreeInfo>>> ExecuteAsync()
     {
       List<DepartmentsTreeInfo> departmentsTreeCache = _cache.Get<List<DepartmentsTreeInfo>>(CacheKeys.DepartmentsTree);
 
       if (departmentsTreeCache is null)
       {
-        List<Tuple<Guid, string, string, Guid?>> departmentsTree = await _departmentRepository.GetDepartmentsTreeAsync(filter);
+        List<Tuple<Guid, string, string, Guid?>> departmentsTree = await _departmentRepository.GetDepartmentsTreeAsync();
         departmentsTreeCache = _cache.Set(CacheKeys.DepartmentsTree, _departmentsTreeInfoMapper.Map(departmentsTree, null));
       }
 

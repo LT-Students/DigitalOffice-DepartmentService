@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.DepartmentsTree.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
-using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +13,9 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
   {
     [HttpGet("get")]
     public async Task<OperationResultResponse<List<DepartmentsTreeInfo>>> GetDepartmentsTreeAsync(
-      [FromServices] IGetDepartmentsTreeCommand command,
-      [FromQuery] FindDepartmentFilter filter)
+      [FromServices] IGetDepartmentsTreeCommand command)
     {
-      return await command.ExecuteAsync(filter);
+      return await command.ExecuteAsync();
     }
   }
 }
