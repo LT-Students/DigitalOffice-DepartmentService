@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
@@ -17,16 +18,19 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
 {
   public class PositionService : IPositionService
   {
-    private readonly IRequestClient<IGetPositionsRequest> _rcGetPositions;
+    private readonly IRequestClient<IGetPositionsRequest> _rcGetPositionsData;
+    private readonly IRequestClient<IFilterPositionsRequest> _rcGetPosotions;
     private readonly ILogger<PositionService> _logger;
     private readonly IGlobalCacheRepository _globalCache;
 
     public PositionService(
-      IRequestClient<IGetPositionsRequest> rcGetPositions,
+      IRequestClient<IGetPositionsRequest> rcGetPositionsData,
+      IRequestClient<IFilterPositionsRequest> rcGetPosotions,
       ILogger<PositionService> logger,
       IGlobalCacheRepository globalCache)
     {
-      _rcGetPositions = rcGetPositions;
+      _rcGetPositionsData = rcGetPositionsData;
+      _rcGetPosotions = rcGetPosotions;
       _logger = logger;
       _globalCache = globalCache;
     }
@@ -50,7 +54,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       else
       {
         positions = (await RequestHandler.ProcessRequest<IGetPositionsRequest, IGetPositionsResponse>(
-            _rcGetPositions,
+            _rcGetPositionsData,
             IGetPositionsRequest.CreateObj(usersIds),
             errors,
             _logger))
@@ -58,6 +62,33 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       }
 
       return positions;
+    }
+
+    public async Task<List<PositionFilteredData>> GetPositionFilteredDataAsync(List<Guid> positionsIds, List<string> errors)
+    {
+      if (positionsIds is null || !positionsIds.Any())
+      {
+        return null;
+      }
+
+      List<PositionFilteredData> positionsData = await _globalCache.GetAsync<List<PositionFilteredData>>(Cache.Positions, positionsIds.GetRedisCacheHashCode());
+
+      if (positionsData is null)
+      {
+        positionsData =
+          (await RequestHandler.ProcessRequest<IFilterPositionsRequest, IFilterPositionsResponse>(
+            _rcGetPosotions,
+            IFilterPositionsRequest.CreateObj(positionsIds),
+            errors,
+            _logger))
+          ?.Positions;
+      }
+      if (positionsData is null)
+      {
+        errors.Add("Can not filter by positions.");
+      }
+
+      return positionsData;
     }
   }
 }

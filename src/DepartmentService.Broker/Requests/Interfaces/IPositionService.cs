@@ -14,5 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces
       List<Guid> usersIds,
       List<string> errors = null,
       CancellationToken cancellationToken = default);
+
+    Task<List<PositionFilteredData>> GetPositionFilteredDataAsync(List<Guid> positionsIds, List<string> errors);
   }
 }

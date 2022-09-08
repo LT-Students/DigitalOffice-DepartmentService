@@ -1,4 +1,5 @@
-﻿using LT.DigitalOffice.Kernel.Requests;
+﻿using System;
+using LT.DigitalOffice.Kernel.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
@@ -22,5 +23,8 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
 
     [FromQuery(Name = "includePositions")]
     public bool IncludePositions { get; set; } = false;
+
+    [FromQuery(Name = "byPositionId")]
+    public Guid? byPositionId { get; set; } = null;
   }
 }
