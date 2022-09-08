@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
@@ -13,7 +14,6 @@ using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using MassTransit;
-using MassTransit.Clients;
 using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.DepartmentService.Broker.Requests
@@ -30,9 +30,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
     {
       List<object> additionalArgs = new() { filter.SkipCount, filter.TakeCount };
 
-      if (filter.AscendingSort.HasValue)
+      if (filter.IsAscendingSort.HasValue)
       {
-        additionalArgs.Add(filter.AscendingSort.Value);
+        additionalArgs.Add(filter.IsAscendingSort.Value);
       }
 
       return usersIds.GetRedisCacheHashCode(additionalArgs.ToArray());
@@ -63,7 +63,10 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
         _logger))?.UserIds;
     }
 
-    public async Task<List<UserData>> GetUsersDatasAsync(List<Guid> usersIds, List<string> errors)
+    public async Task<List<UserData>> GetUsersDatasAsync(
+      List<Guid> usersIds,
+      List<string> errors,
+      CancellationToken cancellationToken = default)
     {
       if (usersIds is null || !usersIds.Any())
       {
@@ -88,7 +91,10 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       return usersData;
     }
 
-    public async Task<(List<UserData> usersData, int totalCount)> GetFilteredUsersAsync(List<Guid> usersIds, FindDepartmentUsersFilter filter)
+    public async Task<(List<UserData> usersData, int totalCount)> GetFilteredUsersAsync(
+      List<Guid> usersIds,
+      FindDepartmentUsersFilter filter,
+      CancellationToken cancellationToken = default)
     {
       if (usersIds is null || !usersIds.Any() || filter is null)
       {
@@ -109,7 +115,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
             usersIds: usersIds,
             skipCount: filter.SkipCount,
             takeCount: filter.TakeCount,
-            ascendingSort: filter.AscendingSort),
+            ascendingSort: filter.IsAscendingSort,
+            fullNameIncludeSubstring: filter.FullNameIncludeSubstring),
           logger: _logger);
 
         usersFilteredData.usersData = response?.UsersData;

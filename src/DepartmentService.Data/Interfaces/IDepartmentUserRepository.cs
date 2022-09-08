@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.DepartmentService.Models.Db;
@@ -24,7 +25,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment);
 
-    Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter);
+    Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter, CancellationToken cancellationToken = default);
 
     Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request);
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DigitalOffice.Models.Broker.Publishing;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
@@ -146,16 +147,15 @@ namespace LT.DigitalOffice.DepartmentService.Data
       foreach (DbDepartmentUser du in dbDepartmentUsers)
       {
         du.Assignment = (int)assignment;
-        du.Role = assignment == DepartmentUserAssignment.Director ? (int)DepartmentUserRole.Manager : du.Role;
+        du.Role = assignment == DepartmentUserAssignment.Director ? (int)DepartmentUserRole.Manager : (int)DepartmentUserRole.Employee;
         du.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
       }
 
       await _provider.SaveAsync();
-
       return true;
     }
 
-    public Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter)
+    public Task<List<DbDepartmentUser>> GetAsync(Guid departmentId, FindDepartmentUsersFilter filter, CancellationToken cancellationToken = default)
     {
       IQueryable<DbDepartmentUser> departmentUsersQuery = _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId);
 
@@ -171,7 +171,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           : departmentUsersQuery.OrderByDescending(d => d.Assignment).ThenByDescending(d => d.Role);
       }
 
-      return departmentUsersQuery.ToListAsync();
+      return departmentUsersQuery.ToListAsync(cancellationToken);
     }
 
     public Task<DbDepartmentUser> GetAsync(Guid userId, bool includeDepartment = false)
@@ -272,6 +272,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       if (director is not null)
       {
         director.Assignment = (int)DepartmentUserAssignment.Employee;
+        director.Role = (int)DepartmentUserRole.Employee;
         director.CreatedBy = _httpContextAccessor.HttpContext.GetUserId();
 
         await _provider.SaveAsync();

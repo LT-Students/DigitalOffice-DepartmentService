@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using LT.DigitalOffice.DepartmentService.Broker.Consumers;
-using LT.DigitalOffice.DepartmentService.Data.Provider.MsSql.Ef;
+using LT.DigitalOffice.DepartmentService.Data.Provider;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configuration;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Configurations;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;

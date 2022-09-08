@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
@@ -46,32 +47,47 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _userInfoMapper = userInfoMapper;
     }
 
-    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(Guid departmentId, FindDepartmentUsersFilter filter)
+    public async Task<FindResultResponse<UserInfo>> ExecuteAsync(
+      Guid departmentId,
+      FindDepartmentUsersFilter filter,
+      CancellationToken cancellationToken = default)
     {
       if (!_baseFindFilterValidator.ValidateCustom(filter, out List<string> errors))
       {
         return ResponseCreatorStatic.CreateFindResponse<UserInfo>(statusCode: HttpStatusCode.BadRequest, errors: errors);
       }
 
-      List<DbDepartmentUser> departmentUsers = await _departmentUserRepository.GetAsync(departmentId: departmentId, filter: filter);
+      List<DbDepartmentUser> departmentUsers = 
+        await _departmentUserRepository.GetAsync(departmentId: departmentId, filter: filter, cancellationToken);
 
-      if (departmentUsers is null)
+      if (departmentUsers is null || !departmentUsers.Any())
       {
-        return new();
+        return new(errors: errors);
       }
 
-      (List<UserData> usersData, int totalCount) =
-        await _userService.GetFilteredUsersAsync(departmentUsers.Select(pu => pu.UserId).ToList(), filter);
+      IEnumerable<Guid> usersIds = departmentUsers.Select(pu => pu.UserId);
+
+      //should fix it in future
+      //filter department users by posinion
+      if (filter.byPositionId.HasValue)
+      {
+        PositionFilteredData data = (await _positionService.GetPositionFilteredDataAsync(new List<Guid>() { filter.byPositionId.Value }, errors))?.FirstOrDefault();
+
+        usersIds = data is not null ? usersIds.Where(i => data.UsersIds.Contains(i)).ToList() : Enumerable.Empty<Guid>();
+      }
+
+      (List<UserData> usersData, int totalCount) = await _userService.GetFilteredUsersAsync(usersIds.ToList(), filter, cancellationToken);
 
       Task<List<ImageInfo>> usersAvatarsTask = filter.IncludeAvatars
         ? _imageService.GetImagesAsync(
             imagesIds: usersData?.Where(x => x.ImageId.HasValue).Select(x => x.ImageId.Value).ToList(),
             imageSourse: ImageSource.User,
-            errors)
+            errors,
+            cancellationToken)
         : Task.FromResult<List<ImageInfo>>(default);
 
       Task<List<PositionData>> usersPositionsTask = filter.IncludePositions
-        ? _positionService.GetPositionsAsync(usersIds: usersData?.Select(x => x.Id).ToList())
+        ? _positionService.GetPositionsAsync(usersIds: usersData?.Select(x => x.Id).ToList(), errors, cancellationToken)
         : Task.FromResult<List<PositionData>>(default);
 
       if (filter.DepartmentUserRoleAscendingSort.HasValue)

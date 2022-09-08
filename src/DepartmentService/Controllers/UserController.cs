@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
@@ -35,9 +36,10 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     public async Task<FindResultResponse<UserInfo>> FindAsync(
       [FromServices] IFindDepartmentUsersCommand command,
       [FromQuery] FindDepartmentUsersFilter filter,
-      [FromQuery] Guid departmentId)
+      [FromQuery] Guid departmentId,
+      CancellationToken cancellationToken)
     {
-      return await command.ExecuteAsync(departmentId, filter);
+      return await command.ExecuteAsync(departmentId, filter, cancellationToken);
     }
 
     [HttpPut("editRole")]

@@ -3,7 +3,6 @@
   <Import Project="$(ProjectDir)..\..\Common.Configurations.targets" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DepartmentService.Data.Provider.MsSql.Ef\DepartmentService.Data.Provider.MsSql.Ef.csproj" />
     <ProjectReference Include="..\..\src\DepartmentService.Data\DepartmentService.Data.csproj" />
   </ItemGroup>
 

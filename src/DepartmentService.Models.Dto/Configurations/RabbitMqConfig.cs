@@ -34,6 +34,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
 
+
+    [AutoInjectRequest(typeof(IFilterPositionsRequest))]
+    public string FilterPositionsEndpoint { get; set; }
+
     //user
 
     [AutoInjectRequest(typeof(ICheckUsersExistence))]
