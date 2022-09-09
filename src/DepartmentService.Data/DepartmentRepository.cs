@@ -160,7 +160,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
     {
       IQueryable<DbDepartment> departments = _provider.Departments.AsQueryable();
 
-      return await departments.Include(x => x.Category).Where(x => x.IsActive == true).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
+      return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
     }
 
     public async Task RemoveAsync(List<Guid> departmentsIds)
