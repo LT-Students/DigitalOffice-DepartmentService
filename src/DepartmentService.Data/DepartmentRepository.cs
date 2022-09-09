@@ -105,8 +105,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
       if (!string.IsNullOrWhiteSpace(filter.NameIncludeSubstring))
       {
         dbDepartments = dbDepartments.Where(d =>
-          d.Name.Contains(filter.NameIncludeSubstring, StringComparison.OrdinalIgnoreCase)
-          || d.ShortName.Contains(filter.NameIncludeSubstring, StringComparison.OrdinalIgnoreCase));
+          d.Name.Contains(filter.NameIncludeSubstring)
+          || d.ShortName.Contains(filter.NameIncludeSubstring));
       }
 
       return (
