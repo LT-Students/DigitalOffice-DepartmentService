@@ -81,7 +81,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       {
         List<Guid> archivedDepartmentsIds = new();
 
-        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(new()), departmentId, archivedDepartmentsIds);
+        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(), departmentId, archivedDepartmentsIds);
 
         await _departmentRepository.RemoveAsync(archivedDepartmentsIds);
 

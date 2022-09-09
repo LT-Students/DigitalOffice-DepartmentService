@@ -159,14 +159,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
     }
 
-    public async Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync(FindDepartmentFilter filter)
+    public async Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync()
     {
       IQueryable<DbDepartment> departments = _provider.Departments.AsQueryable();
-
-      if (filter.IsActive.HasValue)
-      {
-        departments = departments.Where(d => d.IsActive == filter.IsActive);
-      }
 
       return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
     }
