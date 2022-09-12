@@ -192,7 +192,7 @@ namespace LT.DigitalOffice.DepartmentService
             },
           Predicate = check => check.Name != "masstransit-bus",
           ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        });
+        }).RequireHost("health.dev.ltdo.xyz");
       });
     }
 
