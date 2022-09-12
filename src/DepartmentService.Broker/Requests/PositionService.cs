@@ -45,7 +45,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
         return null;
       }
 
-      List<PositionData> positions = await _globalCache.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheHashCode());
+      object request = IGetPositionsRequest.CreateObj(usersIds);
+
+      List<PositionData> positions = await _globalCache.GetAsync<List<PositionData>>(Cache.Positions, usersIds.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (positions is not null)
       {
@@ -55,7 +57,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       {
         positions = (await RequestHandler.ProcessRequest<IGetPositionsRequest, IGetPositionsResponse>(
             _rcGetPositionsData,
-            IGetPositionsRequest.CreateObj(usersIds),
+            request,
             errors,
             _logger))
           ?.Positions;
@@ -71,14 +73,16 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
         return null;
       }
 
-      List<PositionFilteredData> positionsData = await _globalCache.GetAsync<List<PositionFilteredData>>(Cache.Positions, positionsIds.GetRedisCacheHashCode());
+      object request = IFilterPositionsRequest.CreateObj(positionsIds);
+
+      List<PositionFilteredData> positionsData = await _globalCache.GetAsync<List<PositionFilteredData>>(Cache.Positions, positionsIds.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (positionsData is null)
       {
         positionsData =
           (await RequestHandler.ProcessRequest<IFilterPositionsRequest, IFilterPositionsResponse>(
             _rcGetPosotions,
-            IFilterPositionsRequest.CreateObj(positionsIds),
+            request,
             errors,
             _logger))
           ?.Positions;
