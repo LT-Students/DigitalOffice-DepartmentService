@@ -26,9 +26,9 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<List<DbDepartment>> SearchAsync(string text);
 
-    Task<bool> NameExistAsync(string name);
+    Task<bool> NameExistAsync(string name, Guid? departmentId = null);
 
-    Task<bool> ShortNameExistAsync(string shortName);
+    Task<bool> ShortNameExistAsync(string shortName, Guid? departmentId = null);
 
     Task<bool> ExistAsync(Guid departmentId);
 

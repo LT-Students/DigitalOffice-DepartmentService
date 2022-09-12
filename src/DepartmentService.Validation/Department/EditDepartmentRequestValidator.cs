@@ -11,13 +11,14 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace LT.DigitalOffice.DepartmentService.Validation.Department
 {
-  public class EditDepartmentRequestValidator : BaseEditRequestValidator<EditDepartmentRequest>, IEditDepartmentRequestValidator
+  public class EditDepartmentRequestValidator : ExtendedEditRequestValidator<Guid, EditDepartmentRequest>, IEditDepartmentRequestValidator
   {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ICategoryRepository _categoryRepository;
 
-    private async Task HandleInternalPropertyValidation(
+    private async Task HandleInternalPropertyValidationAsync(
       Operation<EditDepartmentRequest> requestedOperation,
+      Guid departmentId,
       CustomContext context)
     {
       RequestedOperation = requestedOperation;
@@ -63,7 +64,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           {
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
-            && !await _departmentRepository.NameExistAsync(x.value?.ToString()),
+            && !await _departmentRepository.NameExistAsync(x.value?.ToString(), departmentId),
             "The department name already exist."
           },
         });
@@ -90,7 +91,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
           {
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
-            && !await _departmentRepository.ShortNameExistAsync(x.value?.ToString()),
+            && !await _departmentRepository.ShortNameExistAsync(x.value?.ToString(), departmentId),
             "The department short name already exist."
           },
         });
@@ -154,8 +155,14 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
       _departmentRepository = departmentRepository;
       _categoryRepository = categoryRepository;
 
-      RuleForEach(request => request.Operations)
-        .CustomAsync(async (x, context, token) => await HandleInternalPropertyValidation(x, context));
+      RuleFor(x => x)
+        .CustomAsync(async (x, context, _) =>
+        {
+          foreach (var op in x.Item2.Operations)
+          {
+            await HandleInternalPropertyValidationAsync(op, x.Item1, context);
+          }
+        });
     }
   }
 }
