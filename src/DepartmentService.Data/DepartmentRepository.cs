@@ -147,8 +147,8 @@ namespace LT.DigitalOffice.DepartmentService.Data
     public Task<bool> NameExistAsync(string name, Guid? departmentId = null)
     {
       return departmentId is null
-        ? _provider.Departments.AnyAsync(d => d.Name == name)
-        : _provider.Departments.AnyAsync(d => d.Name == name && d.Id != departmentId);
+        ? _provider.Departments.AnyAsync(d => d.Name == name && d.Id != departmentId)
+        : _provider.Departments.AnyAsync(d => d.Name == name);
     }
 
     public Task<bool> ShortNameExistAsync(string shortName, Guid? departmentId = null)
