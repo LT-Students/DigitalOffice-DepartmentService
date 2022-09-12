@@ -146,7 +146,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public Task<bool> NameExistAsync(string name, Guid? departmentId = null)
     {
-      return departmentId is null
+      return departmentId.HasValue
         ? _provider.Departments.AnyAsync(d => d.Name == name && d.Id != departmentId)
         : _provider.Departments.AnyAsync(d => d.Name == name);
     }
