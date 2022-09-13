@@ -62,8 +62,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
-
+      ValidationResult validationResult = await _validator.ValidateAsync((departmentId, request));
       if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest,

@@ -57,15 +57,15 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartment.Id;
     }
 
-    public async Task<DbDepartment> GetAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
+    public Task<DbDepartment> GetAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
       return filter is null
-        ? null
-        : await CreateGetPredicates(filter, _provider.Departments.AsQueryable())
+        ? Task.FromResult(default(DbDepartment))
+        : CreateGetPredicates(filter, _provider.Departments.AsQueryable())
           .FirstOrDefaultAsync(d => d.Id == filter.DepartmentId, cancellationToken);
     }
 
-    public async Task<List<DbDepartment>> GetAsync(
+    public Task<List<DbDepartment>> GetAsync(
       List<Guid> departmentsIds = null,
       List<Guid> usersIds = null)
     {
@@ -83,7 +83,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       dbDepartments = dbDepartments.Include(d => d.Users.Where(du => du.IsActive));
 
-      return await dbDepartments.ToListAsync();
+      return dbDepartments.ToListAsync();
     }
 
     public async Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter, CancellationToken cancellationToken = default)
@@ -119,9 +119,9 @@ namespace LT.DigitalOffice.DepartmentService.Data
         await dbDepartments.CountAsync(cancellationToken));
     }
 
-    public async Task<List<DbDepartment>> SearchAsync(string text)
+    public Task<List<DbDepartment>> SearchAsync(string text)
     {
-      return await _provider.Departments
+      return _provider.Departments
         .Where(d => d.Name.Contains(text, StringComparison.OrdinalIgnoreCase))
         .ToListAsync();
     }
@@ -144,26 +144,28 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return true;
     }
 
-    public async Task<bool> NameExistAsync(string name)
+    public Task<bool> NameExistAsync(string name, Guid? departmentId = null)
     {
-      return await _provider.Departments.AnyAsync(d => d.Name == name);
+      return departmentId.HasValue
+        ? _provider.Departments.AnyAsync(d => d.Name == name && d.Id != departmentId)
+        : _provider.Departments.AnyAsync(d => d.Name == name);
     }
 
-    public async Task<bool> ShortNameExistAsync(string shortName)
+    public Task<bool> ShortNameExistAsync(string shortName, Guid? departmentId = null)
     {
-      return await _provider.Departments.AnyAsync(d => d.ShortName == shortName);
+      return departmentId.HasValue
+        ? _provider.Departments.AnyAsync(d => d.ShortName == shortName && d.Id != departmentId)
+        : _provider.Departments.AnyAsync(d => d.ShortName == shortName);
     }
 
-    public async Task<bool> ExistAsync(Guid departmentId)
+    public Task<bool> ExistAsync(Guid departmentId)
     {
-      return await _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
+      return _provider.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive);
     }
 
-    public async Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync()
+    public Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync()
     {
-      IQueryable<DbDepartment> departments = _provider.Departments.AsQueryable();
-
-      return await departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
+      return _provider.Departments.Include(x => x.Category).Select(x => new Tuple<Guid, string, string, Guid?>(x.Id, x.Name, x.Category.Name, x.ParentId)).ToListAsync();
     }
 
     public async Task RemoveAsync(List<Guid> departmentsIds)

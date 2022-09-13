@@ -180,12 +180,11 @@ namespace LT.DigitalOffice.DepartmentService.Data
         .FirstOrDefaultAsync(u => u.IsActive && u.UserId == userId);
     }
 
-    public async Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
+    public Task<List<DbDepartmentUser>> GetAsync(List<Guid> usersIds, bool includeDepartments = false)
     {
       return usersIds is null
-        ? new()
-        : await
-          CreateGetPredicates(includeDepartments, _provider.DepartmentsUsers.AsQueryable())
+        ? Task.FromResult(default(List<DbDepartmentUser>))
+        : CreateGetPredicates(includeDepartments, _provider.DepartmentsUsers.AsQueryable())
           .Where(u => u.IsActive && usersIds.Contains(u.UserId))
           .ToListAsync();
     }
