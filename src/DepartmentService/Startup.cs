@@ -182,11 +182,11 @@ namespace LT.DigitalOffice.DepartmentService
       {
         endpoints.MapControllers().RequireCors(CorsPolicyName);
 
-        endpoints.MapHealthChecks($"/{_serviceInfoConfig.Id}/hc", new HealthCheckOptions
+        endpoints.MapHealthChecks("/hc", new HealthCheckOptions
         {
           ResultStatusCodes = new Dictionary<HealthStatus, int>
             {
-              { HealthStatus.Unhealthy, 200 },
+              { HealthStatus.Unhealthy, 503 },
               { HealthStatus.Healthy, 200 },
               { HealthStatus.Degraded, 200 },
             },
