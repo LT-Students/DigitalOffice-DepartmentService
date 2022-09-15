@@ -167,11 +167,11 @@ namespace LT.DigitalOffice.DepartmentService
             {
               { HealthStatus.Unhealthy, 503 },
               { HealthStatus.Healthy, 200 },
-              { HealthStatus.Degraded, 200 }
+              { HealthStatus.Degraded, 200 },
             },
           Predicate = check => check.Name != "masstransit-bus",
           ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        }).RequireHost("172.18.0.24"); // This is the fixed IP of test service
+        }).RequireHost("127.18.0.24");
       });
     }
 
