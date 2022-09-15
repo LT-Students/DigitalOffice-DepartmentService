@@ -171,7 +171,7 @@ namespace LT.DigitalOffice.DepartmentService
             },
           Predicate = check => check.Name != "masstransit-bus",
           ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-        }).RequireHost("127.18.0.24");
+        }).RequireHost("::ffff:127.18.0.24:*");
       });
     }
 
