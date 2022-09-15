@@ -79,7 +79,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       await _repository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
 
       _httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Created;
-      updatedUsersIds.Select(userId => _globalCache.RemoveAsync(userId));
+
+      updatedUsersIds?.ForEach(async userId => await _globalCache.RemoveAsync(userId));
       await _globalCache.RemoveAsync(request.DepartmentId);
 
       return new OperationResultResponse<bool>(body: true);

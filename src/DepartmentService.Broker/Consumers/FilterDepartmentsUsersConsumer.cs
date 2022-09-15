@@ -54,6 +54,9 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
       if (departmentFilteredData is not null)
       {
+        List<Guid> elementsIds = departmentFilteredData.Select(d => d.Id)
+          .Concat(departmentFilteredData.SelectMany(d => d.UsersIds)).ToList();
+
         await _globalCache.CreateAsync(
           Cache.Departments,
           context.Message.DepartmentsIds.GetRedisCacheKey(context.Message.GetBasicProperties()),
