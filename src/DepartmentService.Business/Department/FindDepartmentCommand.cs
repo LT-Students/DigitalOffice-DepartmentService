@@ -93,7 +93,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
             _userMapper.Map(
               d.Users?.FirstOrDefault(u => u.Assignment == (int)DepartmentUserAssignment.Director),
               userData,
-              images?.FirstOrDefault(i => i.Id == userData.ImageId), null));
+              images?.FirstOrDefault(i => i.Id == userData?.ImageId),
+              null));
         }).ToList());
     }
   }
