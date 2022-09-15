@@ -14,6 +14,7 @@ using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.BrokerSupport.AccessValidatorEngine.Interfaces;
 using LT.DigitalOffice.Kernel.Constants;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
+using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -31,6 +32,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
     private readonly IMemoryCache _cache;
+    private readonly IGlobalCacheRepository _globalCache;
 
     public CreateDepartmentCommand(
       ICreateDepartmentRequestValidator validator,
@@ -41,7 +43,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      IMemoryCache cache)
+      IMemoryCache cache,
+      IGlobalCacheRepository globalCache)
     {
       _validator = validator;
       _departmentMapper = departmentMapper;
@@ -52,6 +55,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
       _cache = cache;
+      _globalCache = globalCache;
     }
 
     public async Task<OperationResultResponse<Guid?>> ExecuteAsync(CreateDepartmentRequest request)
@@ -88,6 +92,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       await _userRepository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
 
       _cache.Remove(CacheKeys.DepartmentsTree);
+      updatedUsersIds.ForEach(async u => await _globalCache.RemoveAsync(u));
 
       return response;
     }

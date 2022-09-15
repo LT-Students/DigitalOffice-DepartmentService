@@ -7,6 +7,7 @@ using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
 using LT.DigitalOffice.Kernel.Validators;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace LT.DigitalOffice.DepartmentService.Validation.Department
@@ -19,7 +20,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
     private async Task HandleInternalPropertyValidationAsync(
       Operation<EditDepartmentRequest> requestedOperation,
       Guid departmentId,
-      CustomContext context)
+      ValidationContext<(Guid, JsonPatchDocument<EditDepartmentRequest>)> context)
     {
       RequestedOperation = requestedOperation;
       Context = context;
