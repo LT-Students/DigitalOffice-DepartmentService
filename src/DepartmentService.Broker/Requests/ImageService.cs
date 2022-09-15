@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
@@ -30,7 +31,11 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       _logger = logger;
     }
 
-    public async Task<List<ImageInfo>> GetImagesAsync(List<Guid> imagesIds, ImageSource imageSourse, List<string> errors)
+    public async Task<List<ImageInfo>> GetImagesAsync(
+      List<Guid> imagesIds,
+      ImageSource imageSourse,
+      List<string> errors,
+      CancellationToken cancellationToken = default)
     {
       return imagesIds is null || !imagesIds.Any()
         ? null

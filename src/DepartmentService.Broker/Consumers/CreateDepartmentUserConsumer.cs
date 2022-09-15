@@ -18,24 +18,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
     private readonly IGlobalCacheRepository _globalCache;
     private readonly ILogger<CreateDepartmentUserConsumer> _logger;
 
-    private async Task<bool> CreateEntityAsync(ICreateDepartmentUserPublish request)
-    {
-      bool response = false;
-
-      if (await _departmentRepository.ExistAsync(request.DepartmentId))
-      {
-        return await _userRepository.CreateAsync(new List<DbDepartmentUser>()
-        {
-          _userMapper.Map(
-            request.UserId,
-            request.DepartmentId,
-            request.CreatedBy)
-        });
-      }
-
-      return response;
-    }
-
     public CreateDepartmentUserConsumer(
       IDepartmentRepository departmentRepository,
       IDepartmentUserRepository userReposirory,
@@ -52,9 +34,14 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
     public async Task Consume(ConsumeContext<ICreateDepartmentUserPublish> context)
     {
-      if (await CreateEntityAsync(context.Message))
+      if (await _departmentRepository.ExistAsync(context.Message.DepartmentId))
       {
-        await _globalCache.RemoveAsync(context.Message.DepartmentId);
+        await _userRepository.CreateAsync(new List<DbDepartmentUser>() { _userMapper.Map(context.Message) });
+
+        if (context.Message.IsActive)
+        {
+          await _globalCache.RemoveAsync(context.Message.DepartmentId);
+        }
       }
       else
       {

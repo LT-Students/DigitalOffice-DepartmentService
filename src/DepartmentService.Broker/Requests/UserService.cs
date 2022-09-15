@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Broker.Requests.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser;
@@ -13,7 +14,6 @@ using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Requests.User;
 using LT.DigitalOffice.Models.Broker.Responses.User;
 using MassTransit;
-using MassTransit.Clients;
 using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.DepartmentService.Broker.Requests
@@ -25,18 +25,6 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
     private readonly IRequestClient<ICheckUsersExistence> _rcCheckUsersExistence;
     private readonly ILogger<UserService> _logger;
     private readonly IGlobalCacheRepository _globalCache;
-
-    private string CreateRedisKey(IEnumerable<Guid> usersIds, FindDepartmentUsersFilter filter)
-    {
-      List<object> additionalArgs = new() { filter.SkipCount, filter.TakeCount };
-
-      if (filter.AscendingSort.HasValue)
-      {
-        additionalArgs.Add(filter.AscendingSort.Value);
-      }
-
-      return usersIds.GetRedisCacheHashCode(additionalArgs.ToArray());
-    }
 
     public UserService(
       IRequestClient<IGetUsersDataRequest> rcGetUsersData,
@@ -63,14 +51,19 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
         _logger))?.UserIds;
     }
 
-    public async Task<List<UserData>> GetUsersDatasAsync(List<Guid> usersIds, List<string> errors)
+    public async Task<List<UserData>> GetUsersDatasAsync(
+      List<Guid> usersIds,
+      List<string> errors,
+      CancellationToken cancellationToken = default)
     {
       if (usersIds is null || !usersIds.Any())
       {
         return null;
       }
 
-      List<UserData> usersData = await _globalCache.GetAsync<List<UserData>>(Cache.Users, usersIds.GetRedisCacheHashCode());
+      object request = IGetUsersDataRequest.CreateObj(usersIds);
+
+      List<UserData> usersData = await _globalCache.GetAsync<List<UserData>>(Cache.Users, usersIds.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (usersData is not null)
       {
@@ -80,7 +73,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       else
       {
         usersData = (await _rcGetUsersData.ProcessRequest<IGetUsersDataRequest, IGetUsersDataResponse>(
-          IGetUsersDataRequest.CreateObj(usersIds),
+          request,
           errors,
           _logger))?.UsersData;
       }
@@ -88,14 +81,25 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       return usersData;
     }
 
-    public async Task<(List<UserData> usersData, int totalCount)> GetFilteredUsersAsync(List<Guid> usersIds, FindDepartmentUsersFilter filter)
+    public async Task<(List<UserData> usersData, int totalCount)> GetFilteredUsersAsync(
+      List<Guid> usersIds,
+      FindDepartmentUsersFilter filter,
+      CancellationToken cancellationToken = default)
     {
       if (usersIds is null || !usersIds.Any() || filter is null)
       {
         return default;
       }
 
-      (List<UserData> usersData, int totalCount) usersFilteredData = await _globalCache.GetAsync<(List<UserData>, int)>(Cache.Users, CreateRedisKey(usersIds, filter));
+      object request = IFilteredUsersDataRequest.CreateObj(
+        usersIds: usersIds,
+        skipCount: filter.SkipCount,
+        takeCount: filter.TakeCount,
+        ascendingSort: filter.IsAscendingSort,
+        fullNameIncludeSubstring: filter.FullNameIncludeSubstring);
+
+      (List<UserData> usersData, int totalCount) usersFilteredData =
+        await _globalCache.GetAsync<(List<UserData>, int)>(Cache.Users, usersIds.GetRedisCacheKey(request.GetBasicProperties()));
 
       if (usersFilteredData.usersData is not null)
       {
@@ -105,11 +109,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
       else
       {
         IFilteredUsersDataResponse response = await _rcGetFilteredUsers.ProcessRequest<IFilteredUsersDataRequest, IFilteredUsersDataResponse>(
-          request: IFilteredUsersDataRequest.CreateObj(
-            usersIds: usersIds,
-            skipCount: filter.SkipCount,
-            takeCount: filter.TakeCount,
-            ascendingSort: filter.AscendingSort),
+          request: request,
           logger: _logger);
 
         usersFilteredData.usersData = response?.UsersData;

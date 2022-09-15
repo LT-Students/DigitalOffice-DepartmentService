@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
@@ -13,25 +14,25 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
   {
     Task<Guid?> CreateAsync(DbDepartment dbDepartment);
 
-    Task<DbDepartment> GetAsync(GetDepartmentFilter filter);
+    Task<DbDepartment> GetAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default);
 
     Task<List<DbDepartment>> GetAsync(
       List<Guid> departmentsIds = null,
       List<Guid> usersIds = null);
 
-    Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter);
+    Task<(List<DbDepartment> dbDepartments, int totalCount)> FindAsync(FindDepartmentFilter filter, CancellationToken cancellationToken = default);
 
     Task<bool> EditAsync(Guid departmentId, JsonPatchDocument<DbDepartment> request);
 
     Task<List<DbDepartment>> SearchAsync(string text);
 
-    Task<bool> NameExistAsync(string name);
+    Task<bool> NameExistAsync(string name, Guid? departmentId = null);
 
-    Task<bool> ShortNameExistAsync(string shortName);
+    Task<bool> ShortNameExistAsync(string shortName, Guid? departmentId = null);
 
     Task<bool> ExistAsync(Guid departmentId);
 
-    Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync(FindDepartmentFilter filter);
+    Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync();
 
     Task RemoveAsync(List<Guid> departmentsIds);
   }

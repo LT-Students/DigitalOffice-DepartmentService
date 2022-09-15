@@ -62,8 +62,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
       }
 
-      ValidationResult validationResult = await _validator.ValidateAsync(request);
-
+      ValidationResult validationResult = await _validator.ValidateAsync((departmentId, request));
       if (!validationResult.IsValid)
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.BadRequest,
@@ -81,7 +80,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       {
         List<Guid> archivedDepartmentsIds = new();
 
-        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(new()), departmentId, archivedDepartmentsIds);
+        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(), departmentId, archivedDepartmentsIds);
 
         await _departmentRepository.RemoveAsync(archivedDepartmentsIds);
 

@@ -64,16 +64,18 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
           allGuids.AddRange(context.Message.UsersIds);
         }
 
+        if (context.Message.DepartmentsIds is not null && context.Message.DepartmentsIds.Any())
+        {
+          allGuids.AddRange(context.Message.DepartmentsIds);
+        }
+
         if (allGuids.Any())
         {
-          string key = allGuids.GetRedisCacheHashCode();
-
-          List<Guid> elementsIds = departmentsData.Select(department => department.Id).ToList();
-          elementsIds.AddRange(departmentsData.Select(department => department.Users).SelectMany(x => x).Select(user => user.UserId));
+          List<Guid> elementsIds = departmentsData.Select(d => d.Id).Concat(departmentsData.SelectMany(d => d.Users.Select(du => du.UserId))).ToList();
 
           await _globalCache.CreateAsync(
             Cache.Departments,
-            key,
+            allGuids.GetRedisCacheKey(context.Message.GetBasicProperties()),
             departmentsData,
             elementsIds,
             TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));

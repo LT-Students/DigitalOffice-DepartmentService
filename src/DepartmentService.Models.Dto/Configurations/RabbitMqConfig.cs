@@ -1,7 +1,6 @@
 ﻿using LT.DigitalOffice.Kernel.BrokerSupport.Attributes;
 using LT.DigitalOffice.Kernel.BrokerSupport.Configurations;
 using LT.DigitalOffice.Models.Broker.Common;
-using LT.DigitalOffice.Models.Broker.Requests.Department;
 using LT.DigitalOffice.Models.Broker.Requests.Image;
 using LT.DigitalOffice.Models.Broker.Requests.Position;
 using LT.DigitalOffice.Models.Broker.Requests.Project;
@@ -15,6 +14,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     public string GetDepartmentsEndpoint { get; set; }
     public string GetDepartmentsUsersEndpoint { get; set; }
     public string DisactivateDepartmentUserEndpoint { get; set; }
+    public string ActivateDepartmentUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
     public string FilterDepartmentsEndpoint { get; set; }
     public string GetDepartmentUserRoleEndpoint { get; set; }
@@ -33,6 +33,10 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
 
     [AutoInjectRequest(typeof(IGetPositionsRequest))]
     public string GetPositionsEndpoint { get; set; }
+
+
+    [AutoInjectRequest(typeof(IFilterPositionsRequest))]
+    public string FilterPositionsEndpoint { get; set; }
 
     //user
 

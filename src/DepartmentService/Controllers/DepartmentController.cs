@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Models;
@@ -26,17 +27,19 @@ namespace LT.DigitalOffice.DepartmentService.Controllers
     [HttpGet("get")]
     public async Task<OperationResultResponse<DepartmentResponse>> GetAsync(
       [FromServices] IGetDepartmentCommand command,
-      [FromQuery] GetDepartmentFilter filter)
+      [FromQuery] GetDepartmentFilter filter,
+      CancellationToken cancellationToken)
     {
-      return await command.ExecuteAsync(filter);
+      return await command.ExecuteAsync(filter, cancellationToken);
     }
 
     [HttpGet("find")]
     public async Task<FindResultResponse<DepartmentInfo>> FindAsync(
       [FromServices] IFindDepartmentsCommand command,
-      [FromQuery] FindDepartmentFilter filter)
+      [FromQuery] FindDepartmentFilter filter,
+      CancellationToken cancellationToken)
     {
-      return await command.ExecuteAsync(filter);
+      return await command.ExecuteAsync(filter, cancellationToken);
     }
 
     [HttpPatch("edit")]

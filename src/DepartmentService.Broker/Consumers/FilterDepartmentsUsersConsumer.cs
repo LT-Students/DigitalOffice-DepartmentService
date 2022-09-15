@@ -54,11 +54,12 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
       if (departmentFilteredData is not null)
       {
-        string key = context.Message.DepartmentsIds.GetRedisCacheHashCode();
+        List<Guid> elementsIds = departmentFilteredData.Select(d => d.Id)
+          .Concat(departmentFilteredData.SelectMany(d => d.UsersIds)).ToList();
 
         await _globalCache.CreateAsync(
           Cache.Departments,
-          key,
+          context.Message.DepartmentsIds.GetRedisCacheKey(context.Message.GetBasicProperties()),
           departmentFilteredData,
           context.Message.DepartmentsIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
