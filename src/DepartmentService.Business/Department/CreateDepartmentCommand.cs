@@ -92,7 +92,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       await _userRepository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
 
       _cache.Remove(CacheKeys.DepartmentsTree);
-      updatedUsersIds.ForEach(async u => await _globalCache.RemoveAsync(u));
+      updatedUsersIds?.ForEach(async u => await _globalCache.RemoveAsync(u));
 
       return response;
     }
