@@ -9,8 +9,6 @@ using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department.Filters;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Responses;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -18,22 +16,16 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
   {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDepartmentResponseMapper _departmentResponseMapper;
-    private readonly ILogger<GetDepartmentCommand> _logger;
     private readonly IResponseCreator _responseCreator;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public GetDepartmentCommand(
       IDepartmentRepository departmentRepository,
       IDepartmentResponseMapper departmentResponseMapper,
-      ILogger<GetDepartmentCommand> logger,
-      IResponseCreator responseCreator,
-      IHttpContextAccessor httpContextAccessor)
+      IResponseCreator responseCreator)
     {
       _departmentRepository = departmentRepository;
       _departmentResponseMapper = departmentResponseMapper;
-      _logger = logger;
       _responseCreator = responseCreator;
-      _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
