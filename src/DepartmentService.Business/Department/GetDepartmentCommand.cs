@@ -38,7 +38,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
     public async Task<OperationResultResponse<DepartmentResponse>> ExecuteAsync(GetDepartmentFilter filter, CancellationToken cancellationToken = default)
     {
-      _logger.LogInformation($"<--------- REMOTE HOST IS: {_httpContextAccessor.HttpContext.Connection.RemoteIpAddress} ----------->");
       DbDepartment dbDepartment = await _departmentRepository.GetAsync(filter, cancellationToken);
 
       if (dbDepartment is null)
