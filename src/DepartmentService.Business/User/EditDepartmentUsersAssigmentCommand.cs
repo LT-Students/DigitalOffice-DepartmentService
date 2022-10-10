@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using FluentValidation.Results;
+using LT.DigitalOffice.DepartmentService.Broker.Helpers.Branch.Interfaces;
 using LT.DigitalOffice.DepartmentService.Business.User.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Enums;
@@ -14,6 +15,7 @@ using LT.DigitalOffice.Kernel.Extensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
+using LT.DigitalOffice.Models.Broker.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace LT.DigitalOffice.DepartmentService.Business.User
@@ -26,6 +28,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
+    private readonly IDepartmentBranchHelper _departmentBranchHelper;
 
     public EditDepartmentUsersAssigmentCommand(
       IEditDepartmentUsersAssignmentRequestValidator validator,
@@ -33,7 +36,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       IHttpContextAccessor httpContextAccessor,
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
-      IGlobalCacheRepository globalCache)
+      IGlobalCacheRepository globalCache,
+      IDepartmentBranchHelper departmentBranchHelper)
     {
       _validator = validator;
       _repository = repository;
@@ -41,11 +45,14 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
+      _departmentBranchHelper = departmentBranchHelper;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, EditDepartmentUserAssignmentRequest request)
     {
-      if (!await _repository.IsManagerAsync(_httpContextAccessor.HttpContext.GetUserId())
+      if ((await _departmentBranchHelper.GetDepartmentUserRole(
+          userId: _httpContextAccessor.HttpContext.GetUserId(),
+          departmentId: departmentId) != DepartmentUserRole.Manager)
         && !await _accessValidator.HasRightsAsync(Rights.AddEditRemoveDepartments))
       {
         return _responseCreator.CreateFailureResponse<bool>(HttpStatusCode.Forbidden);
