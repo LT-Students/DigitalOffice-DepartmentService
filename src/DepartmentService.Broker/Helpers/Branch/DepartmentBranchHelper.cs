@@ -46,7 +46,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Helpers.Branch
         {
           childrenIds.AddRange(currentChildrenIds);
 
-          foreach (var childId in currentChildrenIds)
+          foreach (Guid childId in currentChildrenIds)
           {
             childrenIdsStack.Push(childId);
           }

@@ -29,7 +29,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         {
           currentParent.Children = currentChildren;
 
-          foreach (var child in currentChildren)
+          foreach (DepartmentsTreeInfo child in currentChildren)
           {
             childrenStack.Push(child);
           }
