@@ -277,15 +277,5 @@ namespace LT.DigitalOffice.DepartmentService.Data
         await _provider.SaveAsync();
       }
     }
-
-    public async Task<bool> IsManagerAsync(Guid userId)
-    {
-      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers
-        .FirstOrDefaultAsync(du => du.UserId == userId);
-
-      return dbDepartmentUser is not null
-        && dbDepartmentUser.IsActive
-        && dbDepartmentUser.Assignment == (int)DepartmentUserRole.Manager;
-    }
   }
 }

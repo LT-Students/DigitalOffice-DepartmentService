@@ -40,7 +40,5 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task RemoveAsync(List<Guid> departmentIds);
 
     Task RemoveDirectorAsync(Guid departmentId);
-
-    Task<bool> IsManagerAsync(Guid userId);
   }
 }
