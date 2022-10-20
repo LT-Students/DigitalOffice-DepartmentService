@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Broker.Helpers.Branch.Interfaces;
+using LT.DigitalOffice.DepartmentService.Broker.Helpers.MemoryCache.Interfaces;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Patch.Interfaces;
@@ -17,7 +18,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -30,8 +30,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IAccessValidator _accessValidator;
     private readonly IResponseCreator _responseCreator;
     private readonly IGlobalCacheRepository _globalCache;
-    private readonly IMemoryCache _cache;
-    private readonly IDepartmentChildren _departmentChildren;
+    private readonly IDepartmentBranchHelper _departmentBranchHelper;
+    private readonly IMemoryCacheHelper _memoryCacheHelper;
 
     public EditDepartmentCommand(
       IEditDepartmentRequestValidator validator,
@@ -41,8 +41,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IAccessValidator accessValidator,
       IResponseCreator responseCreator,
       IGlobalCacheRepository globalCache,
-      IMemoryCache cache,
-      IDepartmentChildren departmentChildren)
+      IDepartmentBranchHelper departmentBranchHelper,
+      IMemoryCacheHelper memoryCacheHelper)
     {
       _validator = validator;
       _departmentRepository = departmentRepository;
@@ -51,8 +51,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _accessValidator = accessValidator;
       _responseCreator = responseCreator;
       _globalCache = globalCache;
-      _cache = cache;
-      _departmentChildren = departmentChildren;
+      _departmentBranchHelper = departmentBranchHelper;
+      _memoryCacheHelper = memoryCacheHelper;
     }
 
     public async Task<OperationResultResponse<bool>> ExecuteAsync(Guid departmentId, JsonPatchDocument<EditDepartmentRequest> request)
@@ -78,9 +78,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       if (isActiveOperation is not null && bool.TryParse(isActiveOperation.ToString(), out bool isActive) && !isActive)
       {
-        List<Guid> archivedDepartmentsIds = new();
-
-        _departmentChildren.GetChildrenIds(await _departmentRepository.GetDepartmentsTreeAsync(), departmentId, archivedDepartmentsIds);
+        List<Guid> archivedDepartmentsIds = _departmentBranchHelper.GetChildrenIds(await _memoryCacheHelper.GetDepartmentsTreeAsync(), departmentId);
 
         await _departmentRepository.RemoveAsync(archivedDepartmentsIds);
 
@@ -91,7 +89,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
 
       await _globalCache.RemoveAsync(departmentId);
 
-      _cache.Remove(CacheKeys.DepartmentsTree);
+      _memoryCacheHelper.Remove(CacheKeys.DepartmentsTree, CacheKeys.DepartmentsTreeInfo);
 
       return response;
     }

@@ -10,14 +10,33 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
   {
     public List<DepartmentsTreeInfo> Map(List<Tuple<Guid, string, string, Guid?>> listDepartments, Guid? idParent)
     {
-      List<DepartmentsTreeInfo> children = listDepartments.Where(p => p.Item4 == idParent).Select(x => new DepartmentsTreeInfo { Id = x.Item1, Name = x.Item2, CategoryName = x.Item3, ParentId = x.Item4 }).ToList();
+      //because dictionary can't have null as key, empty guid is used here for elements, whose parentId is null
+      Dictionary<Guid, List<DepartmentsTreeInfo>> childrenDictionary = listDepartments.GroupBy(ld => ld.Item4 ?? Guid.Empty)
+        .ToDictionary(ld => ld.Key, ld => ld.Select(x => new DepartmentsTreeInfo { Id = x.Item1, Name = x.Item2, CategoryName = x.Item3, ParentId = x.Item4 }).ToList());
 
-      foreach (DepartmentsTreeInfo child in children)
+      if (!childrenDictionary.TryGetValue(idParent ?? Guid.Empty, out var treeInfo))
       {
-        child.Children = Map(listDepartments, child.Id);
+        return Enumerable.Empty<DepartmentsTreeInfo>().ToList();
       }
 
-      return children;
+      Stack<DepartmentsTreeInfo> childrenStack = new(treeInfo);
+
+      while (childrenStack.Any())
+      {
+        DepartmentsTreeInfo currentParent = childrenStack.Pop();
+
+        if (childrenDictionary.TryGetValue(currentParent.Id, out var currentChildren))
+        {
+          currentParent.Children = currentChildren;
+
+          foreach (DepartmentsTreeInfo child in currentChildren)
+          {
+            childrenStack.Push(child);
+          }
+        }
+      }
+
+      return treeInfo;
     }
   }
 }

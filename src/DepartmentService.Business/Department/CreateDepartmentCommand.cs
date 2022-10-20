@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using FluentValidation.Results;
+using LT.DigitalOffice.DepartmentService.Broker.Helpers.MemoryCache.Interfaces;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Db.Interfaces;
@@ -17,7 +18,6 @@ using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.RedisSupport.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace LT.DigitalOffice.DepartmentService.Business.Department
 {
@@ -31,7 +31,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IAccessValidator _accessValidator;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IResponseCreator _responseCreator;
-    private readonly IMemoryCache _cache;
+    private readonly IMemoryCacheHelper _memoryCacheHelper;
     private readonly IGlobalCacheRepository _globalCache;
 
     public CreateDepartmentCommand(
@@ -43,7 +43,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IAccessValidator accessValidator,
       IHttpContextAccessor httpContextAccessor,
       IResponseCreator responseCreator,
-      IMemoryCache cache,
+      IMemoryCacheHelper memoryCacheHelper,
       IGlobalCacheRepository globalCache)
     {
       _validator = validator;
@@ -54,7 +54,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _accessValidator = accessValidator;
       _httpContextAccessor = httpContextAccessor;
       _responseCreator = responseCreator;
-      _cache = cache;
+      _memoryCacheHelper = memoryCacheHelper;
       _globalCache = globalCache;
     }
 
@@ -91,7 +91,8 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       List<Guid> updatedUsersIds = await _userRepository.EditAsync(dbDepartmentUsers);
       await _userRepository.CreateAsync(dbDepartmentUsers.Where(du => !updatedUsersIds.Contains(du.UserId)).ToList());
 
-      _cache.Remove(CacheKeys.DepartmentsTree);
+      _memoryCacheHelper.Remove(CacheKeys.DepartmentsTree, CacheKeys.DepartmentsTreeInfo);
+
       updatedUsersIds?.ForEach(async u => await _globalCache.RemoveAsync(u));
 
       return response;
