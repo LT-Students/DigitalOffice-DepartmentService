@@ -63,7 +63,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
 
       object request = IGetUsersDataRequest.CreateObj(usersIds);
 
-      List<UserData> usersData = await _globalCache.GetAsync<List<UserData>>(Cache.Users, usersIds.GetRedisCacheKey(request.GetBasicProperties()));
+      List<UserData> usersData = await _globalCache.GetAsync<List<UserData>>(Cache.Users, usersIds.GetRedisCacheKey(
+        nameof(IGetUsersDataRequest), request.GetBasicProperties()));
 
       if (usersData is not null)
       {
@@ -99,7 +100,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Requests
         fullNameIncludeSubstring: filter.FullNameIncludeSubstring);
 
       (List<UserData> usersData, int totalCount) usersFilteredData =
-        await _globalCache.GetAsync<(List<UserData>, int)>(Cache.Users, usersIds.GetRedisCacheKey(request.GetBasicProperties()));
+        await _globalCache.GetAsync<(List<UserData>, int)>(Cache.Users, usersIds.GetRedisCacheKey(
+          nameof(IFilteredUsersDataRequest), request.GetBasicProperties()));
 
       if (usersFilteredData.usersData is not null)
       {

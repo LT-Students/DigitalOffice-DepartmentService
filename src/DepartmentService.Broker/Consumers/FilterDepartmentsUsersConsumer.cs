@@ -59,7 +59,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
         await _globalCache.CreateAsync(
           Cache.Departments,
-          context.Message.DepartmentsIds.GetRedisCacheKey(context.Message.GetBasicProperties()),
+          context.Message.DepartmentsIds.GetRedisCacheKey(nameof(IFilterDepartmentsRequest), context.Message.GetBasicProperties()),
           departmentFilteredData,
           context.Message.DepartmentsIds,
           TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));
