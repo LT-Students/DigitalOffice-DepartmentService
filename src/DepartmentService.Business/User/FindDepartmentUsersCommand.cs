@@ -62,18 +62,30 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       if (departmentUsers is null || !departmentUsers.Any())
       {
-        return new(errors: errors);
+        return new();
       }
 
-      IEnumerable<Guid> usersIds = departmentUsers.Select(pu => pu.UserId);
+      List<Guid> usersIds = departmentUsers.Select(pu => pu.UserId).ToList();
 
       //should fix it in future
       //filter department users by posinion
       if (filter.byPositionId.HasValue)
       {
-        PositionFilteredData data = (await _positionService.GetPositionFilteredDataAsync(new List<Guid>() { filter.byPositionId.Value }, errors))?.FirstOrDefault();
+        PositionFilteredData positionsData =
+          (await _positionService.GetPositionFilteredDataAsync(
+            positionsIds: new List<Guid>()
+            {
+              filter.byPositionId.Value
+            },
+            errors: errors))?
+          .FirstOrDefault();
 
-        usersIds = data is not null ? usersIds.Where(i => data.UsersIds.Contains(i)).ToList() : Enumerable.Empty<Guid>();
+        usersIds = positionsData?.UsersIds.Intersect(usersIds).ToList();
+      }
+
+      if (usersIds is null || !usersIds.Any())
+      {
+        return new();
       }
 
       (List<UserData> usersData, int totalCount) = await _userService.GetFilteredUsersAsync(usersIds.ToList(), filter, cancellationToken);
@@ -93,7 +105,7 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       if (filter.DepartmentUserRoleAscendingSort.HasValue)
       {
         usersData = departmentUsers
-          .Select(du => usersData.FirstOrDefault(u => u.Id == du.UserId))
+          .Select(du => usersData?.FirstOrDefault(u => u.Id == du.UserId))
           .Where(u => u is not null).ToList();
       }
 
