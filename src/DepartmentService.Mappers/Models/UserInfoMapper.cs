@@ -13,7 +13,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
     public UserInfo Map(
       DbDepartmentUser dbDepartmentUser,
       UserData userData,
-      ImageInfo image,
       PositionData userPosition)
     {
       if (dbDepartmentUser is null)
@@ -32,7 +31,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
         FirstName = userData.FirstName,
         LastName = userData.LastName,
         MiddleName = userData.MiddleName,
-        AvatarImage = image,
+        ImageId = userData.ImageId,
         DepartmentUser = new DepartmentUserInfo()
         {
           UserId = userData.Id,

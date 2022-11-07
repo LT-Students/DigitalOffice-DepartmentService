@@ -12,7 +12,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces
     UserInfo Map(
       DbDepartmentUser dbDepartmentUser,
       UserData userData,
-      ImageInfo image,
       PositionData userPosition);
   }
 }

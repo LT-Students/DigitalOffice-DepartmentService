@@ -15,7 +15,6 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
-using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
 using LT.DigitalOffice.Models.Broker.Models.Position;
 using Pipelines.Sockets.Unofficial.Arenas;
@@ -27,7 +26,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
     private readonly IBaseFindFilterValidator _baseFindFilterValidator;
     private readonly IDepartmentUserRepository _departmentUserRepository;
     private readonly IUserService _userService;
-    private readonly IImageService _imageService;
     private readonly IPositionService _positionService;
     private readonly IUserInfoMapper _userInfoMapper;
 
@@ -35,14 +33,12 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       IBaseFindFilterValidator baseFindFilterValidator,
       IDepartmentUserRepository projectUserRepository,
       IUserService userService,
-      IImageService imageService,
       IPositionService positionService,
       IUserInfoMapper userInfoMapper)
     {
       _baseFindFilterValidator = baseFindFilterValidator;
       _departmentUserRepository = projectUserRepository;
       _userService = userService;
-      _imageService = imageService;
       _positionService = positionService;
       _userInfoMapper = userInfoMapper;
     }
@@ -62,29 +58,33 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
 
       if (departmentUsers is null || !departmentUsers.Any())
       {
-        return new(errors: errors);
+        return new();
       }
 
-      IEnumerable<Guid> usersIds = departmentUsers.Select(pu => pu.UserId);
+      List<Guid> usersIds = departmentUsers.Select(pu => pu.UserId).ToList();
 
       //should fix it in future
       //filter department users by posinion
       if (filter.byPositionId.HasValue)
       {
-        PositionFilteredData data = (await _positionService.GetPositionFilteredDataAsync(new List<Guid>() { filter.byPositionId.Value }, errors))?.FirstOrDefault();
+        PositionFilteredData positionsData =
+          (await _positionService.GetPositionFilteredDataAsync(
+            positionsIds: new List<Guid>()
+            {
+              filter.byPositionId.Value
+            },
+            errors: errors))?
+          .FirstOrDefault();
 
-        usersIds = data is not null ? usersIds.Where(i => data.UsersIds.Contains(i)).ToList() : Enumerable.Empty<Guid>();
+        usersIds = positionsData?.UsersIds.Intersect(usersIds).ToList();
+      }
+
+      if (usersIds is null || !usersIds.Any())
+      {
+        return new();
       }
 
       (List<UserData> usersData, int totalCount) = await _userService.GetFilteredUsersAsync(usersIds.ToList(), filter, cancellationToken);
-
-      Task<List<ImageInfo>> usersAvatarsTask = filter.IncludeAvatars
-        ? _imageService.GetImagesAsync(
-            imagesIds: usersData?.Where(x => x.ImageId.HasValue).Select(x => x.ImageId.Value).ToList(),
-            imageSourse: ImageSource.User,
-            errors,
-            cancellationToken)
-        : Task.FromResult<List<ImageInfo>>(default);
 
       Task<List<PositionData>> usersPositionsTask = filter.IncludePositions
         ? _positionService.GetPositionsAsync(usersIds: usersData?.Select(x => x.Id).ToList(), errors, cancellationToken)
@@ -93,11 +93,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
       if (filter.DepartmentUserRoleAscendingSort.HasValue)
       {
         usersData = departmentUsers
-          .Select(du => usersData.FirstOrDefault(u => u.Id == du.UserId))
+          .Select(du => usersData?.FirstOrDefault(u => u.Id == du.UserId))
           .Where(u => u is not null).ToList();
       }
-
-      List<ImageInfo> usersAvatars = await usersAvatarsTask;
       List<PositionData> usersPositions = await usersPositionsTask;
 
       return new FindResultResponse<UserInfo>(
@@ -107,7 +105,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.User
           .Select(userData => _userInfoMapper.Map(
             dbDepartmentUser: departmentUsers.FirstOrDefault(pu => pu.UserId == userData.Id),
             userData: userData,
-            image: usersAvatars?.FirstOrDefault(av => av.Id == userData.ImageId),
             userPosition: usersPositions?.FirstOrDefault(p => p.UsersIds.Contains(userData.Id))))
           .ToList());
     }

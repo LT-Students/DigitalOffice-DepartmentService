@@ -18,9 +18,6 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Requests.DepartmentUser
     [FromQuery(Name = "departmentUserRoleAscendingSort")]
     public bool? DepartmentUserRoleAscendingSort { get; set; } = null;
 
-    [FromQuery(Name = "includeAvatars")]
-    public bool IncludeAvatars { get; set; } = false;
-
     [FromQuery(Name = "includePositions")]
     public bool IncludePositions { get; set; } = false;
 

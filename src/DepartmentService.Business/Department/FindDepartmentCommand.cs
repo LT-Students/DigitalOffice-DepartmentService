@@ -16,7 +16,6 @@ using LT.DigitalOffice.Kernel.FluentValidationExtensions;
 using LT.DigitalOffice.Kernel.Helpers.Interfaces;
 using LT.DigitalOffice.Kernel.Responses;
 using LT.DigitalOffice.Kernel.Validators.Interfaces;
-using LT.DigitalOffice.Models.Broker.Enums;
 using LT.DigitalOffice.Models.Broker.Models;
 using StackExchange.Redis;
 
@@ -28,7 +27,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
     private readonly IDepartmentInfoMapper _departmentMapper;
     private readonly IUserInfoMapper _userMapper;
     private readonly IUserService _userService;
-    private readonly IImageService _imageService;
     private readonly IBaseFindFilterValidator _baseFindValidator;
     private readonly IResponseCreator _responseCreator;
 
@@ -38,7 +36,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       IDepartmentInfoMapper departmentMapper,
       IUserInfoMapper UserMapper,
       IUserService userService,
-      IImageService imageService,
       IResponseCreator responseCreator)
     {
       _baseFindValidator = baseFindValidator;
@@ -46,7 +43,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
       _departmentMapper = departmentMapper;
       _userMapper = UserMapper;
       _userService = userService;
-      _imageService = imageService;
       _responseCreator = responseCreator;
     }
 
@@ -75,12 +71,6 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
         errors,
         cancellationToken);
 
-      List<ImageInfo> images = await _imageService.GetImagesAsync(
-        usersData?.Where(ud => ud.ImageId.HasValue)?.Select(ud => ud.ImageId.Value).ToList(),
-        ImageSource.User,
-        errors,
-        cancellationToken);
-
       UserData userData = null;
 
       return new FindResultResponse<DepartmentInfo>(
@@ -94,9 +84,9 @@ namespace LT.DigitalOffice.DepartmentService.Business.Department
           return _departmentMapper.Map(
             d,
             _userMapper.Map(
-              d.Users?.FirstOrDefault(u => u.Assignment == (int)DepartmentUserAssignment.Director),
-              userData,
-              images?.FirstOrDefault(i => i.Id == userData?.ImageId), null));
+              dbDepartmentUser: d.Users?.FirstOrDefault(u => u.Assignment == (int)DepartmentUserAssignment.Director),
+              userData: userData,
+              userPosition: null));
         }).ToList());
     }
   }
