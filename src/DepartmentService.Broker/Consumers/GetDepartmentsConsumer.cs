@@ -40,7 +40,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         : null;
 
       return dbDepartments.Select(d => _departmentDataMapper
-        .Map(d, listDepartments is null ? null : _branchHelper.GetChildrenIds(listDepartments, d.Id)))
+        .Map(dbDepartment: d, childrenIds: listDepartments is null ? null : _branchHelper.GetChildrenIds(listDepartments, d.Id)))
         .ToList();
     }
 
