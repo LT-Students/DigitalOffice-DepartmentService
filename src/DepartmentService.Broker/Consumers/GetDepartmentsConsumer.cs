@@ -35,10 +35,12 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         departmentsIds: request.DepartmentsIds,
         usersIds: request.UsersIds);
 
-      List<Tuple<Guid, string, string, Guid?>> listDepartments = await _memoryCacheHelper.GetDepartmentsTreeAsync();
+      List<Tuple<Guid, string, string, Guid?>> listDepartments = request.IncludeChildDepartmentsIds
+        ? await _memoryCacheHelper.GetDepartmentsTreeAsync()
+        : null;
 
       return dbDepartments.Select(d => _departmentDataMapper
-        .Map(d, _branchHelper.GetChildrenIds(listDepartments, d.Id)))
+        .Map(d, listDepartments is null ? null : _branchHelper.GetChildrenIds(listDepartments, d.Id)))
         .ToList();
     }
 
