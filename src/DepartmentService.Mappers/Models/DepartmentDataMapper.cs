@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
 using LT.DigitalOffice.Models.Broker.Models.Department;
@@ -14,7 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
       _departmentUserDataMapper = departmentUserDataMapper;
     }
 
-    public DepartmentData Map(DbDepartment dbDepartment)
+    public DepartmentData Map(DbDepartment dbDepartment, List<Guid> childrenIds)
     {
       return dbDepartment is null
         ? null
@@ -22,7 +24,8 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
           dbDepartment.Id,
           dbDepartment.Name,
           dbDepartment.ShortName,
-          users: dbDepartment.Users?.Select(_departmentUserDataMapper.Map).ToList());
+          users: dbDepartment.Users?.Select(_departmentUserDataMapper.Map).ToList(),
+          childDepartmentsIds: childrenIds);
     }
   }
 }
