@@ -31,7 +31,11 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         departmentsIds: request.DepartmentsIds,
         usersIds: request.UsersIds);
 
-      return dbDepartments.Select(_departmentDataMapper.Map).ToList();
+      Dictionary<Guid, List<Guid>> childDepartments = await _departmentRepository.GetChildIdsAsync(dbDepartments.Select(d => d.Id).ToList());
+
+      return dbDepartments.Select(d => _departmentDataMapper
+        .Map(d, childDepartments.TryGetValue(d.Id, out List<Guid> childIds) ? childIds : null))
+        .ToList();
     }
 
     public GetDepartmentsConsumer(

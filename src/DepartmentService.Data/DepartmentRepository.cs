@@ -36,6 +36,22 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return dbDepartments;
     }
 
+    private List<Guid> GetSubChilds(IQueryable<DbDepartment> dbDepartments, List<Guid> departmentsIds, List<Guid> subChilds)
+    {
+      foreach (Guid departmentId in departmentsIds)
+      {
+        List<Guid> childs = dbDepartments.Where(d => d.ParentId == departmentId).Select(d => d.Id).ToList();
+
+        if (childs is not null && childs.Any())
+        {
+          subChilds = subChilds.Concat(childs).ToList();
+          subChilds = GetSubChilds(dbDepartments, departmentsIds: childs, subChilds: subChilds);
+        }
+      }
+
+      return subChilds;
+    }
+
     public DepartmentRepository(
       IDataProvider provider,
       IHttpContextAccessor httpContextAccessor)
@@ -175,6 +191,35 @@ namespace LT.DigitalOffice.DepartmentService.Data
       dbDepartments.ForEach(x => x.IsActive = false);
 
       await _provider.SaveAsync();
+    }
+
+    public async Task<Dictionary<Guid, List<Guid>>> GetChildIdsAsync(List<Guid> departmentsIds)
+    {
+      Dictionary<Guid, List<Guid>> childs = new();
+
+      if (departmentsIds is null || !departmentsIds.Any())
+      {
+        return childs;
+      }
+
+      IQueryable<DbDepartment> dbDepartments = _provider.Departments.AsQueryable();
+      List<Guid> subChilds = new();
+      List<Guid> childIds = new();
+
+      foreach (Guid departmentId in departmentsIds)
+      {
+        childIds = await dbDepartments.Where(d => d.ParentId == departmentId).Select(d => d.Id).ToListAsync();
+
+        if (childIds is not null && childIds.Any())
+        {
+          subChilds = GetSubChilds(dbDepartments, departmentsIds: childIds, subChilds: new List<Guid>());
+        }
+
+        childIds = childIds.Concat(subChilds).ToList();
+        childs.TryAdd(departmentId, childIds);
+      }
+
+      return childs;
     }
   }
 }

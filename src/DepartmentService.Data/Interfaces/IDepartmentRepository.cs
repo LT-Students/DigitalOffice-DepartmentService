@@ -35,5 +35,7 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
     Task<List<Tuple<Guid, string, string, Guid?>>> GetDepartmentsTreeAsync();
 
     Task RemoveAsync(List<Guid> departmentsIds);
+
+    Task<Dictionary<Guid, List<Guid>>> GetChildIdsAsync(List<Guid> departmentsIds);
   }
 }
