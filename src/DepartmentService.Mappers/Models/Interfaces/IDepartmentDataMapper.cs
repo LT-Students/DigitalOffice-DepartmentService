@@ -9,6 +9,6 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces
   [AutoInject]
   public interface IDepartmentDataMapper
   {
-    DepartmentData Map(DbDepartment dbDepartment, List<Guid> childIds);
+    DepartmentData Map(DbDepartment dbDepartment, List<Guid> childrenIds);
   }
 }

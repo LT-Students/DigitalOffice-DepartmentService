@@ -16,7 +16,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
       _departmentUserDataMapper = departmentUserDataMapper;
     }
 
-    public DepartmentData Map(DbDepartment dbDepartment, List<Guid> childIds)
+    public DepartmentData Map(DbDepartment dbDepartment, List<Guid> childrenIds)
     {
       return dbDepartment is null
         ? null
@@ -25,7 +25,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Models
           dbDepartment.Name,
           dbDepartment.ShortName,
           users: dbDepartment.Users?.Select(_departmentUserDataMapper.Map).ToList(),
-          childDepartmentsIds: childIds);
+          childDepartmentsIds: childrenIds);
     }
   }
 }
