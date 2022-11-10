@@ -30,7 +30,6 @@ public class EditDepartmentCommandTests
 {
   private AutoMocker _autoMocker;
   private IEditDepartmentCommand _command;
-
   private JsonPatchDocument<EditDepartmentRequest> _request;
   private JsonPatchDocument<DbDepartment> _dbRequest;
 
