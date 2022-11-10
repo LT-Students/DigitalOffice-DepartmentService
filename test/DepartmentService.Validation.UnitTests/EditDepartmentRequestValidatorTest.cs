@@ -41,15 +41,15 @@ public class EditDepartmentRequestValidatorTest
 
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.NameExistAsync(It.IsAny<String>(), It.IsAny<Guid>()))
-      .Returns(Task.FromResult(false));
+      .ReturnsAsync(false);
 
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.ShortNameExistAsync(It.IsAny<String>(), It.IsAny<Guid>()))
-      .Returns(Task.FromResult(false));
+      .ReturnsAsync(false);
 
     _autoMocker
       .Setup<ICategoryRepository, Task<bool>>(x => x.IdExistAsync(It.IsAny<Guid>()))
-      .Returns(Task.FromResult(true));
+      .ReturnsAsync(true);
 
     _request = new JsonPatchDocument<EditDepartmentRequest>(
       new List<Operation<EditDepartmentRequest>>
@@ -121,7 +121,7 @@ public class EditDepartmentRequestValidatorTest
   {
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.NameExistAsync(It.IsAny<String>(), It.IsAny<Guid>()))
-      .Returns(Task.FromResult(true));
+      .ReturnsAsync(true);
 
     Assert.False(_validator.ValidateAsync((_departmentId, _request)).Result.IsValid);
   }
@@ -155,7 +155,7 @@ public class EditDepartmentRequestValidatorTest
   {
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.ShortNameExistAsync(It.IsAny<String>(), It.IsAny<Guid>()))
-      .Returns(Task.FromResult(true));
+      .ReturnsAsync(true);
 
     Assert.False(_validator.ValidateAsync((_departmentId, _request)).Result.IsValid);
   }
@@ -181,7 +181,7 @@ public class EditDepartmentRequestValidatorTest
   {
     _autoMocker
       .Setup<ICategoryRepository, Task<bool>>(x => x.IdExistAsync(It.IsAny<Guid>()))
-      .Returns(Task.FromResult(false));
+      .ReturnsAsync(false);
 
     Assert.False(_validator.ValidateAsync((_departmentId, _request)).Result.IsValid);
   }
