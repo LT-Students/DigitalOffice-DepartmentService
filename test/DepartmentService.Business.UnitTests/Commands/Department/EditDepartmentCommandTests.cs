@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using LT.DigitalOffice.DepartmentService.Business.Department;
 using LT.DigitalOffice.DepartmentService.Business.Department.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
@@ -140,10 +141,10 @@ public class EditDepartmentCommandTests
     _autoMocker
       .Setup<IAccessValidator, Task<bool>>(x => x.HasRightsAsync(Rights.AddEditRemoveDepartments))
       .ReturnsAsync(true);
-
+    
     _autoMocker
-      .Setup<IEditDepartmentRequestValidator, bool>(x => x.ValidateAsync(It.IsAny<ValueTuple<Guid, JsonPatchDocument<EditDepartmentRequest>>>(), default).Result.IsValid)
-      .Returns(true);
+      .Setup<IEditDepartmentRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<ValueTuple<Guid, JsonPatchDocument<EditDepartmentRequest>>>(), default))
+      .ReturnsAsync(new ValidationResult());
 
     _autoMocker
       .Setup<IPatchDbDepartmentMapper, JsonPatchDocument<DbDepartment>>(x => x.Map(_request))
@@ -151,7 +152,7 @@ public class EditDepartmentCommandTests
 
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.EditAsync(It.IsAny<Guid>(), It.IsAny<JsonPatchDocument<DbDepartment>>()))
-      .Returns(Task.FromResult(true));
+      .ReturnsAsync(true);
   }
 
   [Test]
@@ -188,10 +189,9 @@ public class EditDepartmentCommandTests
   [Test]
   public async Task ShouldReturnFailedResponseWhenValidationIsFailedAsync()
   {
-
     _autoMocker
-      .Setup<IEditDepartmentRequestValidator, bool>(x => x.ValidateAsync(It.IsAny<ValueTuple<Guid, JsonPatchDocument<EditDepartmentRequest>>>(), default).Result.IsValid)
-      .Returns(false);
+      .Setup<IEditDepartmentRequestValidator, Task<ValidationResult>>(x => x.ValidateAsync(It.IsAny<ValueTuple<Guid, JsonPatchDocument<EditDepartmentRequest>>>(), default))
+      .ReturnsAsync(new ValidationResult( new List<ValidationFailure>() { new ValidationFailure() } ));
 
     OperationResultResponse<bool> expectedResponse = new()
     {
