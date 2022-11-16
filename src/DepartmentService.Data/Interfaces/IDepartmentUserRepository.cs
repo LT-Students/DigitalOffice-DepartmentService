@@ -21,6 +21,8 @@ namespace LT.DigitalOffice.DepartmentService.Data.Interfaces
 
     Task<Guid?> ActivateAsync(IActivateUserPublish request);
 
+    Task<Guid?> MakeUserPendingAsync(Guid userId, Guid createdBy);
+
     Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role);
 
     Task<bool> EditAssignmentAsync(Guid departmentId, List<Guid> usersIds, DepartmentUserAssignment assignment);
