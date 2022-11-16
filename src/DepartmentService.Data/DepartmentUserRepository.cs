@@ -225,7 +225,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       {
         departmentUsersQuery = from users in departmentUsersQuery.Where(du => du.IsActive || du.IsPending)
                                group users by users.UserId into userGroup
-                               select userGroup.AsQueryable().OrderByDescending(u => u.IsActive).First();
+                               select userGroup.OrderByDescending(u => u.IsActive).First();
       }
       else
       {
