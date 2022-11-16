@@ -190,6 +190,7 @@ namespace LT.DigitalOffice.DepartmentService
         x.AddConsumer<GetDepartmentsConsumer>();
         x.AddConsumer<DisactivateDepartmentUserConsumer>();
         x.AddConsumer<ActivateDepartmentUserConsumer>();
+        x.AddConsumer<CreateDepartmentPendingUserConsumer>();
         x.AddConsumer<GetDepartmentsUsersConsumer>();
         x.AddConsumer<SearchDepartmentsConsumer>();
         x.AddConsumer<FilterDepartmentsUsersConsumer>();
@@ -234,6 +235,11 @@ namespace LT.DigitalOffice.DepartmentService
       cfg.ReceiveEndpoint(_rabbitMqConfig.ActivateDepartmentUserEndpoint, ep =>
       {
         ep.ConfigureConsumer<ActivateDepartmentUserConsumer>(context);
+      });
+
+      cfg.ReceiveEndpoint(_rabbitMqConfig.CreateDepartmentPendingUserEndpoint, ep =>
+      {
+        ep.ConfigureConsumer<CreateDepartmentPendingUserConsumer>(context);
       });
 
       cfg.ReceiveEndpoint(_rabbitMqConfig.GetDepartmentsUsersEndpoint, ep =>

@@ -36,12 +36,12 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
     {
       if (await _departmentRepository.ExistAsync(context.Message.DepartmentId))
       {
-        await _userRepository.CreateAsync(new List<DbDepartmentUser>() { _userMapper.Map(context.Message) });
+        Task<bool> createUserTask = _userRepository.CreateAsync(new List<DbDepartmentUser>() { _userMapper.Map(context.Message) });
 
-        if (context.Message.IsActive)
-        {
-          await _globalCache.RemoveAsync(context.Message.DepartmentId);
-        }
+        Task<bool> updateCacheTask = _globalCache.RemoveAsync(context.Message.DepartmentId);
+
+        await createUserTask;
+        await updateCacheTask;
       }
       else
       {
