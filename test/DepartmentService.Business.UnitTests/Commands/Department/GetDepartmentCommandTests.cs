@@ -150,7 +150,7 @@ public class GetDepartmentCommandTests
   {
     _autoMocker
       .Setup<IDepartmentRepository, Task<DbDepartment>>(x => x.GetAsync(It.IsAny<GetDepartmentFilter>(), It.IsAny<CancellationToken>()))
-      .ReturnsAsync(It.IsAny<DbDepartment>);
+      .ReturnsAsync((DbDepartment) null);
 
     OperationResultResponse<DepartmentResponse> expectedResponse = new()
     {
