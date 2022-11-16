@@ -66,7 +66,6 @@ public class EditDepartmentCommandTests
     _autoMocker.Resolvers.Clear();
   }
 
-
   [OneTimeSetUp]
   public void OneTimeSetUp()
   {
