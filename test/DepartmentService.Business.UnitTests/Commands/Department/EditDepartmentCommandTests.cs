@@ -61,7 +61,7 @@ public class EditDepartmentCommandTests
     _autoMocker.Verify<IMemoryCacheHelper, Task<List<Tuple<Guid, string, string, Guid?>>>>(x => x.GetDepartmentsTreeAsync(), memoryCacheHelperGetDepartmentsTreeTimes);
     _autoMocker.Verify<IGlobalCacheRepository, Task>(x => x.RemoveAsync(It.IsAny<Guid>()), globalCacheRepositoryTimes);
     _autoMocker.Verify<IDepartmentBranchHelper, List<Guid>>(
-      x => x.GetChildrenIds(It.IsAny<List<Tuple<Guid, string, string, Guid?>>>(), It.IsAny<Guid>()), departmentBranchHelperTimes);
+      x => x.GetChildrenIds(It.Ref<List<Tuple<Guid, string, string, Guid?>>>.IsAny, It.IsAny<Guid>()), departmentBranchHelperTimes);
 
     _autoMocker.Resolvers.Clear();
   }
@@ -152,7 +152,7 @@ public class EditDepartmentCommandTests
     _autoMocker.GetMock<IDepartmentBranchHelper>().Reset();
 
     _autoMocker
-      .Setup<IDepartmentBranchHelper, List<Guid>>(x => x.GetChildrenIds(It.IsAny<List<Tuple<Guid, string, string, Guid?>>>(), It.IsAny<Guid>()))
+      .Setup<IDepartmentBranchHelper, List<Guid>>(x => x.GetChildrenIds(It.Ref<List<Tuple<Guid, string, string, Guid?>>>.IsAny, It.IsAny<Guid>()))
       .Returns(new List<Guid>());
 
     _autoMocker
