@@ -65,7 +65,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
         .Where(du => departmentUsers.Select(r => r.UserId).Contains(du.UserId)).ToListAsync();
 
-      if (dbDepartmentsUsers is not null && dbDepartmentsUsers.Any())
+      if (dbDepartmentsUsers.Any())
       {
         DbDepartmentUser requestData = null;
 
@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
         .Where(du => usersIds.Contains(du.UserId)).ToListAsync();
 
-      if (dbDepartmentsUsers is null && dbDepartmentsUsers.Any())
+      if (dbDepartmentsUsers.Any())
       {
         return false;
       }
@@ -160,7 +160,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
           && du.IsActive)
           .ToListAsync();
 
-      if (dbDepartmentUsers is null || !dbDepartmentUsers.Any())
+      if (!dbDepartmentUsers.Any())
       {
         return false;
       }
@@ -266,7 +266,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       List<DbDepartmentUser> targetUsers = await dbDepartmentUsers.ToListAsync();
 
-      if (targetUsers is not null || targetUsers.Any())
+      if (targetUsers.Any())
       {
         foreach (DbDepartmentUser du in targetUsers)
         {
