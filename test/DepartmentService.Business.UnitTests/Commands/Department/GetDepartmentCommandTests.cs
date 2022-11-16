@@ -43,8 +43,10 @@ public class GetDepartmentCommandTests
   {
     _autoMocker.Verify<IResponseCreator, OperationResultResponse<DepartmentResponse>>(
       x => x.CreateFailureResponse<DepartmentResponse>(It.IsAny<HttpStatusCode>(), It.IsAny<List<string>>()), responseCreatorTimes);
+
     _autoMocker.Verify<IDepartmentRepository, Task<DbDepartment>>(
       x => x.GetAsync(It.IsAny<GetDepartmentFilter>(), It.IsAny<CancellationToken>()), projectRepositoryTimes);
+
     _autoMocker.Verify<IDepartmentResponseMapper, DepartmentResponse>(
       x => x.Map(It.IsAny<DbDepartment>()), departmentResponseMapperTimes);
   }

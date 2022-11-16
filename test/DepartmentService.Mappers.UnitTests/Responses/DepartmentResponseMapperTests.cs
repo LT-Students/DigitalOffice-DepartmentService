@@ -29,6 +29,17 @@ public class DepartmentResponseMapperTests
   private DbCategory _dbCategory;
   private CategoryInfo _categoryInfo;
 
+  private void Verifiable(
+    Times categoryMapperTimes,
+    Times departmentUserMapperTimes)
+  {
+    _mocker.Verify<ICategoryInfoMapper, CategoryInfo>(
+      x => x.Map(It.IsAny<DbCategory>()), categoryMapperTimes);
+
+    _mocker.Verify<IDepartmentUserInfoMapper, DepartmentUserInfo>(
+      x => x.Map(It.IsAny<DbDepartmentUser>()), departmentUserMapperTimes);
+  }
+
   private void CreateModels()
   {
     _dbCategory = new()
@@ -109,12 +120,20 @@ public class DepartmentResponseMapperTests
   public void ShouldReturnNullWhenRequestMappingObjectIsNull()
   {
     Assert.AreEqual(null, _mapper.Map(null));
+
+    Verifiable(
+      categoryMapperTimes: Times.Never(),
+      departmentUserMapperTimes: Times.Never());
   }
 
   [Test]
   public void ShouldReturnDepartmentResponseWhenMappingDbDepartment()
   {
     SerializerAssert.AreEqual(_response, _mapper.Map(_dbDepartment));
+
+    Verifiable(
+      categoryMapperTimes: Times.Once(),
+      departmentUserMapperTimes: Times.Once());
   }
 }
 
