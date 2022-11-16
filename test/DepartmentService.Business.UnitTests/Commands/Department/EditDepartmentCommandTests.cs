@@ -79,63 +79,14 @@ public class EditDepartmentCommandTests
       {
         new Operation<EditDepartmentRequest>(
           "replace",
-          $"/{nameof(EditDepartmentRequest.Name)}",
-          "",
-          "new Name"),
-
-        new Operation<EditDepartmentRequest>(
-          "replace",
-          $"/{nameof(EditDepartmentRequest.ShortName)}",
-          "",
-          "new ShortName"),
-
-        new Operation<EditDepartmentRequest>(
-          "replace",
-          $"/{nameof(EditDepartmentRequest.Description)}",
-          "",
-          "new Description"),
-
-        new Operation<EditDepartmentRequest>(
-          "replace",
           $"/{nameof(EditDepartmentRequest.IsActive)}",
           "",
           true)
-
       }, new CamelCasePropertyNamesContractResolver());
 
     _dbRequest = new JsonPatchDocument<DbDepartment>(
-      new List<Operation<DbDepartment>>
-      {
-         new Operation<DbDepartment>(
-           "replace",
-           $"/{nameof(DbDepartment.Name)}",
-           "",
-           "New Name"),
-
-         new Operation<DbDepartment>(
-           "replace",
-           $"/{nameof(DbDepartment.ShortName)}",
-           "",
-           "new ShortName"),
-
-         new Operation<DbDepartment>(
-           "replace",
-           $"/{nameof(DbDepartment.Description)}",
-           "",
-           "new Description"),
-
-         new Operation<DbDepartment>(
-          "replace",
-          $"/{nameof(DbDepartment.IsActive)}",
-          "",
-          true),
-
-          new Operation<DbDepartment>(
-            "replace",
-            $"/{nameof(DbDepartment.CategoryId)}",
-            "",
-            Guid.NewGuid())
-      }, new CamelCasePropertyNamesContractResolver());
+      new List<Operation<DbDepartment>>(),
+      new CamelCasePropertyNamesContractResolver());
   }
 
   [SetUp]
