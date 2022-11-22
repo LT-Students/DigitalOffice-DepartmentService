@@ -2,6 +2,7 @@
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
+using LT.DigitalOffice.DepartmentService.Validation.Department.Resources;
 using LT.DigitalOffice.DepartmentService.Validation.DepartmentUser.Interfaces;
 
 namespace LT.DigitalOffice.DepartmentService.Validation.Department
@@ -14,39 +15,39 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
       ICreateUsersValidator usersValidator)
     {
       RuleFor(request => request.Name)
-        .Must(n => n.Trim().Length > 1).WithMessage("Department name is too short.")
-        .MaximumLength(300).WithMessage("Department name is too long.")
+        .Must(n => n.Trim().Length > 1).WithMessage(CreateDepartmentRequestValidatorResource.NameTooShort)
+        .MaximumLength(300).WithMessage(CreateDepartmentRequestValidatorResource.NameTooLong)
         .MustAsync(async (request, _) => !await departmentRepository.NameExistAsync(request))
-        .WithMessage("The department name is already exists.");
+        .WithMessage(CreateDepartmentRequestValidatorResource.ExistingName);
 
       RuleFor(request => request.ShortName)
-        .Must(n => n.Trim().Length > 1).WithMessage("Department short name is too short.")
-        .MaximumLength(40).WithMessage("Department short name is too long.")
+        .Must(n => n.Trim().Length > 1).WithMessage(CreateDepartmentRequestValidatorResource.ShortNameTooShort)
+        .MaximumLength(40).WithMessage(CreateDepartmentRequestValidatorResource.ShortNameTooLong)
         .MustAsync(async (request, _) => !await departmentRepository.ShortNameExistAsync(request))
-        .WithMessage("The department name is already exists.");
+        .WithMessage(CreateDepartmentRequestValidatorResource.ExistingShortName);
 
       When(request => request.Description is not null, () =>
       {
         RuleFor(request => request.Description)
-          .MaximumLength(1000).WithMessage("Department description is too long.");
+          .MaximumLength(1000).WithMessage(CreateDepartmentRequestValidatorResource.DescriptionTooLong);
       });
 
       When(request => request.ParentId.HasValue, () =>
       {
         RuleFor(request => request.ParentId)
           .NotEmpty()
-          .WithMessage("ParentId must not be empty.")
+          .WithMessage(CreateDepartmentRequestValidatorResource.EmptyParentId)
           .MustAsync(async (parentId, _) => await departmentRepository.ExistAsync(parentId.Value))
-          .WithMessage("This department id doesn't exist.");
+          .WithMessage(CreateDepartmentRequestValidatorResource.NotExistingDepartment);
       });
 
       When(request => request.CategoryId.HasValue, () =>
       {
         RuleFor(request => request.CategoryId)
           .NotEmpty()
-          .WithMessage("CategoryId must not be empty.")
+          .WithMessage(CreateDepartmentRequestValidatorResource.EmptyCategoryId)
           .MustAsync(async (categoryId, _) => await categoryRepository.IdExistAsync(categoryId.Value))
-          .WithMessage("This category id doesn't exist.");
+          .WithMessage(CreateDepartmentRequestValidatorResource.NotExistingCategory);
       });
 
       RuleFor(request => request.Users)
