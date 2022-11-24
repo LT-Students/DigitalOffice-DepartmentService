@@ -53,7 +53,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         new()
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), EditDepartmentRequestValidatorResource.EmptyName },
-          { x => x.value.ToString().Length < 300, EditDepartmentRequestValidatorResource.NameTooLong },
+          { x => x.value.ToString().Length < 301, EditDepartmentRequestValidatorResource.NameTooLong },
         }, CascadeMode.Stop);
 
       await AddFailureForPropertyIfAsync(
