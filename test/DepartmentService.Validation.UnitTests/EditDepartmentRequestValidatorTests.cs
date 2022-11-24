@@ -124,20 +124,7 @@ public class EditDepartmentRequestValidatorTestss
   [Test]
   public async Task NameIsTooLongTestAsync()
   {
-    GetOperationByPath(nameof(EditDepartmentRequest.Name)).value = new string('*', 300);
-
-    (await _validator.TestValidateAsync((_departmentId, _request))).ShouldHaveAnyValidationError();
-
-    Verifiable(
-      departmentRepositoryNameExistTimes: Times.Exactly(2),
-      departmentRepositoryShortNameExistTimes: Times.Once(),
-      categoryRepositoryIdExistTimes: Times.Once());
-  }
-
-  [Test]
-  public async Task NameIsTooShortTestAsync()
-  {
-    GetOperationByPath(nameof(EditDepartmentRequest.Name)).value = "*";
+    GetOperationByPath(nameof(EditDepartmentRequest.Name)).value = new string('*', 301);
 
     (await _validator.TestValidateAsync((_departmentId, _request))).ShouldHaveAnyValidationError();
 
@@ -153,19 +140,6 @@ public class EditDepartmentRequestValidatorTestss
     _autoMocker
       .Setup<IDepartmentRepository, Task<bool>>(x => x.NameExistAsync(It.IsAny<String>(), It.IsAny<Guid>()))
       .ReturnsAsync(true);
-
-    (await _validator.TestValidateAsync((_departmentId, _request))).ShouldHaveAnyValidationError();
-
-    Verifiable(
-      departmentRepositoryNameExistTimes: Times.Exactly(2),
-      departmentRepositoryShortNameExistTimes: Times.Once(),
-      categoryRepositoryIdExistTimes: Times.Once());
-  }
-
-  [Test]
-  public async Task ShortNameIsTooShortTestAsync()
-  {
-    GetOperationByPath(nameof(EditDepartmentRequest.ShortName)).value = "*";
 
     (await _validator.TestValidateAsync((_departmentId, _request))).ShouldHaveAnyValidationError();
 
