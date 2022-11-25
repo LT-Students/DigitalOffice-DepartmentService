@@ -135,9 +135,6 @@
   <data name="NameTooLong" xml:space="preserve">
     <value>Название департамента слишком длинное.</value>
   </data>
-  <data name="NameTooShort" xml:space="preserve">
-    <value>Название департамента слишком короткое.</value>
-  </data>
   <data name="NotExistingCategory" xml:space="preserve">
     <value>Категории с таким Id не существует.</value>
   </data>
@@ -146,8 +143,5 @@
   </data>
   <data name="ShortNameTooLong" xml:space="preserve">
     <value>Сокращённое имя департамента слишком длинное.</value>
-  </data>
-  <data name="ShortNameTooShort" xml:space="preserve">
-    <value>Сокращённое имя департамента слишком короткое.</value>
   </data>
 </root>

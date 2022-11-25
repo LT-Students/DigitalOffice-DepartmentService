@@ -15,13 +15,11 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
       ICreateUsersValidator usersValidator)
     {
       RuleFor(request => request.Name)
-        .Must(n => n.Trim().Length > 1).WithMessage(CreateDepartmentRequestValidatorResource.NameTooShort)
         .MaximumLength(300).WithMessage(CreateDepartmentRequestValidatorResource.NameTooLong)
         .MustAsync(async (request, _) => !await departmentRepository.NameExistAsync(request))
         .WithMessage(CreateDepartmentRequestValidatorResource.ExistingName);
 
       RuleFor(request => request.ShortName)
-        .Must(n => n.Trim().Length > 1).WithMessage(CreateDepartmentRequestValidatorResource.ShortNameTooShort)
         .MaximumLength(40).WithMessage(CreateDepartmentRequestValidatorResource.ShortNameTooLong)
         .MustAsync(async (request, _) => !await departmentRepository.ShortNameExistAsync(request))
         .WithMessage(CreateDepartmentRequestValidatorResource.ExistingShortName);

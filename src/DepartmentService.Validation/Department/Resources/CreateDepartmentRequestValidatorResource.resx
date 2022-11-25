@@ -127,16 +127,13 @@
     <value>ParentId must not be empty.</value>
   </data>
   <data name="ExistingName" xml:space="preserve">
-    <value>The department name is already exists.</value>
+    <value>The department name already exists.</value>
   </data>
   <data name="ExistingShortName" xml:space="preserve">
-    <value>The department short name is already exists.</value>
+    <value>The department short name already exists.</value>
   </data>
   <data name="NameTooLong" xml:space="preserve">
     <value>Department name is too long.</value>
-  </data>
-  <data name="NameTooShort" xml:space="preserve">
-    <value>Department name is too short.</value>
   </data>
   <data name="NotExistingCategory" xml:space="preserve">
     <value>This category id doesn't exist.</value>
@@ -146,8 +143,5 @@
   </data>
   <data name="ShortNameTooLong" xml:space="preserve">
     <value>Department short name is too long.</value>
-  </data>
-  <data name="ShortNameTooShort" xml:space="preserve">
-    <value>Department short name is too short.</value>
   </data>
 </root>

@@ -138,16 +138,10 @@
   <data name="NameTooLong" xml:space="preserve">
     <value>Name is too long.</value>
   </data>
-  <data name="NameTooShort" xml:space="preserve">
-    <value>Name is too short.</value>
-  </data>
   <data name="NotExistingCategory" xml:space="preserve">
     <value>Category id doesn`t exist.</value>
   </data>
   <data name="ShortNameTooLong" xml:space="preserve">
     <value>Short name is too long.</value>
-  </data>
-  <data name="ShortNameTooShort" xml:space="preserve">
-    <value>Short name is too short.</value>
   </data>
 </root>

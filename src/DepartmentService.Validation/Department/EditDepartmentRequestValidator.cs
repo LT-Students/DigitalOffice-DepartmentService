@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentValidation;
-using FluentValidation.Validators;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
@@ -54,8 +53,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         new()
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), EditDepartmentRequestValidatorResource.EmptyName },
-          { x => x.value.ToString().Trim().Length > 2, EditDepartmentRequestValidatorResource.NameTooShort },
-          { x => x.value.ToString().Length < 300, EditDepartmentRequestValidatorResource.NameTooLong },
+          { x => x.value.ToString().Length < 301, EditDepartmentRequestValidatorResource.NameTooLong },
         }, CascadeMode.Stop);
 
       await AddFailureForPropertyIfAsync(
@@ -81,7 +79,6 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         new()
         {
           { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), EditDepartmentRequestValidatorResource.EmptyShortName },
-          { x => x.value.ToString().Trim().Length > 2, EditDepartmentRequestValidatorResource.ShortNameTooShort },
           { x => x.value.ToString().Length < 41, EditDepartmentRequestValidatorResource.ShortNameTooLong },
         }, CascadeMode.Stop);
 
