@@ -130,7 +130,7 @@
     <value>The department name already exists.</value>
   </data>
   <data name="ExistingShortName" xml:space="preserve">
-    <value>The department short name is already exists.</value>
+    <value>The department short name already exists.</value>
   </data>
   <data name="NameTooLong" xml:space="preserve">
     <value>Department name is too long.</value>

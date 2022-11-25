@@ -98,7 +98,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The department short name is already exists..
+        ///   Looks up a localized string similar to The department short name already exists..
         /// </summary>
         internal static string ExistingShortName {
             get {
