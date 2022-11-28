@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentValidation;
-using FluentValidation.Validators;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Dto.Requests.Department;
 using LT.DigitalOffice.DepartmentService.Validation.Department.Interfaces;
+using LT.DigitalOffice.DepartmentService.Validation.Department.Resources;
 using LT.DigitalOffice.Kernel.Validators;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -52,9 +52,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace,
         new()
         {
-          { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Name must not be empty." },
-          { x => x.value.ToString().Trim().Length > 2, "Name is too short." },
-          { x => x.value.ToString().Length < 300, "Name is too long." },
+          { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), EditDepartmentRequestValidatorResource.EmptyName },
+          { x => x.value.ToString().Length < 301, EditDepartmentRequestValidatorResource.NameTooLong },
         }, CascadeMode.Stop);
 
       await AddFailureForPropertyIfAsync(
@@ -66,7 +65,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
             && !await _departmentRepository.NameExistAsync(x.value?.ToString(), departmentId),
-            "The department name already exist."
+            EditDepartmentRequestValidatorResource.ExistingName
           },
         });
 
@@ -79,9 +78,8 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace,
         new()
         {
-          { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), "Short name must not be empty." },
-          { x => x.value.ToString().Trim().Length > 2, "Short name is too short." },
-          { x => x.value.ToString().Length < 41, "Short name is too long." },
+          { x => !string.IsNullOrEmpty(x.value?.ToString().Trim()), EditDepartmentRequestValidatorResource.EmptyShortName },
+          { x => x.value.ToString().Length < 41, EditDepartmentRequestValidatorResource.ShortNameTooLong },
         }, CascadeMode.Stop);
 
       await AddFailureForPropertyIfAsync(
@@ -93,7 +91,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
             async x =>
             !string.IsNullOrEmpty(x.value?.ToString())
             && !await _departmentRepository.ShortNameExistAsync(x.value?.ToString(), departmentId),
-            "The department short name already exist."
+            EditDepartmentRequestValidatorResource.ExistingShortName
           },
         });
 
@@ -106,7 +104,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace,
         new()
         {
-          { x => x.value?.ToString().Trim().Length < 1000, "Description is too long." },
+          { x => x.value?.ToString().Trim().Length < 1000, EditDepartmentRequestValidatorResource.DescriptionTooLong },
         });
 
       #endregion
@@ -118,7 +116,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
         x => x == OperationType.Replace,
         new()
         {
-          { x => bool.TryParse(x.value?.ToString(), out bool _), "Incorrect format of IsActive." },
+          { x => bool.TryParse(x.value?.ToString(), out bool _), EditDepartmentRequestValidatorResource.IncorrectIsActiveFormat },
         });
 
       #endregion
@@ -142,7 +140,7 @@ namespace LT.DigitalOffice.DepartmentService.Validation.Department
                 ? await _categoryRepository.IdExistAsync(categoryId)
                 : false;
             },
-            "Category id doesn`t exist."
+            EditDepartmentRequestValidatorResource.NotExistingCategory
           }
         });
     }

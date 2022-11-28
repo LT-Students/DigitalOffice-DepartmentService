@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LT.DigitalOffice.DepartmentService.Broker.Helpers.Branch.Interfaces;
+using LT.DigitalOffice.DepartmentService.Broker.Helpers.MemoryCache.Interfaces;
 using LT.DigitalOffice.DepartmentService.Data.Interfaces;
 using LT.DigitalOffice.DepartmentService.Mappers.Models.Interfaces;
 using LT.DigitalOffice.DepartmentService.Models.Db;
@@ -24,6 +26,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
     private readonly IDepartmentDataMapper _departmentDataMapper;
     private readonly IGlobalCacheRepository _globalCache;
     private readonly IOptions<RedisConfig> _redisConfig;
+    private readonly IDepartmentBranchHelper _branchHelper;
+    private readonly IMemoryCacheHelper _memoryCacheHelper;
 
     private async Task<List<DepartmentData>> GetDepartmentsAsync(IGetDepartmentsRequest request)
     {
@@ -31,19 +35,29 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
         departmentsIds: request.DepartmentsIds,
         usersIds: request.UsersIds);
 
-      return dbDepartments.Select(_departmentDataMapper.Map).ToList();
+      List<Tuple<Guid, string, string, Guid?>> listDepartments = request.IncludeChildDepartmentsIds
+        ? await _memoryCacheHelper.GetDepartmentsTreeAsync()
+        : null;
+
+      return dbDepartments.Select(d => _departmentDataMapper
+        .Map(dbDepartment: d, childrenIds: listDepartments is null ? null : _branchHelper.GetChildrenIds(listDepartments, d.Id)))
+        .ToList();
     }
 
     public GetDepartmentsConsumer(
       IDepartmentRepository departmenrRepository,
       IDepartmentDataMapper departmentDataMapper,
       IGlobalCacheRepository globalCache,
-      IOptions<RedisConfig> redisConfig)
+      IOptions<RedisConfig> redisConfig,
+      IDepartmentBranchHelper departmentBranchHelper,
+      IMemoryCacheHelper memoryCacheHelper)
     {
       _departmentRepository = departmenrRepository;
       _departmentDataMapper = departmentDataMapper;
       _globalCache = globalCache;
       _redisConfig = redisConfig;
+      _branchHelper = departmentBranchHelper;
+      _memoryCacheHelper = memoryCacheHelper;
     }
 
     public async Task Consume(ConsumeContext<IGetDepartmentsRequest> context)
@@ -75,7 +89,7 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
 
           await _globalCache.CreateAsync(
             Cache.Departments,
-            allGuids.GetRedisCacheKey(context.Message.GetBasicProperties()),
+            allGuids.GetRedisCacheKey(nameof(IGetDepartmentsRequest), context.Message.GetBasicProperties()),
             departmentsData,
             elementsIds,
             TimeSpan.FromMinutes(_redisConfig.Value.CacheLiveInMinutes));

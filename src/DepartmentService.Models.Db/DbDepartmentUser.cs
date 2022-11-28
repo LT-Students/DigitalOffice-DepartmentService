@@ -15,6 +15,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Db
     public int Role { get; set; }
     public int Assignment { get; set; }
     public bool IsActive { get; set; }
+    public bool IsPending { get; set; }
     public Guid CreatedBy { get; set; }
 
     public DbDepartment Department { get; set; }

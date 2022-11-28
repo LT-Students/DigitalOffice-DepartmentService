@@ -24,7 +24,8 @@ namespace LT.DigitalOffice.DepartmentService.Broker.Consumers
           new DepartmentUserExtendedData(
             userId: du.UserId,
             departmentId: du.DepartmentId,
-            isActive: du.IsActive))
+            isActive: du.IsActive,
+            isPending: du.IsPending))
         .ToList());
     }
 

@@ -15,6 +15,7 @@ namespace LT.DigitalOffice.DepartmentService.Models.Dto.Configuration
     public string GetDepartmentsUsersEndpoint { get; set; }
     public string DisactivateDepartmentUserEndpoint { get; set; }
     public string ActivateDepartmentUserEndpoint { get; set; }
+    public string CreateDepartmentPendingUserEndpoint { get; set; }
     public string SearchDepartmentEndpoint { get; set; }
     public string FilterDepartmentsEndpoint { get; set; }
     public string GetDepartmentUserRoleEndpoint { get; set; }

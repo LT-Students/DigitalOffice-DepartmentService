@@ -55,23 +55,23 @@ namespace LT.DigitalOffice.DepartmentService.Data
       return true;
     }
 
-    public async Task<List<Guid>> EditAsync(List<DbDepartmentUser> request)
+    public async Task<List<Guid>> EditAsync(List<DbDepartmentUser> departmentUsers)
     {
-      if (request is null || !request.Any())
+      if (departmentUsers is null || !departmentUsers.Any())
       {
         return null;
       }
 
-      IQueryable<DbDepartmentUser> dbDepartmentsUsers = _provider.DepartmentsUsers
-        .Where(du => request.Select(r => r.UserId).Contains(du.UserId));
+      List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
+        .Where(du => departmentUsers.Select(r => r.UserId).Contains(du.UserId)).ToListAsync();
 
-      if (dbDepartmentsUsers is not null && dbDepartmentsUsers.Any())
+      if (dbDepartmentsUsers.Any())
       {
         DbDepartmentUser requestData = null;
 
         foreach (DbDepartmentUser du in dbDepartmentsUsers)
         {
-          requestData = request.FirstOrDefault(u => u.UserId == du.UserId);
+          requestData = departmentUsers.FirstOrDefault(u => u.UserId == du.UserId);
 
           du.DepartmentId = requestData.DepartmentId;
           du.CreatedBy = requestData.CreatedBy;
@@ -96,9 +96,29 @@ namespace LT.DigitalOffice.DepartmentService.Data
       }
 
       user.IsActive = true;
+      user.IsPending = false;
+
       await _provider.SaveAsync();
 
       return user.DepartmentId;
+    }
+
+    public async Task<Guid?> MakeUserPendingAsync(Guid userId, Guid createdBy)
+    {
+      DbDepartmentUser dbDepartmentUser = await _provider.DepartmentsUsers.FirstOrDefaultAsync(du => du.UserId == userId);
+
+      if (dbDepartmentUser is null)
+      {
+        return null;
+      }
+
+      dbDepartmentUser.IsActive = false;
+      dbDepartmentUser.IsPending = true;
+      dbDepartmentUser.CreatedBy = createdBy;
+
+      await _provider.SaveAsync();
+
+      return dbDepartmentUser.DepartmentId;
     }
 
     public async Task<bool> EditRoleAsync(List<Guid> usersIds, DepartmentUserRole role)
@@ -108,10 +128,10 @@ namespace LT.DigitalOffice.DepartmentService.Data
         return false;
       }
 
-      IQueryable<DbDepartmentUser> dbDepartmentsUsers = _provider.DepartmentsUsers
-        .Where(du => usersIds.Contains(du.UserId));
+      List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
+        .Where(du => usersIds.Contains(du.UserId)).ToListAsync();
 
-      if (dbDepartmentsUsers is null && dbDepartmentsUsers.Any())
+      if (dbDepartmentsUsers.Any())
       {
         return false;
       }
@@ -134,12 +154,13 @@ namespace LT.DigitalOffice.DepartmentService.Data
         return false;
       }
 
-      IQueryable<DbDepartmentUser> dbDepartmentUsers =
-        _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId
+      List<DbDepartmentUser> dbDepartmentUsers =
+        await _provider.DepartmentsUsers.Where(du => du.DepartmentId == departmentId
           && usersIds.Contains(du.UserId)
-          && du.IsActive);
+          && du.IsActive)
+          .ToListAsync();
 
-      if (dbDepartmentUsers is null || !dbDepartmentUsers.Any())
+      if (!dbDepartmentUsers.Any())
       {
         return false;
       }
@@ -191,18 +212,27 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
     public Task<List<DbDepartmentUser>> GetAsync(IGetDepartmentsUsersRequest request)
     {
-      IQueryable<DbDepartmentUser> dbDepartmentUser = request.ByEntryDate.HasValue 
+      IQueryable<DbDepartmentUser> departmentUsersQuery = request.ByEntryDate.HasValue 
         ? _provider.DepartmentsUsers
             .TemporalBetween(
               request.ByEntryDate.Value,
               request.ByEntryDate.Value.AddMonths(1))
-            .Where(u => u.IsActive).Distinct()
-            .AsQueryable()
-        : _provider.DepartmentsUsers.AsQueryable().Where(du => du.IsActive);
+        : _provider.DepartmentsUsers.AsQueryable();
 
-      dbDepartmentUser = dbDepartmentUser.Where(du => request.DepartmentsIds.Contains(du.DepartmentId));
+      departmentUsersQuery = departmentUsersQuery.Where(du => request.DepartmentsIds.Contains(du.DepartmentId));
 
-      return dbDepartmentUser.ToListAsync();
+      if (request.IncludePendingUsers)
+      {
+        departmentUsersQuery = from users in departmentUsersQuery.Where(du => du.IsActive || du.IsPending)
+                               group users by users.UserId into userGroup
+                               select userGroup.OrderByDescending(u => u.IsActive).First();
+      }
+      else
+      {
+        departmentUsersQuery = departmentUsersQuery.Where(du => du.IsActive).Distinct();
+      }
+
+      return departmentUsersQuery.ToListAsync();
     }
 
     public async Task<Guid?> RemoveAsync(Guid userId, Guid removedBy)
@@ -236,7 +266,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
 
       List<DbDepartmentUser> targetUsers = await dbDepartmentUsers.ToListAsync();
 
-      if (targetUsers is not null || targetUsers.Any())
+      if (targetUsers.Any())
       {
         foreach (DbDepartmentUser du in targetUsers)
         {

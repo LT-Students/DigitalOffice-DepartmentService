@@ -29,6 +29,7 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
           UserId = request.UserId,
           DepartmentId = departmentId,
           IsActive = true,
+          IsPending = false,
           Role = request.Assignment == DepartmentUserAssignment.Director 
             ? (int)DepartmentUserRole.Manager
             : (int)request.Role,
@@ -42,15 +43,16 @@ namespace LT.DigitalOffice.DepartmentService.Mappers.Db
       return request is null
         ? default
         : new DbDepartmentUser()
-      {
-        Id = Guid.NewGuid(),
-        UserId = request.UserId,
-        DepartmentId = request.DepartmentId,
-        IsActive = request.IsActive,
-        Role = (int)DepartmentUserRole.Employee,
-        Assignment = (int)DepartmentUserAssignment.Employee,
-        CreatedBy = request.CreatedBy
-      };
+        {
+          Id = Guid.NewGuid(),
+          UserId = request.UserId,
+          DepartmentId = request.DepartmentId,
+          IsActive = request.IsActive,
+          IsPending = true,
+          Role = (int)DepartmentUserRole.Employee,
+          Assignment = (int)DepartmentUserAssignment.Employee,
+          CreatedBy = request.CreatedBy
+        };
     }
   }
 }
