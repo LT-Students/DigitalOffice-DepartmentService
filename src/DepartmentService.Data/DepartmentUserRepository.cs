@@ -131,7 +131,7 @@ namespace LT.DigitalOffice.DepartmentService.Data
       List<DbDepartmentUser> dbDepartmentsUsers = await _provider.DepartmentsUsers
         .Where(du => usersIds.Contains(du.UserId)).ToListAsync();
 
-      if (dbDepartmentsUsers.Any())
+      if (!dbDepartmentsUsers.Any())
       {
         return false;
       }
